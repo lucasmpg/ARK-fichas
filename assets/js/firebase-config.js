@@ -20,17 +20,17 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const firebaseConfig = window.__ARK_FIREBASE_CONFIG__;
+const firebaseConfig = {
+  apiKey: "AIzaSyBwg5k0wXPZ4ZOeCfCjPHe95yDFJNSu_ww",
+  authDomain: "ark-fichas.firebaseapp.com",
+  projectId: "ark-fichas",
+  storageBucket: "ark-fichas.firebasestorage.app",
+  messagingSenderId: "1097313250279",
+  appId: "1:1097313250279:web:050f40ceca2ca90da36b42",
+  measurementId: "G-3HX09H36Q5"
+};
 
-if (!firebaseConfig?.apiKey || !firebaseConfig?.projectId || !firebaseConfig?.appId) {
-  throw new Error(
-    "Configuração Firebase ausente. Crie o arquivo assets/js/runtime-config.js a partir de assets/js/runtime-config.example.js antes de publicar o projeto."
-  );
-}
-
-export const ADMIN_EMAILS = Array.isArray(window.__ARK_ADMIN_EMAILS__)
-  ? window.__ARK_ADMIN_EMAILS__
-  : ["moisslucas3@gmail.com"];
+export const ADMIN_EMAILS = ["moisslucas3@gmail.com"];
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
