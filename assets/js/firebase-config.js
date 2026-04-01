@@ -32,8 +32,6 @@ const firebaseConfig = {
 
 export const ADMIN_EMAILS = [
   "moisslucas3@gmail.com"
-];export const ADMIN_EMAILS = [
-  "moisslucas3@gmail.com"
 ];
 
 const app = initializeApp(firebaseConfig);
