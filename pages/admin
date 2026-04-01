@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Mestre</title>
+  <link rel="stylesheet" href="../assets/css/admin.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <div class="card list-card">
+      <div class="authbar-actions">
+        <button id="goHomeBtn" type="button">Início</button>
+        <button id="goMySheetBtn" type="button">Minha ficha</button>
+        <button id="logoutBtn" type="button">Sair</button>
+      </div>
+      <h1 class="hero-title">Painel do Mestre</h1>
+      <div class="notice" id="adminStatus">Carregando...</div>
+      <div class="page-actions">
+        <button id="refreshBtn" type="button">Atualizar lista</button>
+      </div>
+      <div id="workspaceList" class="sheet-list"></div>
+    </div>
+  </div>
+  <script type="module" src="../assets/js/admin.js"></script>
+</body>
+</html>
