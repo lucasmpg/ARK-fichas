@@ -5,8 +5,7 @@ import {
   saveWorkspace,
   upsertUserProfile,
   waitForAuth,
-  listAllUsers,
-  userCanViewWorkspace
+  listAllUsers
 } from "./firebase-config.js";
 
 const attrs = [
@@ -40,12 +39,56 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const closeModal = (modal) => { modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); };
 const openModal = (modal) => { modal.classList.remove('hidden'); modal.setAttribute('aria-hidden', 'false'); };
 
+const normalizeSharedViewers = (value) => Array.isArray(value) ? value.filter((item, index, arr) => item && item.uid && arr.findIndex((x) => x.uid === item.uid) === index) : [];
+const creatureCanView = (user, currentCreature) => !!(user && currentCreature && normalizeSharedViewers(currentCreature.sharedViewers).some((item) => item.uid === user.uid));
+function computeWorkspaceSharedViewerUids() {
+  const set = new Set();
+  (workspace?.creatures || []).forEach((item) => normalizeSharedViewers(item.sharedViewers).forEach((viewer) => set.add(viewer.uid)));
+  return [...set];
+}
+let currentInventorySlots = 0;
+function inventoryKey(slot, field) { return `creature_inventory_${slot}_${field}`; }
+function inventorySlotCount() { return Math.max(0, Math.round(num('inventorySlotsBase')) || 0); }
+function createInventoryRows(force=false) {
+  const totalSlots = inventorySlotCount();
+  const body = byId('creatureInventoryBody');
+  if (!body) return;
+  if (!force && totalSlots === currentInventorySlots) return;
+  currentInventorySlots = totalSlots;
+  const previous = {};
+  body.querySelectorAll('[data-creature-inventory]').forEach((el) => { previous[el.dataset.key] = el.value; });
+  body.innerHTML = '';
+  for (let i = 1; i <= totalSlots; i += 1) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="slot-badge">${i}</span></td><td><input data-creature-inventory data-key="${inventoryKey(i,'desc')}" id="${inventoryKey(i,'desc')}" placeholder="Nome do item" /></td><td><input data-creature-inventory data-key="${inventoryKey(i,'qty')}" id="${inventoryKey(i,'qty')}" type="number" min="0" step="1" value="0" /></td><td><input data-creature-inventory data-key="${inventoryKey(i,'unit')}" id="${inventoryKey(i,'unit')}" type="number" min="0" step="0.01" value="0" /></td><td><input id="${inventoryKey(i,'total')}" readonly /></td>`;
+    body.appendChild(tr);
+  }
+  Object.entries(previous).forEach(([key, value]) => { const el = byId(key); if (el) el.value = value; });
+}
+function inventoryTotals() {
+  const totalSlots = inventorySlotCount();
+  let used = 0;
+  let totalWeight = 0;
+  for (let i = 1; i <= totalSlots; i += 1) {
+    const desc = byId(inventoryKey(i,'desc'))?.value?.trim() || '';
+    const qty = Math.max(0, parseFloat(byId(inventoryKey(i,'qty'))?.value || 0) || 0);
+    const unit = Math.max(0, parseFloat(byId(inventoryKey(i,'unit'))?.value || 0) || 0);
+    const line = qty * unit;
+    const totalInput = byId(inventoryKey(i,'total'));
+    if (totalInput) totalInput.value = line.toFixed(2).replace(/\.00$/, '');
+    if (desc) used += 1;
+    totalWeight += line;
+  }
+  return { totalSlots, used, free: Math.max(0, totalSlots - used), totalWeight };
+}
+
 function ensureWorkspaceShape(data) {
   return {
     ownerUid: workspaceUid,
     ownerName: data?.ownerName || '',
     ownerEmail: data?.ownerEmail || '',
     sharedViewers: Array.isArray(data?.sharedViewers) ? data.sharedViewers : [],
+    sharedViewerUids: Array.isArray(data?.sharedViewerUids) ? data.sharedViewerUids : [],
     creatures: Array.isArray(data?.creatures) ? data.creatures : []
   };
 }
@@ -77,6 +120,17 @@ function saveCreatureToWorkspace() {
   creature.bonusPontos = num('bonusPontos');
   creature.stats = creature.stats || {};
   attrs.forEach((attr) => { creature.stats[attr.id] = clamp(Math.round(num(attr.id)), 0, 100); });
+  creature.inventory = creature.inventory || { slotsBase: 5, items: [] };
+  creature.inventory.slotsBase = Math.max(0, Math.round(num('inventorySlotsBase')) || 0);
+  creature.inventory.items = [];
+  for (let i = 1; i <= inventorySlotCount(); i += 1) {
+    creature.inventory.items.push({
+      desc: byId(inventoryKey(i,'desc'))?.value || '',
+      qty: parseFloat(byId(inventoryKey(i,'qty'))?.value || 0) || 0,
+      unit: parseFloat(byId(inventoryKey(i,'unit'))?.value || 0) || 0
+    });
+  }
+  creature.sharedViewers = normalizeSharedViewers(creature.sharedViewers);
   creature.current = {
     vidaAtual: clamp(num('vidaAtual'), 0, Math.max(0, parseFloat(byId('vidaAtualMax').value || 0))),
     torporAtual: clamp(num('torporAtual'), 0, Math.max(0, parseFloat(byId('torporAtualMax').value || 0))),
@@ -90,7 +144,8 @@ async function persistCreature() {
   if (!canEdit && !canAdminEdit) return;
   saveCreatureToWorkspace();
   workspace.creatures = workspace.creatures.map((item) => (item.id === creature.id ? creature : item));
-  await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures) });
+  workspace.sharedViewerUids = computeWorkspaceSharedViewerUids();
+  await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures), sharedViewerUids: clone(workspace.sharedViewerUids) });
 }
 
 function renderAttributeCards() {
@@ -129,6 +184,15 @@ function applyCreatureToForm() {
   byId('staminaAtual').value = creature.current?.staminaAtual ?? 100;
   byId('notas').value = creature.notes || '';
   byId('adminNotas').value = creature.adminNotas || '';
+  byId('inventorySlotsBase').value = creature.inventory?.slotsBase || 5;
+  createInventoryRows(true);
+  const items = Array.isArray(creature.inventory?.items) ? creature.inventory.items : [];
+  items.forEach((item, index) => {
+    const slot = index + 1;
+    const desc = byId(inventoryKey(slot,'desc')); if (desc) desc.value = item.desc || '';
+    const qty = byId(inventoryKey(slot,'qty')); if (qty) qty.value = item.qty ?? 0;
+    const unit = byId(inventoryKey(slot,'unit')); if (unit) unit.value = item.unit ?? 0;
+  });
 }
 
 function remainingPointBudget() {
@@ -161,6 +225,9 @@ function setEditableState() {
 
   byId('deleteCreatureBtn').disabled = !canEdit;
   byId('transferCreatureBtn').disabled = !canEdit;
+  byId('shareCreatureBtn').style.display = canEdit || canAdminEdit ? 'inline-flex' : 'none';
+  byId('inventorySlotsBase').disabled = !canAdminEdit;
+  document.querySelectorAll('[data-creature-inventory]').forEach((field) => { field.readOnly = !canEdit && !canAdminEdit; });
   if (isViewerMode) {
     byId('transferCreatureBtn').title = 'Modo compartilhado: somente leitura';
     byId('deleteCreatureBtn').title = 'Modo compartilhado: somente leitura';
@@ -238,6 +305,9 @@ function updateAll() {
   const andar = baseMovimento + Math.floor(destreza / 5) * 1.5;
   const correr = andar * 2;
   const capacidade = basePeso + peso * 10;
+  createInventoryRows();
+  const inventory = inventoryTotals();
+  const pesoAtual = inventory.totalWeight;
   const danoFisicoPercent = forca * 2;
   const danoFisicoTotal = baseDano + Math.round(baseDano * (danoFisicoPercent / 100));
   const danoDistancia = destreza * 2;
@@ -261,17 +331,28 @@ function updateAll() {
   byId('torporInfo').textContent = 'resistência natural pela constituição';
   byId('staminaMax').textContent = staminaMax;
   byId('staminaRegen').textContent = `regen: ${staminaRegenPct}% por turno`;
-  byId('andarVal').textContent = `${andar.toFixed(1).replace('.0', '')} m`;
-  byId('correrVal').textContent = `${correr.toFixed(1).replace('.0', '')} m`;
+  byId('andarVal').textContent = `${andarFinal.toFixed(1).replace('.0', '')} m`;
+  byId('correrVal').textContent = `${correrFinal.toFixed(1).replace('.0', '')} m`;
   byId('esquivaVal').textContent = `${esquiva}`;
   byId('furtividadeVal').textContent = `${furtividade}`;
   byId('percepcaoVal').textContent = `${percepcao}`;
   byId('zonaPercepcao').textContent = `zona passiva: ${(percepcao / 2).toFixed(1).replace('.0', '')}`;
+  let andarFinal = andar;
+  let correrFinal = correr;
+  let pesoPenaltyText = 'sem penalidade';
+  const cargaPct = capacidade <= 0 ? 0 : (pesoAtual / capacidade) * 100;
+  if (cargaPct > 100) { andarFinal = 0; correrFinal = 0; pesoPenaltyText = 'imóvel por excesso de carga'; }
+  else if (cargaPct > 80) { andarFinal *= 0.7; correrFinal *= 0.7; pesoPenaltyText = 'deslocamento reduzido em 30% acima de 80% de carga'; }
   byId('capacidadeVal').textContent = `${capacidade} kg`;
   byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
   byId('danoDistVal').textContent = `+${danoDistancia}%`;
   byId('oxigenioVal').textContent = `${oxigenio} s`;
-  byId('pesoPenalty').textContent = 'sem mochila nesta ficha';
+  byId('pesoPenalty').textContent = pesoPenaltyText;
+  byId('creaturePesoAtual').value = pesoAtual.toFixed(2).replace(/\.00$/, '');
+  byId('creaturePesoUso').value = `${cargaPct.toFixed(1)}%`;
+  byId('creatureSlotsTotal').textContent = inventory.totalSlots;
+  byId('creatureSlotsUsed').textContent = inventory.used;
+  byId('creatureSlotsFree').textContent = inventory.free;
   byId('vidaAtualMax').value = vidaMax;
   byId('torporAtualMax').value = torporMax;
   byId('staminaAtualMax').value = staminaMax;
@@ -306,7 +387,8 @@ async function transferCreature() {
     ownerUid: newOwnerUid,
     ownerName: targetRaw?.ownerName || targetUser?.name || '',
     ownerEmail: targetRaw?.ownerEmail || targetUser?.email || '',
-    creatures: Array.isArray(targetRaw?.creatures) ? targetRaw.creatures : []
+    creatures: Array.isArray(targetRaw?.creatures) ? targetRaw.creatures : [],
+    sharedViewerUids: Array.isArray(targetRaw?.sharedViewerUids) ? targetRaw.sharedViewerUids : []
   };
   saveCreatureToWorkspace();
   workspace.creatures = workspace.creatures.filter((item) => item.id !== creature.id);
@@ -314,12 +396,14 @@ async function transferCreature() {
   creature.ownerName = targetUser?.name || '';
   creature.ownerEmail = targetUser?.email || '';
   targetWorkspace.creatures.push(creature);
-  await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures) });
+  workspace.sharedViewerUids = computeWorkspaceSharedViewerUids();
+  await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures), sharedViewerUids: clone(workspace.sharedViewerUids) });
   await saveWorkspace(newOwnerUid, {
     ownerUid: newOwnerUid,
     ownerName: targetWorkspace.ownerName,
     ownerEmail: targetWorkspace.ownerEmail,
-    creatures: clone(targetWorkspace.creatures)
+    creatures: clone(targetWorkspace.creatures),
+    sharedViewerUids: clone(targetWorkspace.sharedViewerUids)
   });
   window.location.href = './dashboard.html';
 }
@@ -350,10 +434,7 @@ async function init() {
 
   const raw = await getWorkspace(workspaceUid);
   workspace = ensureWorkspaceShape(raw);
-  if (!workspace || (!admin && workspaceUid !== currentUser.uid && !userCanViewWorkspace(currentUser, workspace))) {
-    window.location.href = './dashboard.html';
-    return;
-  }
+  if (!workspace) { window.location.href = './dashboard.html'; return; }
 
   creature = workspace.creatures.find((item) => item.id === creatureId);
   if (!creature) {
@@ -364,10 +445,12 @@ async function init() {
 
   canAdminEdit = admin;
   canEdit = admin || currentUser.uid === creature.ownerUid;
-  isViewerMode = !canEdit && userCanViewWorkspace(currentUser, workspace);
+  isViewerMode = !canEdit && creatureCanView(currentUser, creature);
+  if (!canEdit && !isViewerMode) { window.location.href = './dashboard.html'; return; }
 
   renderAttributeCards();
   applyCreatureToForm();
+  createInventoryRows(true);
   setEditableState();
   updateAll();
 
@@ -467,7 +550,8 @@ async function init() {
     if (!canEdit) return;
     if (!confirm(`Apagar a criatura ${creature.nome || 'sem nome'}?`)) return;
     workspace.creatures = workspace.creatures.filter((item) => item.id !== creature.id);
-    await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures) });
+    workspace.sharedViewerUids = computeWorkspaceSharedViewerUids();
+  await saveWorkspace(workspaceUid, { creatures: clone(workspace.creatures), sharedViewerUids: clone(workspace.sharedViewerUids) });
     goBackToDashboard();
   });
 
@@ -476,10 +560,51 @@ async function init() {
     .filter((user) => user.uid !== creature.ownerUid)
     .map((user) => `<option value="${user.uid}">${user.name || 'Sem nome'} • ${user.email || 'Sem e-mail'}</option>`)
     .join('');
+
+  const shareTargetUser = byId('shareTargetUser');
+  shareTargetUser.innerHTML = allUsers
+    .filter((user) => user.uid !== creature.ownerUid)
+    .map((user) => `<option value="${user.uid}">${user.name || 'Sem nome'} • ${user.email || 'Sem e-mail'}</option>`)
+    .join('');
+
+  const renderSharedViewers = () => {
+    const host = byId('sharedViewerList');
+    host.innerHTML = '';
+    const viewers = normalizeSharedViewers(creature.sharedViewers);
+    if (!viewers.length) { host.innerHTML = '<div class="notice">Nenhum usuário com acesso de visualização.</div>'; return; }
+    viewers.forEach((viewer) => {
+      const item = document.createElement('div');
+      item.className = 'card-mini';
+      item.innerHTML = `<h2>${viewer.name || 'Sem nome'}</h2><div class="meta-stack"><div><strong>E-mail:</strong> ${viewer.email || 'Sem e-mail'}</div><div><strong>Link:</strong> ./criatura.html?uid=${encodeURIComponent(workspaceUid)}&cid=${encodeURIComponent(creature.id)}&view=1</div></div><div class="card-actions"><button type="button" data-remove-share>Remover acesso</button></div>`;
+      item.querySelector('[data-remove-share]').disabled = !(canEdit || canAdminEdit);
+      item.querySelector('[data-remove-share]').addEventListener('click', async () => {
+        if (!(canEdit || canAdminEdit)) return;
+        creature.sharedViewers = normalizeSharedViewers(creature.sharedViewers).filter((entry) => entry.uid !== viewer.uid);
+        updateAll();
+        await persistCreature();
+        renderSharedViewers();
+      });
+      host.appendChild(item);
+    });
+  };
+  renderSharedViewers();
+
+  byId('shareCreatureBtn').addEventListener('click', () => { if (canEdit || canAdminEdit) openModal(byId('shareCreatureModal')); });
+  byId('cancelShareCreatureBtn').addEventListener('click', () => closeModal(byId('shareCreatureModal')));
+  byId('addShareCreatureBtn').addEventListener('click', async () => {
+    if (!(canEdit || canAdminEdit)) return;
+    const uid = shareTargetUser.value;
+    const target = allUsers.find((user) => user.uid === uid);
+    if (!target) return;
+    creature.sharedViewers = normalizeSharedViewers([...(creature.sharedViewers || []), { uid: target.uid, name: target.name || '', email: target.email || '' }]);
+    await persistCreature();
+    renderSharedViewers();
+    closeModal(byId('shareCreatureModal'));
+  });
   byId('transferCreatureBtn').addEventListener('click', () => openModal(byId('transferCreatureModal')));
   byId('cancelTransferCreatureBtn').addEventListener('click', () => closeModal(byId('transferCreatureModal')));
   byId('confirmTransferCreatureBtn').addEventListener('click', transferCreature);
-  [byId('pointConfirmModal'), byId('transferCreatureModal')].forEach((modal) => modal.addEventListener('click', (event) => {
+  [byId('pointConfirmModal'), byId('transferCreatureModal'), byId('shareCreatureModal')].forEach((modal) => modal.addEventListener('click', (event) => {
     if (event.target === modal) closeModal(modal);
   }));
 }
