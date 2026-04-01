@@ -85,12 +85,10 @@ async function bootstrapCloud() {
 
   const workspace = await getWorkspace(targetWorkspaceUid);
   if (!admin && requestedUid && requestedUid !== firebaseUser.uid) {
-    if (!workspace || !userCanViewWorkspace(firebaseUser, { ...workspace, ownerUid: targetWorkspaceUid })) {
-      window.location.href = './dashboard.html';
-      return;
-    }
-    isSharedViewerMode = true;
+    window.location.href = './dashboard.html';
+    return;
   }
+  isSharedViewerMode = false;
   if (workspace?.sheetStore) {
     remoteWorkspaceSeed = cloneWorkspaceStore(workspace.sheetStore);
     window.__workspaceOwnerEmail = workspace.ownerEmail || '';
@@ -129,6 +127,9 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
     const confirmReplaceImportBtn = document.getElementById('confirmReplaceImportBtn');
 
     let pendingImportMode = 'append';
+    const resetSheetModal = document.getElementById('resetSheetModal');
+    const cancelResetSheetBtn = document.getElementById('cancelResetSheetBtn');
+    const confirmResetSheetBtn = document.getElementById('confirmResetSheetBtn');
 
     function uniqueId() {
       return `ficha_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -415,7 +416,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
 
     function loadWorkspace() {
       if (remoteWorkspaceSeed && Array.isArray(remoteWorkspaceSeed.tabs) && remoteWorkspaceSeed.tabs.length) {
-        sheetStore = cloneWorkspaceStore(remoteWorkspaceSeed);
+        const first = remoteWorkspaceSeed.tabs[0];
+        sheetStore = { activeId: first.id || uniqueId(), tabs: [{ id: first.id || uniqueId(), name: normalizeTabName(first.name || first.data?.nome, 1), data: { ...makeBlankState(), ...(first.data || {}) } }] };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(sheetStore));
         return;
       }
@@ -424,10 +426,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
         try {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.tabs) && parsed.tabs.length) {
-            sheetStore = parsed;
-            if (!sheetStore.tabs.some(tab => tab.id === sheetStore.activeId)) {
-              sheetStore.activeId = sheetStore.tabs[0].id;
-            }
+            const first = parsed.tabs[0];
+            sheetStore = { activeId: first.id || uniqueId(), tabs: [{ id: first.id || uniqueId(), name: normalizeTabName(first.name || first.data?.nome, 1), data: { ...makeBlankState(), ...(first.data || {}) } }] };
             return;
           }
         } catch (e) {}
@@ -437,17 +437,14 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
         if (!legacyRaw) continue;
         try {
           const legacyData = JSON.parse(legacyRaw);
-          sheetStore = {
-            activeId: uniqueId(),
-            tabs: []
-          };
-          sheetStore.tabs.push({ id: sheetStore.activeId, name: normalizeTabName(legacyData.nome, 1), data: legacyData });
+          const id = uniqueId();
+          sheetStore = { activeId: id, tabs: [{ id, name: normalizeTabName(legacyData.nome, 1), data: { ...makeBlankState(), ...legacyData } }] };
           persistSheetStore();
           return;
         } catch (e) {}
       }
       const firstId = uniqueId();
-      sheetStore = { activeId: firstId, tabs: [{ id: firstId, name: defaultTabName(1), data: makeBlankState() }] };
+      sheetStore = { activeId: firstId, tabs: [{ id: firstId, name: 'Ficha principal', data: makeBlankState() }] };
       persistSheetStore();
     }
 
@@ -1162,20 +1159,20 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       updateAll();
     });
 
-    byId('exportBtn').addEventListener('click', () => {
+    if (byId('exportBtn')) byId('exportBtn').addEventListener('click', () => {
       saveState();
       renderExportChecklist();
       openModal(exportModal);
     });
 
-    byId('importBtn').addEventListener('click', () => {
+    if (byId('importBtn')) byId('importBtn').addEventListener('click', () => {
       pendingImportMode = 'append';
       const defaultOption = document.querySelector('input[name="importMode"][value="append"]');
       if (defaultOption) defaultOption.checked = true;
       openModal(importModal);
     });
 
-    confirmExportBtn.addEventListener('click', () => {
+    if (confirmExportBtn) confirmExportBtn.addEventListener('click', () => {
       saveState();
       const mode = document.querySelector('input[name="exportMode"]:checked')?.value || 'active';
       const active = getActiveTab();
@@ -1196,13 +1193,13 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       closeModal(exportModal);
     });
 
-    cancelExportBtn.addEventListener('click', () => closeModal(exportModal));
+    if (cancelExportBtn) cancelExportBtn.addEventListener('click', () => closeModal(exportModal));
 
     document.querySelectorAll('input[name="exportMode"]').forEach(radio => {
       radio.addEventListener('change', syncExportChecklistState);
     });
 
-    chooseImportFileBtn.addEventListener('click', () => {
+    if (chooseImportFileBtn) chooseImportFileBtn.addEventListener('click', () => {
       pendingImportMode = document.querySelector('input[name="importMode"]:checked')?.value || 'append';
       closeModal(importModal);
       if (pendingImportMode === 'replace') {
@@ -1212,14 +1209,14 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId('fileInput').click();
     });
 
-    cancelImportBtn.addEventListener('click', () => closeModal(importModal));
-    cancelReplaceImportBtn.addEventListener('click', () => closeModal(replaceImportModal));
-    confirmReplaceImportBtn.addEventListener('click', () => {
+    if (cancelImportBtn) cancelImportBtn.addEventListener('click', () => closeModal(importModal));
+    if (cancelReplaceImportBtn) cancelReplaceImportBtn.addEventListener('click', () => closeModal(replaceImportModal));
+    if (confirmReplaceImportBtn) confirmReplaceImportBtn.addEventListener('click', () => {
       closeModal(replaceImportModal);
       byId('fileInput').click();
     });
 
-    byId('fileInput').addEventListener('change', async (e) => {
+    if (byId('fileInput')) byId('fileInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       try {
@@ -1240,50 +1237,37 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       }
     });
 
-    byId('printBtn').addEventListener('click', () => window.print());
-    byId('resetBtn').addEventListener('click', () => {
+    if (byId('printBtn')) byId('printBtn').addEventListener('click', () => window.print());
+    if (byId('resetBtn')) byId('resetBtn').addEventListener('click', () => {
+      if (!window.__isAdminUser) return;
+      openModal(resetSheetModal);
+    });
+
+    cancelResetSheetBtn?.addEventListener('click', () => closeModal(resetSheetModal));
+    confirmResetSheetBtn?.addEventListener('click', () => {
       const active = getActiveTab();
       if (!active) return;
-      if (!confirm('Isso vai limpar apenas a ficha atual. Deseja continuar?')) return;
       active.data = makeBlankState();
-      active.name = defaultTabName(sheetStore.tabs.indexOf(active) + 1);
+      active.name = 'Ficha principal';
       persistSheetStore();
-      renderTabs();
       applyStateToForm(active.data);
       createInventoryRows(true);
       updateAll();
+      closeModal(resetSheetModal);
     });
 
-    byId('addTabBtn').addEventListener('click', () => {
-      saveState();
-      createTab({}, defaultTabName(sheetStore.tabs.length + 1));
-    });
-
-    byId('tabsBar').addEventListener('click', (e) => {
-      const closeBtn = e.target.closest('[data-close-tab]');
-      if (closeBtn) {
-        e.stopPropagation();
-        openCloseTabModal(closeBtn.dataset.closeTab);
-        return;
-      }
-      const tabBtn = e.target.closest('[data-tab-id]');
-      if (tabBtn) {
-        switchTab(tabBtn.dataset.tabId);
-      }
-    });
-
-    cancelCloseTabBtn.addEventListener('click', () => {
+    cancelCloseTabBtn?.addEventListener('click', () => {
       closeCloseTabModal();
     });
 
-    confirmCloseTabBtn.addEventListener('click', () => {
+    confirmCloseTabBtn?.addEventListener('click', () => {
       if (pendingCloseTabId) {
         closeTab(pendingCloseTabId);
       }
       closeCloseTabModal();
     });
 
-    closeTabModal.addEventListener('click', (e) => {
+    closeTabModal?.addEventListener('click', (e) => {
       if (e.target === closeTabModal) {
         closeCloseTabModal();
       }
@@ -1304,6 +1288,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       if (e.key === 'Escape') {
         closeAllSecondaryModals();
         closeModal(byId('pointConfirmModal'));
+        closeModal(resetSheetModal);
         pendingAttributeIncrement = null;
       }
     });
@@ -1353,6 +1338,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       initCustomSelects();
       createInventoryRows(true);
       updateManualPermissionUI();
+      const resetBtn = byId('resetBtn'); if (resetBtn) resetBtn.style.display = window.__isAdminUser ? 'inline-flex' : 'none';
       updateAll();
       applySharedViewerReadOnlyUI();
       suppressCloudSave = isSharedViewerMode;
