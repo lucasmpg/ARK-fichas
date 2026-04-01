@@ -97,8 +97,8 @@ export async function saveWorkspace(uid, payload) {
   }, { merge: true });
 }
 
-export async function listAllWorkspaces() {
-  const snap = await getDocs(query(collection(db, "workspaces"), orderBy("updatedAt", "desc")));
+export async function listAllUsers() {
+  const snap = await getDocs(query(collection(db, "users"), orderBy("name", "asc")));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
