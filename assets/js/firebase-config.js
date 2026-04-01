@@ -30,13 +30,11 @@ const firebaseConfig = {
   measurementId: "G-3HX09H36Q5"
 };
 
-export function isAdminUser(user) {
-  console.log("EMAIL LOGADO:", user?.email);
-  console.log("ADMIN_EMAILS:", ADMIN_EMAILS);
-  const result = !!user && isAdminEmail(user.email);
-  console.log("IS ADMIN:", result);
-  return result;
-}
+export const ADMIN_EMAILS = [
+  "moisslucas3@gmail.com"
+];export const ADMIN_EMAILS = [
+  "moisslucas3@gmail.com"
+];
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
