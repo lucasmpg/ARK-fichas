@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha ARK RPG</title>
+  <link rel="stylesheet" href="../assets/css/app.css" />
+</head>
+<body>
+
+  <div class="app-shell-header">
+    <div class="authbar card">
+      <div class="authbar-left">
+        <strong id="authStatus">Entrando...</strong>
+        <span id="authUserInfo" class="muted"></span>
+      </div>
+      <div class="authbar-actions">
+        <button id="goHomeBtn" type="button">Início</button>
+        <button id="goAdminBtn" type="button" style="display:none;">Painel do mestre</button>
+        <button id="logoutBtn" type="button">Sair</button>
+      </div>
+    </div>
+  </div>
+
+<div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Ficha Automatizada • ARK RPG</h1>
+        <div class="subtitle">Salva automaticamente no navegador. Pode ser usada como base e expandida depois com armas, criaturas e efeitos avançados.</div>
+      </div>
+      <div class="actions">
+        <button id="exportBtn">Exportar</button>
+        <button id="importBtn">Importar</button>
+        <button id="printBtn">Imprimir / PDF</button>
+        <button class="btn-danger" id="resetBtn">Limpar ficha</button>
+      </div>
+    </div>
+
+    <div class="tabs-shell">
+      <div class="tabs-header">
+        <div class="tabs-title">Fichas abertas</div>
+        <div class="tabs-bar" id="tabsBar"></div>
+        <button type="button" class="tab-add-btn" id="addTabBtn" title="Nova ficha">+</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="section-title-horizontal">Identidade e atributos</h2>
+        <div class="row">
+          <div>
+            <label for="nome">Nome</label>
+            <input id="nome" data-save placeholder="Nome do personagem" />
+          </div>
+          <div>
+            <label for="jogador">Jogador</label>
+            <input id="jogador" data-save placeholder="Nome do jogador" />
+          </div>
+          <div>
+            <label for="tribo">Tribo / grupo</label>
+            <input id="tribo" data-save placeholder="Grupo, tribo ou facção" />
+          </div>
+          <div>
+            <label for="origem">Origem</label>
+            <input id="origem" data-save placeholder="Origem, profissão ou conceito" />
+          </div>
+        </div>
+
+        <div class="left-header-grid section-space">
+          <div class="left-header-box level-highlight">
+            <label for="nivel">Nível</label>
+            <input id="nivel" data-save type="number" min="1" value="1" />
+          </div>
+          <div class="left-header-box">
+            <label for="pontosPorNivel">Pontos por nível</label>
+            <input id="pontosPorNivel" type="number" value="5" readonly />
+          </div>
+          <div class="left-header-box">
+            <label for="bonusPontos">Ajuste manual de pontos</label>
+            <input id="bonusPontos" data-save type="number" value="0" />
+          </div>
+          <div class="left-header-box">
+            <label for="perkBonus">Ajuste manual de perks</label>
+            <input id="perkBonus" data-save type="number" value="0" />
+          </div>
+        </div>
+
+        <div class="metric-grid left-metrics section-space">
+          <div class="metric">
+            <div class="name">Pontos totais</div>
+            <div class="value" id="pontosTotais">0</div>
+            <div class="sub">fórmula atual: nível × pontos por nível + ajuste manual</div>
+          </div>
+          <div class="metric">
+            <div class="name">Pontos gastos</div>
+            <div class="value" id="pontosGastos">0</div>
+            <div class="sub">soft cap automático 50+ custa 2, 80+ custa 3</div>
+          </div>
+          <div class="metric">
+            <div class="name">Pontos restantes</div>
+            <div class="value" id="pontosRestantes">0</div>
+            <div class="sub" id="pontosStatus">disponível</div>
+          </div>
+          <div class="metric">
+            <div class="name">Perks totais</div>
+            <div class="value" id="perkTotal">0</div>
+            <div class="sub">1 perk a cada 5 níveis + ajuste manual</div>
+          </div>
+          <div class="metric">
+            <div class="name">Perks marcadas</div>
+            <div class="value" id="perkUsed">0</div>
+            <div class="sub">requisitos básicos por atributo</div>
+          </div>
+          <div class="metric">
+            <div class="name">Perks restantes</div>
+            <div class="value" id="perkLeft">0</div>
+            <div class="sub" id="perkStatus">disponível</div>
+          </div>
+        </div>
+
+        <div class="section-space">
+          
+<h2>Atributos</h2>
+          <div class="stat-grid">
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Força</strong>
+                <div class="attr-sub">+2% dano físico / ponto</div>
+              </div>
+              <input id="forca" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="forcaCost" readonly /></div>
+                <div><label>Bônus</label><input id="forcaInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Constituição</strong>
+                <div class="attr-sub">+10 HP / ponto</div>
+              </div>
+              <input id="constituicao" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="constituicaoCost" readonly /></div>
+                <div><label>Bônus</label><input id="constituicaoInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Destreza</strong>
+                <div class="attr-sub">mov., esquiva e distância</div>
+              </div>
+              <input id="destreza" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="destrezaCost" readonly /></div>
+                <div><label>Bônus</label><input id="destrezaInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Inteligência</strong>
+                <div class="attr-sub">crafting</div>
+              </div>
+              <input id="inteligencia" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="inteligenciaCost" readonly /></div>
+                <div><label>Bônus</label><input id="inteligenciaInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Sabedoria</strong>
+                <div class="attr-sub">percepção e oxigênio</div>
+              </div>
+              <input id="sabedoria" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="sabedoriaCost" readonly /></div>
+                <div><label>Bônus</label><input id="sabedoriaInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Carisma</strong>
+                <div class="attr-sub">interações e liderança</div>
+              </div>
+              <input id="carisma" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="carismaCost" readonly /></div>
+                <div><label>Bônus</label><input id="carismaInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Peso</strong>
+                <div class="attr-sub">+10 kg / ponto</div>
+              </div>
+              <input id="peso" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="pesoCost" readonly /></div>
+                <div><label>Bônus</label><input id="pesoInfo" readonly /></div>
+              </div>
+            </div>
+
+            <div class="attr">
+              <div class="attr-head attr-head-center">
+                <strong>Resistência</strong>
+                <div class="attr-sub">stamina e regen</div>
+              </div>
+              <input id="resistencia" data-save class="attr-input" type="number" min="0" max="100" value="0" />
+              <div class="mini">
+                <div><label>Custo total</label><input id="resistenciaCost" readonly /></div>
+                <div><label>Bônus</label><input id="resistenciaInfo" readonly /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Recursos e derivados</h2>
+        <div class="metric-grid compact-metrics">
+          <div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div>
+          <div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div>
+          <div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div>
+          <div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub">corrida = 2× andar</div></div>
+          <div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div>
+          <div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">fórmula com d100/2 + destreza/2</div></div>
+          <div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div>
+          <div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div>
+          <div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div>
+          <div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">acima de 100% fica imóvel</div></div>
+          <div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">+0%</div><div class="sub">força</div></div>
+          <div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div>
+          <div class="metric"><div class="name">Crafting</div><div class="value" id="craftVelVal">+0%</div><div class="sub" id="craftQualVal">qualidade +0%</div></div>
+        </div>
+
+        <div class="section-space">
+          
+<h2>Recursos atuais</h2>
+          <div class="resource-box">
+            <div><label>Vida atual</label><input id="vidaAtual" data-save type="number" min="0" value="100" /></div>
+            <div><label>Máxima</label><input id="vidaAtualMax" readonly /></div>
+            <div><label>Variação</label><input id="vidaDelta" type="number" value="0" /></div>
+            <div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button></div>
+            <div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div>
+          </div>
+          <div class="progress"><div class="bar hp" id="vidaBar"></div></div>
+
+          <div class="resource-box section-space">
+            <div><label>Torpor atual</label><input id="torporAtual" data-save type="number" min="0" value="0" /></div>
+            <div><label>Máximo</label><input id="torporAtualMax" readonly /></div>
+            <div><label>Variação</label><input id="torporDelta" type="number" value="0" /></div>
+            <div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button></div>
+            <div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div>
+          </div>
+          <div class="progress"><div class="bar torpor" id="torporBar"></div></div>
+
+          <div class="resource-box section-space">
+            <div><label>Stamina atual</label><input id="staminaAtual" data-save type="number" min="0" value="100" /></div>
+            <div><label>Máxima</label><input id="staminaAtualMax" readonly /></div>
+            <div><label>Variação</label><input id="staminaDelta" type="number" value="0" /></div>
+            <div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button></div>
+            <div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div>
+          </div>
+          <div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
+
+          <div class="resource-box section-space">
+            <div><label>Peso carregado total</label><input id="pesoAtual" readonly /></div>
+            <div><label>Capacidade</label><input id="pesoAtualMax" readonly /></div>
+            <div><label>Uso %</label><input id="pesoUso" readonly /></div>
+            <div class="resource-main-action"><button type="button" onclick="updateAll()">Atualizar</button></div>
+            <div class="resource-side-action"><button type="button" onclick="document.getElementById('inventoryBody').scrollIntoView({behavior:'smooth', block:'center'})">Inventário</button></div>
+          </div>
+          <div class="progress"><div class="bar peso" id="pesoBar"></div></div>
+        </div>
+
+        <div class="section-space">
+          <h2>Inventário e peso</h2>
+          <div class="metric-grid">
+            <div class="metric"><div class="name">Espaços do personagem</div><div class="value" id="inventarioSlotsTotal">5</div><div class="sub">5 base + 1 por ponto em Peso</div></div>
+            <div class="metric"><div class="name">Espaços usados</div><div class="value" id="inventarioSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
+            <div class="metric"><div class="name">Espaços livres</div><div class="value" id="inventarioSlotsLivres">5</div><div class="sub">itens soltos no personagem</div></div>
+          </div>
+          <div class="inventory-table-wrap section-space">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>Espaço</th>
+                  <th>Descrição do item</th>
+                  <th>Quantidade</th>
+                  <th>Peso unitário</th>
+                  <th>Peso total</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
+          </div>
+
+          <div class="row section-space">
+            <div>
+              <label for="mochilaAtiva">Mochila equipada</label>
+              <select id="mochilaAtiva" data-save>
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+              </select>
+            </div>
+            <div id="mochilaSlotsBox" style="display:none;">
+              <label for="mochilaSlots">Slots adicionais da mochila</label>
+              <select id="mochilaSlots" data-save>
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="mochilaSection" class="section-space" style="display:none;">
+            <div class="metric-grid">
+              <div class="metric"><div class="name">Espaços da mochila</div><div class="value" id="mochilaSlotsTotalLabel">10</div><div class="sub">armazenamento separado do personagem</div></div>
+              <div class="metric"><div class="name">Espaços usados</div><div class="value" id="mochilaSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
+              <div class="metric"><div class="name">Espaços livres</div><div class="value" id="mochilaSlotsLivres">10</div><div class="sub">itens guardados na mochila</div></div>
+            </div>
+            <div class="inventory-table-wrap section-space">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Espaço</th>
+                    <th>Descrição do item</th>
+                    <th>Quantidade</th>
+                    <th>Peso unitário</th>
+                    <th>Peso total</th>
+                  </tr>
+                </thead>
+                <tbody id="backpackBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="footer-note">O peso total dos itens do personagem e da mochila é calculado automaticamente e já entra no peso carregado do personagem, incluindo as desvantagens de movimento por sobrecarga.</div>
+        </div>
+
+        <div class="section-space">
+          <h2>Postura, armadura e ação rápida</h2>
+          <div class="row">
+            <div>
+              <label for="postura">Postura atual</label>
+              <select id="postura" data-save>
+                <option value="ofensiva">Ofensiva</option>
+                <option value="defensiva">Defensiva</option>
+                <option value="esquiva">Esquiva</option>
+              </select>
+            </div>
+            <div>
+              <label for="armadura">Tipo de armadura</label>
+              <select id="armadura" data-save>
+                <option value="leve">Leve</option>
+                <option value="media">Média</option>
+                <option value="pesada">Pesada</option>
+              </select>
+            </div>
+            <div>
+              <label for="reducaoArmadura">Redução de dano da armadura (%)</label>
+              <input id="reducaoArmadura" data-save type="number" min="0" max="100" value="0" />
+            </div>
+            <div>
+              <label for="acaoRapida">Consumir stamina por ação</label>
+              <select id="acaoRapida">
+                <option value="0">Andar (0)</option>
+                <option value="5">Correr (5)</option>
+                <option value="10">Ataque leve (10)</option>
+                <option value="15">Ataque médio (15)</option>
+                <option value="25">Ataque pesado (25)</option>
+                <option value="12">Ataque à distância (12)</option>
+                <option value="18">Ataque à distância pesado (18)</option>
+                <option value="10">Postura defensiva (10)</option>
+                <option value="10">Postura esquiva (10)</option>
+                <option value="5">Usar item em combate (5)</option>
+                <option value="5">Comandar criatura (5)</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions section-space">
+            <button class="btn-accent" id="useActionBtn">Gastar stamina da ação</button>
+          </div>
+          <div class="footer-note" id="posturaResumo"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Combate, armas e observações</h2>
+        <div class="row">
+          <div>
+            <label for="armaNome">Arma atual</label>
+            <input id="armaNome" data-save value="Soco" />
+          </div>
+          <div>
+            <label for="armaDado">Dado da arma</label>
+            <input id="armaDado" data-save value="1d4" />
+          </div>
+          <div>
+            <label for="armaEscala">Dano com base em</label>
+            <select id="armaEscala" data-save>
+              <option value="forca">Força</option>
+              <option value="destreza">Destreza</option>
+              <option value="nenhum">Nenhum</option>
+            </select>
+          </div>
+          <div>
+            <label for="armaBonus">Bônus fixo da arma</label>
+            <input id="armaBonus" data-save type="number" value="0" />
+          </div>
+        </div>
+
+        <div class="combat-box">
+          <h3>Cálculo de dano causado</h3>
+          <div class="row">
+            <div>
+              <label for="rolagemD20">Resultado do d20</label>
+              <input id="rolagemD20" type="number" min="1" max="20" value="11" />
+            </div>
+            <div>
+              <label for="danoBaseRolado">Dano rolado no dado da arma</label>
+              <input id="danoBaseRolado" type="number" min="0" value="1" />
+            </div>
+            <div>
+              <label for="bonusPercentualExtra">Adicional percentual de dano (%)</label>
+              <input id="bonusPercentualExtra" type="number" value="0" />
+            </div>
+            <div>
+              <label for="efeitoExtra">Bônus fixo situacional</label>
+              <input id="efeitoExtra" type="number" value="0" />
+            </div>
+          </div>
+          <div class="row section-space">
+            <div>
+              <label for="tamanhoAlvo">Tamanho do alvo</label>
+              <select id="tamanhoAlvo">
+                <option value="normal">Normal</option>
+                <option value="grande">Criatura grande</option>
+              </select>
+            </div>
+            <div>
+              <label for="reducaoArmaduraAlvo">Redução da armadura do alvo (%)</label>
+              <input id="reducaoArmaduraAlvo" type="number" min="0" max="100" value="0" />
+            </div>
+            <div>
+              <label for="danoAplicadoAlvo">PV do alvo antes do golpe (opcional)</label>
+              <input id="danoAplicadoAlvo" type="number" min="0" value="0" />
+            </div>
+            <div>
+              <label for="vidaRestanteAlvo">PV do alvo após o golpe</label>
+              <input id="vidaRestanteAlvo" readonly />
+            </div>
+          </div>
+          <div class="actions section-space">
+            <button class="btn-accent" id="applyDamageToTargetBtn">Aplicar dano no alvo</button>
+          </div>
+          <div class="metric-grid section-space attack-summary-grid">
+            <div class="metric"><div class="name">Escalonamento</div><div class="value" id="armaScaleValue">+0</div><div class="sub" id="armaScaleText"></div></div>
+            <div class="metric"><div class="name">Multiplicador d20</div><div class="value" id="multiD20">100%</div><div class="sub">1-3=30%, 4-10=50%, 11-17=100%, 18-19=150%, 20=200%</div></div>
+            <div class="metric"><div class="name">Percentual total</div><div class="value" id="percentualTotalDano">+0%</div><div class="sub">atributo + adicional + perks</div></div>
+            <div class="metric"><div class="name">Dano bruto causado</div><div class="value" id="danoBruto">0</div><div class="sub">(dado + bônus fixos) × multiplicadores</div></div>
+            <div class="metric"><div class="name">Dano final no alvo</div><div class="value" id="danoFinal">0</div><div class="sub">com redução da armadura do alvo</div></div>
+            <div class="metric"><div class="name">Resumo</div><div class="value" id="ataqueResumo">Pronto</div><div class="sub">ajuste manual livre</div></div>
+          </div>
+        </div>
+
+        <div class="combat-box">
+          <h3>Cálculo de dano recebido</h3>
+          <div class="row">
+            <div>
+              <label for="danoRecebidoBruto">Dano bruto recebido</label>
+              <input id="danoRecebidoBruto" type="number" min="0" value="0" />
+            </div>
+            <div>
+              <label for="reducaoArmaduraRecebida">Redução usada (%)</label>
+              <input id="reducaoArmaduraRecebida" readonly />
+            </div>
+            <div>
+              <label for="danoRecebidoFinal">Dano final após redução</label>
+              <input id="danoRecebidoFinal" readonly />
+            </div>
+            <div>
+              <label for="vidaAposDanoRecebido">Vida após dano</label>
+              <input id="vidaAposDanoRecebido" readonly />
+            </div>
+          </div>
+          <div class="actions section-space">
+            <button class="btn-danger" id="applyReceivedDamageBtn">Descontar dano da vida</button>
+          </div>
+          <div class="footer-note">Leva em conta a redução da armadura e, se a postura atual estiver em defensiva, soma mais 50% de redução. Na postura de esquiva, a ficha primeiro reduz o dano bruto pelo valor esquivado e só depois aplica a redução percentual da armadura.</div>
+        </div>
+
+        <div class="combat-box" id="esquivaBox" style="display:none;">
+          <h3>Quadro de esquiva</h3>
+          <div class="row">
+            <div>
+              <label for="rolagemEsquiva">Resultado do d100</label>
+              <input id="rolagemEsquiva" type="number" min="1" max="100" value="1" />
+            </div>
+            <div>
+              <label for="penalidadeEsquiva">Penalidade manual da esquiva</label>
+              <input id="penalidadeEsquiva" type="number" value="0" />
+            </div>
+            <div>
+              <label for="formulaEsquiva">Resultado da fórmula de esquiva</label>
+              <input id="formulaEsquiva" readonly />
+            </div>
+            <div>
+              <label for="danoEsquivado">Dano esquivado</label>
+              <input id="danoEsquivado" readonly />
+            </div>
+          </div>
+          <div class="footer-note">Armadura leve: d100/2 + destreza/2. Armadura média: d100/4 + destreza/4. Armadura pesada: não desvia. O cálculo segue este caminho: (dano bruto recebido - dano esquivado) e depois aplica a % de redução da armadura. O dano esquivado é uma redução em valor real, não em porcentagem.</div>
+        </div>
+
+        <div class="metric-grid section-space">
+          <div class="metric"><div class="name">Esquiva estimada</div><div class="value" id="esquivaCalc">0</div><div class="sub">estimativa conforme a armadura atual</div></div>
+        </div>
+
+        
+      </div>
+    </div>
+
+    <div class="layout-wide">
+      <div class="card wide-card perks-shell">
+        <div class="perks-inner">
+          <h2>Perks</h2>
+          <div class="footer-note">As perks ficam centralizadas aqui para leitura e marcação mais confortável, com melhor distribuição visual.</div>
+          <div class="section-space">
+            <div class="perk-grid" id="perkGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card wide-card">
+        <div class="notes-stack">
+          <div>
+            <h2>Anotações</h2>
+            <div class="footer-note">Container amplo para equipamentos, criaturas, observações gerais e qualquer outra informação narrativa ou técnica da ficha.</div>
+          </div>
+          <div>
+            <label for="equipamentos">Equipamentos</label>
+            <textarea id="equipamentos" data-save placeholder="Armas, armaduras, ferramentas, munição..."></textarea>
+          </div>
+          <div>
+            <label for="criaturas">Criaturas / domados</label>
+            <textarea id="criaturas" data-save placeholder="Nome da criatura, função, sela, comandos..."></textarea>
+          </div>
+          <div>
+            <label for="notas">Notas gerais</label>
+            <textarea id="notas" data-save placeholder="Missões, acordos, observações, regras da mesa..."></textarea>
+          </div>
+          <div class="footer-note">
+            Esta versão já automatiza os recursos centrais do sistema. O campo de arma foi deixado simples de propósito para você poder adicionar futuramente os danos e efeitos específicos de cada armamento sem reestruturar a ficha inteira.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div id="closeTabModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="closeTabModalTitle">
+      <h3 id="closeTabModalTitle">Fechar aba</h3>
+      <p id="closeTabMessage">Você tem certeza que quer fechar esta aba?</p>
+      <div class="modal-actions">
+        <button type="button" id="cancelCloseTabBtn">Cancelar</button>
+        <button type="button" id="confirmCloseTabBtn" class="btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+      <h3 id="exportModalTitle">Exportar JSON</h3>
+      <div class="footer-note">Escolha como deseja exportar. Os cálculos da ficha continuam no arquivo HTML; o JSON salva apenas os dados preenchidos.</div>
+      <div class="modal-option-list">
+        <label class="modal-option">
+          <input type="radio" name="exportMode" value="active" checked />
+          <div>
+            <strong>Exportar apenas a aba atual</strong>
+            <div class="small">Gera um JSON somente da ficha aberta neste momento.</div>
+          </div>
+        </label>
+        <label class="modal-option">
+          <input type="radio" name="exportMode" value="workspace" />
+          <div>
+            <strong>Exportar o arquivo completo</strong>
+            <div class="small">Gera um único JSON com todas as abas do arquivo.</div>
+          </div>
+        </label>
+        <label class="modal-option">
+          <input type="radio" name="exportMode" value="selected-separate" />
+          <div>
+            <strong>Exportar abas separadas</strong>
+            <div class="small">Gera um JSON separado para cada aba marcada abaixo.</div>
+          </div>
+        </label>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Abas para exportação separada</div>
+        <div id="exportTabsChecklist" class="checklist-box"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="cancelExportBtn">Cancelar</button>
+        <button type="button" id="confirmExportBtn" class="btn-accent">Exportar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="importModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+      <h3 id="importModalTitle">Importar JSON</h3>
+      <div class="footer-note">Ao importar, as fichas entram em abas novas por padrão. Só haverá substituição total se você escolher essa opção.</div>
+      <div class="modal-option-list">
+        <label class="modal-option">
+          <input type="radio" name="importMode" value="append" checked />
+          <div>
+            <strong>Importar em abas novas</strong>
+            <div class="small">Mantém tudo que já existe e cria novas abas para o conteúdo importado.</div>
+          </div>
+        </label>
+        <label class="modal-option">
+          <input type="radio" name="importMode" value="replace" />
+          <div>
+            <strong>Importar ficha completa substituindo tudo</strong>
+            <div class="small">Apaga todas as abas atuais e carrega somente o conteúdo do arquivo importado.</div>
+          </div>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="cancelImportBtn">Cancelar</button>
+        <button type="button" id="chooseImportFileBtn" class="btn-accent">Escolher arquivo</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="replaceImportModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="replaceImportModalTitle">
+      <h3 id="replaceImportModalTitle">Confirmar importação completa</h3>
+      <p id="replaceImportMessage">Ao importar uma ficha completa, os dados antigos serão perdidos permanentemente, sem chance de recuperar.</p>
+      <div class="modal-actions">
+        <button type="button" id="cancelReplaceImportBtn">Cancelar</button>
+        <button type="button" id="confirmReplaceImportBtn" class="btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <input type="file" id="fileInput" accept="application/json" style="display:none" />
+
+  <script>
+    const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
+    const LEGACY_STORAGE_KEYS = ['ark-rpg-ficha-v5'];
+    const DEFAULT_TAB_NAME = 'Nova ficha';
+    let sheetStore = { activeId: null, tabs: [] };
+    let pendingCloseTabId = null;
+
+    const closeTabModal = document.getElementById('closeTabModal');
+    const closeTabMessage = document.getElementById('closeTabMessage');
+    const cancelCloseTabBtn = document.getElementById('cancelCloseTabBtn');
+    const confirmCloseTabBtn = document.getElementById('confirmCloseTabBtn');
+
+    const exportModal = document.getElementById('exportModal');
+    const importModal = document.getElementById('importModal');
+    const replaceImportModal = document.getElementById('replaceImportModal');
+    const exportTabsChecklist = document.getElementById('exportTabsChecklist');
+    const cancelExportBtn = document.getElementById('cancelExportBtn');
+    const confirmExportBtn = document.getElementById('confirmExportBtn');
+    const cancelImportBtn = document.getElementById('cancelImportBtn');
+    const chooseImportFileBtn = document.getElementById('chooseImportFileBtn');
+    const cancelReplaceImportBtn = document.getElementById('cancelReplaceImportBtn');
+    const confirmReplaceImportBtn = document.getElementById('confirmReplaceImportBtn');
+
+    let pendingImportMode = 'append';
+
+    function uniqueId() {
+      return `ficha_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function defaultTabName(index = 1) {
+      return `${DEFAULT_TAB_NAME} ${index}`;
+    }
+
+    function makeBlankState() {
+      return {};
+    }
+
+    function getActiveTab() {
+      return sheetStore.tabs.find(tab => tab.id === sheetStore.activeId) || null;
+    }
+
+    function persistSheetStore() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sheetStore));
+    }
+
+    function normalizeTabName(name, fallbackIndex = 1) {
+      const clean = String(name || '').trim();
+      return clean || defaultTabName(fallbackIndex);
+    }
+
+
+    function sanitizeFilename(name, fallback = 'ficha_ark_rpg') {
+      return (String(name || fallback)
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '_')
+        .replace(/^_+|_+$/g, '') || fallback);
+    }
+
+    function buildWorkspaceExport(tabs) {
+      return {
+        exportType: 'ark-rpg-workspace',
+        version: 1,
+        activeId: tabs[0]?.id || null,
+        tabs: tabs.map((tab, index) => ({
+          id: tab.id || uniqueId(),
+          name: normalizeTabName(tab.name, index + 1),
+          data: { ...makeBlankState(), ...(tab.data || {}) }
+        }))
+      };
+    }
+
+    function downloadJson(filenameBase, payload) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      const href = URL.createObjectURL(blob);
+      a.href = href;
+      a.download = `${sanitizeFilename(filenameBase)}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(href), 1000);
+    }
+
+    function getSelectedExportTabs() {
+      return [...document.querySelectorAll('[data-export-tab]:checked')]
+        .map(box => sheetStore.tabs.find(tab => tab.id === box.value))
+        .filter(Boolean);
+    }
+
+    function renderExportChecklist() {
+      if (!exportTabsChecklist) return;
+      exportTabsChecklist.innerHTML = '';
+      sheetStore.tabs.forEach((tab, index) => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item';
+        label.innerHTML = `
+          <input type="checkbox" data-export-tab value="${tab.id}" checked />
+          <span>${normalizeTabName(tab.name, index + 1)}</span>
+        `;
+        exportTabsChecklist.appendChild(label);
+      });
+      syncExportChecklistState();
+    }
+
+    function syncExportChecklistState() {
+      const separateMode = document.querySelector('input[name="exportMode"]:checked')?.value === 'selected-separate';
+      document.querySelectorAll('.checklist-item').forEach(item => {
+        item.classList.toggle('disabled', !separateMode);
+      });
+      document.querySelectorAll('[data-export-tab]').forEach(box => {
+        box.disabled = !separateMode;
+      });
+    }
+
+    function openModal(modal) {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal(modal) {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function closeAllSecondaryModals() {
+      closeModal(exportModal);
+      closeModal(importModal);
+      closeModal(replaceImportModal);
+    }
+
+    function normalizeImportedTabs(parsed, fileName = '') {
+      if (parsed && Array.isArray(parsed.tabs) && parsed.tabs.length) {
+        return parsed.tabs.map((tab, index) => ({
+          id: uniqueId(),
+          name: normalizeTabName(tab?.name || tab?.data?.nome, index + 1),
+          data: { ...makeBlankState(), ...(tab?.data || {}) }
+        }));
+      }
+      const fallbackName = fileName.replace(/\.json$/i, '') || parsed?.nome || defaultTabName(sheetStore.tabs.length + 1);
+      return [{
+        id: uniqueId(),
+        name: normalizeTabName(parsed?.nome || fallbackName, sheetStore.tabs.length + 1),
+        data: { ...makeBlankState(), ...(parsed || {}) }
+      }];
+    }
+
+    function appendImportedTabs(tabs) {
+      if (!tabs.length) return;
+      saveState();
+      tabs.forEach((tab, index) => {
+        sheetStore.tabs.push({
+          id: uniqueId(),
+          name: normalizeTabName(tab.name, sheetStore.tabs.length + 1 + index),
+          data: { ...makeBlankState(), ...(tab.data || {}) }
+        });
+      });
+      sheetStore.activeId = sheetStore.tabs[sheetStore.tabs.length - 1].id;
+      persistSheetStore();
+      renderTabs();
+      const active = getActiveTab();
+      applyStateToForm(active ? active.data : {});
+      createInventoryRows(true);
+      updateAll();
+    }
+
+    function replaceWorkspaceWithImportedTabs(tabs) {
+      if (!tabs.length) return;
+      sheetStore = {
+        activeId: tabs[0].id,
+        tabs: tabs.map((tab, index) => ({
+          id: tab.id || uniqueId(),
+          name: normalizeTabName(tab.name, index + 1),
+          data: { ...makeBlankState(), ...(tab.data || {}) }
+        }))
+      };
+      persistSheetStore();
+      renderTabs();
+      applyStateToForm(sheetStore.tabs[0].data || {});
+      createInventoryRows(true);
+      updateAll();
+    }
+
+    function captureCurrentState() {
+      const data = {};
+      document.querySelectorAll('[data-save]').forEach(el => {
+        if (el.type === 'checkbox') data[el.id || el.dataset.perk] = el.checked;
+        else data[el.id] = el.value;
+      });
+      return data;
+    }
+
+    function resetFormToBlank() {
+      document.querySelectorAll('[data-save]').forEach(el => {
+        if (el.type === 'checkbox') el.checked = false;
+        else if (el.type === 'number') el.value = el.defaultValue || '0';
+        else el.value = el.defaultValue || '';
+      });
+      createInventoryRows(true);
+    }
+
+    function applyStateToForm(data = {}) {
+      resetFormToBlank();
+      document.querySelectorAll('[data-save]').forEach(el => {
+        const key = el.id || el.dataset.perk;
+        if (!(key in data)) return;
+        if (el.type === 'checkbox') el.checked = !!data[key];
+        else if (!el.hasAttribute('data-inventory')) el.value = data[key];
+      });
+      createInventoryRows(true);
+      document.querySelectorAll('[data-save][data-inventory]').forEach(el => {
+        const key = el.id || el.dataset.perk;
+        if (!(key in data)) return;
+        el.value = data[key];
+      });
+    }
+
+    function saveActiveTabState() {
+      const active = getActiveTab();
+      if (!active) return;
+      active.data = captureCurrentState();
+      active.name = normalizeTabName(active.data.nome, sheetStore.tabs.indexOf(active) + 1);
+      persistSheetStore();
+      renderTabs();
+    }
+
+    function renderTabs() {
+      const bar = byId('tabsBar');
+      if (!bar) return;
+      bar.innerHTML = '';
+      sheetStore.tabs.forEach((tab, index) => {
+        const btn = document.createElement('div');
+        btn.className = `tab-btn${tab.id === sheetStore.activeId ? ' active' : ''}`;
+        btn.dataset.tabId = tab.id;
+        btn.innerHTML = `
+          <span class="tab-name">${normalizeTabName(tab.name, index + 1)}</span>
+          <button type="button" class="tab-close" data-close-tab="${tab.id}" title="Fechar ficha">×</button>
+        `;
+        bar.appendChild(btn);
+      });
+    }
+
+    function createTab(initialData = {}, preferredName = '') {
+      const tab = {
+        id: uniqueId(),
+        name: normalizeTabName(preferredName || initialData.nome, sheetStore.tabs.length + 1),
+        data: { ...makeBlankState(), ...initialData }
+      };
+      sheetStore.tabs.push(tab);
+      sheetStore.activeId = tab.id;
+      persistSheetStore();
+      renderTabs();
+      applyStateToForm(tab.data);
+      createInventoryRows(true);
+      updateAll();
+    }
+
+    function switchTab(tabId) {
+      if (tabId === sheetStore.activeId) return;
+      saveActiveTabState();
+      sheetStore.activeId = tabId;
+      const active = getActiveTab();
+      if (!active) return;
+      persistSheetStore();
+      renderTabs();
+      applyStateToForm(active.data || {});
+      createInventoryRows(true);
+      updateAll();
+    }
+
+    function openCloseTabModal(tabId) {
+      const tab = sheetStore.tabs.find(item => item.id === tabId);
+      if (!tab) return;
+      pendingCloseTabId = tabId;
+      closeTabMessage.innerHTML = `Você tem certeza que quer fechar a aba <strong>${normalizeTabName(tab.name)}</strong>?<br><br>Os dados da aba serão perdidos e não poderão ser recuperados.`;
+      closeTabModal.classList.remove('hidden');
+      closeTabModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeCloseTabModal() {
+      pendingCloseTabId = null;
+      closeTabModal.classList.add('hidden');
+      closeTabModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function closeTab(tabId) {
+      const index = sheetStore.tabs.findIndex(tab => tab.id === tabId);
+      if (index === -1) return;
+      sheetStore.tabs.splice(index, 1);
+      if (!sheetStore.tabs.length) {
+        const tab = { id: uniqueId(), name: defaultTabName(1), data: makeBlankState() };
+        sheetStore.tabs = [tab];
+      }
+      if (!sheetStore.tabs.some(tab => tab.id === sheetStore.activeId)) {
+        sheetStore.activeId = sheetStore.tabs[Math.max(0, index - 1)].id;
+      }
+      persistSheetStore();
+      renderTabs();
+      const active = getActiveTab();
+      applyStateToForm(active ? active.data : {});
+      createInventoryRows(true);
+      updateAll();
+    }
+
+    function loadWorkspace() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.tabs) && parsed.tabs.length) {
+            sheetStore = parsed;
+            if (!sheetStore.tabs.some(tab => tab.id === sheetStore.activeId)) {
+              sheetStore.activeId = sheetStore.tabs[0].id;
+            }
+            return;
+          }
+        } catch (e) {}
+      }
+      for (const legacyKey of LEGACY_STORAGE_KEYS) {
+        const legacyRaw = localStorage.getItem(legacyKey);
+        if (!legacyRaw) continue;
+        try {
+          const legacyData = JSON.parse(legacyRaw);
+          sheetStore = {
+            activeId: uniqueId(),
+            tabs: []
+          };
+          sheetStore.tabs.push({ id: sheetStore.activeId, name: normalizeTabName(legacyData.nome, 1), data: legacyData });
+          persistSheetStore();
+          return;
+        } catch (e) {}
+      }
+      const firstId = uniqueId();
+      sheetStore = { activeId: firstId, tabs: [{ id: firstId, name: defaultTabName(1), data: makeBlankState() }] };
+      persistSheetStore();
+    }
+
+    function hydrateActiveTab() {
+      const active = getActiveTab();
+      renderTabs();
+      applyStateToForm(active ? active.data : {});
+    }
+
+    const perkData = {
+      forca: [
+        { id: 'golpe_firme', nome: 'Golpe Firme', efeito: '+10% de dano em ataques corpo a corpo' },
+        { id: 'impacto_pesado', nome: 'Impacto Pesado', efeito: '+10% de dano com armas pesadas' },
+        { id: 'derrubar_gigantes', nome: 'Derrubar Gigantes', efeito: '+10% de dano contra criaturas grandes' }
+      ],
+      destreza: [
+        { id: 'passo_leve', nome: 'Passo Leve', efeito: '+1,5 m de movimento' },
+        { id: 'reflexo', nome: 'Reflexo', efeito: '+5% redução de dano' },
+        { id: 'agilidade', nome: 'Agilidade', efeito: '-10% custo de stamina em ataques leves' }
+      ],
+      inteligencia: [
+        { id: 'oficio_inicial', nome: 'Ofício Inicial', efeito: '+10% velocidade de criação' },
+        { id: 'mao_economica', nome: 'Mão Econômica', efeito: '-10% custo de materiais' },
+        { id: 'ajuste_mestre', nome: 'Ajuste de Mestre', efeito: '+5% na qualidade de itens' }
+      ],
+      peso: [
+        { id: 'mulinha', nome: 'Mulinha', efeito: '+25 kg de capacidade' },
+        { id: 'organizacao_basica', nome: 'Organização Básica', efeito: '-10% em peso dos itens' },
+        { id: 'costas_de_ferro', nome: 'Costas de Ferro', efeito: 'Penalidade de movimento só começa em 90%' }
+      ],
+      resistencia: [
+        { id: 'tourinho', nome: 'Tourinho', efeito: '+20 stamina' },
+        { id: 'senta_e_respira', nome: 'Senta e Respira', efeito: '+2% regen stamina' },
+        { id: 'trabalho_consciente', nome: 'Trabalho Consciente', efeito: '-10% custo de ações' }
+      ],
+      constituicao: [
+        { id: 'corpo_forte', nome: 'Corpo Forte', efeito: '+5% resistência a dano' },
+        { id: 'tolerancia_basica', nome: 'Tolerância Básica', efeito: '-10% torpor recebido' }
+      ]
+    };
+
+    function byId(id) { return document.getElementById(id); }
+    function num(id) {
+      const v = parseFloat(byId(id).value);
+      return Number.isFinite(v) ? v : 0;
+    }
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+
+    function inventorySlotCount() {
+      return 5 + Math.max(0, Math.round(num('peso')));
+    }
+
+    function backpackEnabled() {
+      const field = byId('mochilaAtiva');
+      return !!field && field.value === 'sim';
+    }
+
+    function backpackSlotCount() {
+      if (!backpackEnabled()) return 0;
+      return Math.max(0, Math.round(num('mochilaSlots')));
+    }
+
+    function inventoryValueKey(slot, field) {
+      return `inventory_${slot}_${field}`;
+    }
+
+    function backpackValueKey(slot, field) {
+      return `backpack_${slot}_${field}`;
+    }
+
+    let currentInventorySlots = 0;
+    let currentBackpackSlots = 0;
+
+    function createStorageRows(bodyId, totalSlots, keyBuilder, dataAttr) {
+      const body = byId(bodyId);
+      if (!body) return;
+      const previousValues = {};
+      body.querySelectorAll(`[${dataAttr}]`).forEach(el => {
+        previousValues[el.dataset.key] = el.value;
+      });
+      body.innerHTML = '';
+      for (let i = 1; i <= totalSlots; i++) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="slot-badge">${i}</span></td>
+          <td><input data-save ${dataAttr} data-key="${keyBuilder(i,'desc')}" id="${keyBuilder(i,'desc')}" placeholder="Nome do item" /></td>
+          <td><input data-save ${dataAttr} data-key="${keyBuilder(i,'qty')}" id="${keyBuilder(i,'qty')}" type="number" min="0" step="1" value="0" /></td>
+          <td><input data-save ${dataAttr} data-key="${keyBuilder(i,'unit')}" id="${keyBuilder(i,'unit')}" type="number" min="0" step="0.01" value="0" /></td>
+          <td><input id="${keyBuilder(i,'total')}" readonly /></td>
+        `;
+        body.appendChild(tr);
+      }
+      for (const [key, value] of Object.entries(previousValues)) {
+        const el = byId(key);
+        if (el) el.value = value;
+      }
+    }
+
+    function createInventoryRows(force = false) {
+      const totalSlots = inventorySlotCount();
+      if (force || totalSlots !== currentInventorySlots) {
+        currentInventorySlots = totalSlots;
+        createStorageRows('inventoryBody', totalSlots, inventoryValueKey, 'data-inventory');
+      }
+
+      const totalBackpackSlots = backpackSlotCount();
+      const mochilaSection = byId('mochilaSection');
+      const mochilaSlotsBox = byId('mochilaSlotsBox');
+      if (mochilaSection) mochilaSection.style.display = backpackEnabled() ? '' : 'none';
+      if (mochilaSlotsBox) mochilaSlotsBox.style.display = backpackEnabled() ? '' : 'none';
+
+      if (force || totalBackpackSlots !== currentBackpackSlots) {
+        currentBackpackSlots = totalBackpackSlots;
+        createStorageRows('backpackBody', totalBackpackSlots, backpackValueKey, 'data-backpack');
+      }
+    }
+
+    function collectStorageTotals(totalSlots, keyBuilder) {
+      let used = 0;
+      let totalWeight = 0;
+      for (let i = 1; i <= totalSlots; i++) {
+        const descEl = byId(keyBuilder(i,'desc'));
+        const qtyEl = byId(keyBuilder(i,'qty'));
+        const unitEl = byId(keyBuilder(i,'unit'));
+        const totalEl = byId(keyBuilder(i,'total'));
+        if (!descEl || !qtyEl || !unitEl || !totalEl) continue;
+        const desc = (descEl.value || '').trim();
+        const qty = Math.max(0, parseFloat(qtyEl.value) || 0);
+        const unit = Math.max(0, parseFloat(unitEl.value) || 0);
+        const rowTotal = qty * unit;
+        totalEl.value = rowTotal.toFixed(2).replace(/\.00$/, '');
+        if (desc) used += 1;
+        totalWeight += rowTotal;
+      }
+      return { used, totalWeight, totalSlots, free: Math.max(0, totalSlots - used) };
+    }
+
+    function inventoryTotals() {
+      const character = collectStorageTotals(inventorySlotCount(), inventoryValueKey);
+      const backpack = backpackEnabled() ? collectStorageTotals(backpackSlotCount(), backpackValueKey) : { used: 0, totalWeight: 0, totalSlots: 0, free: 0 };
+      return {
+        character,
+        backpack,
+        used: character.used + backpack.used,
+        totalWeight: character.totalWeight + backpack.totalWeight,
+        totalSlots: character.totalSlots + backpack.totalSlots,
+        free: character.free + backpack.free
+      };
+    }
+
+    function attrCost(value) {
+      let total = 0;
+      for (let i = 1; i <= value; i++) {
+        total += i > 80 ? 3 : i > 50 ? 2 : 1;
+      }
+      return total;
+    }
+
+    function d20Multiplier(roll) {
+      if (roll >= 20) return 2;
+      if (roll >= 18) return 1.5;
+      if (roll >= 11) return 1;
+      if (roll >= 4) return 0.5;
+      return 0.3;
+    }
+
+    function createPerks() {
+      const host = byId('perkGrid');
+      const labels = {
+        forca: 'Força', destreza: 'Destreza', inteligencia: 'Inteligência', peso: 'Peso', resistencia: 'Resistência', constituicao: 'Constituição'
+      };
+      host.innerHTML = '';
+      for (const [attr, list] of Object.entries(perkData)) {
+        const group = document.createElement('div');
+        group.className = 'perk-group';
+        group.innerHTML = `<div class="attr-head"><strong>${labels[attr]}</strong><span class="pill">requer pelo menos 1 ponto</span></div>`;
+        list.forEach(perk => {
+          const item = document.createElement('label');
+          item.className = 'perk-item';
+          item.innerHTML = `
+            <input type="checkbox" data-perk="${perk.id}" data-attrreq="${attr}" data-save />
+            <div>
+              <div class="perk-title">${perk.nome}</div>
+              <div class="small">${perk.efeito}</div>
+            </div>
+          `;
+          group.appendChild(item);
+        });
+        host.appendChild(group);
+      }
+    }
+
+    function saveState() {
+      saveActiveTabState();
+    }
+
+    function loadState() {
+      loadWorkspace();
+      hydrateActiveTab();
+    }
+
+    function selectedPerks() {
+      return [...document.querySelectorAll('[data-perk]:checked')].map(el => el.dataset.perk);
+    }
+
+    function hasPerk(id) {
+      return selectedPerks().includes(id);
+    }
+
+
+    function updatePerkLocks() {
+      const perkTotal = Math.floor(Math.max(1, Math.round(num('nivel')) || 1) / 5) + num('perkBonus');
+      const used = selectedPerks().length;
+      const noSlotsLeft = used >= perkTotal;
+      document.querySelectorAll('[data-perk]').forEach(box => {
+        const attr = box.dataset.attrreq;
+        const attrVal = num(attr);
+        const attrBlocked = attrVal < 1;
+        const slotBlocked = !box.checked && noSlotsLeft;
+        box.disabled = attrBlocked || slotBlocked;
+        if (attrBlocked) box.checked = false;
+      });
+    }
+
+    function updateBars(currentId, max, barId, inverse = false) {
+      const current = clamp(num(currentId), 0, Math.max(0, max));
+      byId(currentId).value = current;
+      const pct = max <= 0 ? 0 : (current / max) * 100;
+      byId(barId).style.width = `${clamp(pct, 0, 100)}%`;
+      if (inverse) byId(barId).style.width = `${clamp(pct, 0, 100)}%`;
+    }
+
+    function updateAll() {
+      createInventoryRows();
+      updatePerkLocks();
+
+      const attrs = ['forca','constituicao','destreza','inteligencia','sabedoria','carisma','peso','resistencia'];
+      attrs.forEach(id => {
+        let v = clamp(Math.round(num(id)), 0, 100);
+        byId(id).value = v;
+        byId(id + 'Cost').value = attrCost(v);
+      });
+
+      const forca = num('forca');
+      const constituicao = num('constituicao');
+      const destreza = num('destreza');
+      const inteligencia = num('inteligencia');
+      const sabedoria = num('sabedoria');
+      const peso = num('peso');
+      const resistencia = num('resistencia');
+      const nivel = Math.max(1, Math.round(num('nivel')) || 1);
+      const pontosPorNivel = Math.max(0, num('pontosPorNivel'));
+      const bonusPontos = num('bonusPontos');
+      const perkBonus = num('perkBonus');
+
+      const pontosTotais = nivel * pontosPorNivel + bonusPontos;
+      const custos = attrs.reduce((sum, id) => sum + attrCost(num(id)), 0);
+      const pontosRestantes = pontosTotais - custos;
+      byId('pontosTotais').textContent = pontosTotais;
+      byId('pontosGastos').textContent = custos;
+      byId('pontosRestantes').textContent = pontosRestantes;
+      byId('pontosStatus').textContent = pontosRestantes < 0 ? 'ultrapassou o limite' : 'disponível';
+      byId('pontosStatus').className = pontosRestantes < 0 ? 'sub status-danger' : 'sub status-ok';
+
+      const perkTotal = Math.floor(nivel / 5) + perkBonus;
+      const perkUsed = selectedPerks().length;
+      const perkLeft = perkTotal - perkUsed;
+      byId('perkTotal').textContent = perkTotal;
+      byId('perkUsed').textContent = perkUsed;
+      byId('perkLeft').textContent = perkLeft;
+      byId('perkStatus').textContent = perkLeft < 0 ? 'perks excedidas' : 'disponível';
+      byId('perkStatus').className = perkLeft < 0 ? 'sub status-danger' : 'sub status-ok';
+
+      const vidaMax = 100 + constituicao * 10;
+      let vidaRegenPct = 2 + Math.floor(constituicao / 10);
+      if (hasPerk('corpo_forte')) {}
+      const vidaRegenTurno = Math.round(vidaMax * (vidaRegenPct / 100));
+      const torporMax = 100 + constituicao * 5;
+      let torporResist = Math.floor(constituicao / 10) * 5;
+      if (hasPerk('tolerancia_basica')) torporResist += 10;
+
+      let andar = 5 + Math.floor(destreza / 5) * 1.5;
+      if (hasPerk('passo_leve')) andar += 1.5;
+      let esquivaBase = destreza;
+      let furtividade = destreza;
+
+      const percepcao = 10 + sabedoria;
+      const zonaPercepcao = percepcao / 2;
+      const oxigenio = 60 + sabedoria * 5;
+
+      let capacidade = 50 + peso * 10;
+      if (hasPerk('mulinha')) capacidade += 25;
+
+      let staminaMax = 100 + resistencia * 10;
+      if (hasPerk('tourinho')) staminaMax += 20;
+      let staminaRegenPct = 5 + Math.floor(resistencia / 10);
+      if (hasPerk('senta_e_respira')) staminaRegenPct += 2;
+      const staminaRegenTurno = Math.round(staminaMax * (staminaRegenPct / 100));
+
+      const danoFisico = forca * 2 + (hasPerk('golpe_firme') ? 10 : 0);
+      const danoDistancia = destreza * 2;
+      const craftVel = inteligencia * 2 + (hasPerk('oficio_inicial') ? 10 : 0);
+      const craftQual = inteligencia + (hasPerk('ajuste_mestre') ? 5 : 0);
+      let reducaoDanoExtra = 0;
+      if (hasPerk('reflexo')) reducaoDanoExtra += 5;
+      if (hasPerk('corpo_forte')) reducaoDanoExtra += 5;
+
+      const inventory = inventoryTotals();
+      const pesoAtual = inventory.totalWeight;
+      const threshold = hasPerk('costas_de_ferro') ? 90 : 80;
+      const cargaPct = capacidade <= 0 ? 0 : (pesoAtual / capacidade) * 100;
+      let correr = andar * 2;
+      let pesoPenaltyText = 'sem penalidade';
+      if (cargaPct > 100) {
+        andar = 0;
+        correr = 0;
+        pesoPenaltyText = 'imóvel por excesso de carga';
+      } else if (cargaPct > threshold) {
+        andar *= 0.7;
+        correr *= 0.7;
+        pesoPenaltyText = `deslocamento reduzido em 30% acima de ${threshold}% de carga`;
+      }
+
+      byId('forcaInfo').value = `+${forca * 2}% dano físico`;
+      byId('constituicaoInfo').value = `HP +${constituicao * 10}`;
+      byId('destrezaInfo').value = `+${destreza * 2}% distância`;
+      byId('inteligenciaInfo').value = `criação +${inteligencia * 2}%`;
+      byId('sabedoriaInfo').value = `percepção +${sabedoria}`;
+      byId('carismaInfo').value = 'bônus narrativo';
+      byId('pesoInfo').value = `+${peso * 10} kg`;
+      byId('resistenciaInfo').value = `stamina +${resistencia * 10}`;
+
+      byId('vidaMax').textContent = vidaMax;
+      byId('vidaRegen').textContent = `regen: ${vidaRegenPct}% por turno (${vidaRegenTurno})`;
+      byId('torporMax').textContent = torporMax;
+      byId('torporInfo').textContent = `resistência a torpor: -${torporResist}% | queda natural: 5% por turno`;
+      byId('staminaMax').textContent = staminaMax;
+      byId('staminaRegen').textContent = `regen: ${staminaRegenPct}% por turno (${staminaRegenTurno})`;
+      byId('andarVal').textContent = `${andar.toFixed(1).replace('.0','')} m`;
+      byId('correrVal').textContent = `${correr.toFixed(1).replace('.0','')} m`;
+      byId('esquivaVal').textContent = esquivaBase;
+      byId('furtividadeVal').textContent = furtividade;
+      byId('percepcaoVal').textContent = percepcao;
+      byId('zonaPercepcao').textContent = `zona passiva: ${zonaPercepcao.toFixed(1).replace('.0','')}`;
+      byId('oxigenioVal').textContent = `${oxigenio} s`;
+      byId('capacidadeVal').textContent = `${capacidade} kg`;
+      byId('pesoPenalty').textContent = pesoPenaltyText;
+      byId('danoFisicoVal').textContent = `+${danoFisico}%`;
+      byId('danoDistVal').textContent = `+${danoDistancia}%`;
+      byId('craftVelVal').textContent = `+${craftVel}%`;
+      byId('craftQualVal').textContent = `qualidade +${craftQual}%`;
+
+      byId('vidaAtualMax').value = vidaMax;
+      byId('torporAtualMax').value = torporMax;
+      byId('staminaAtualMax').value = staminaMax;
+      byId('pesoAtual').value = pesoAtual.toFixed(2).replace(/\.00$/, '');
+      byId('pesoAtualMax').value = capacidade;
+      byId('pesoUso').value = `${cargaPct.toFixed(1)}%`;
+      byId('inventarioSlotsTotal').textContent = inventory.character.totalSlots;
+      byId('inventarioSlotsUsados').textContent = inventory.character.used;
+      byId('inventarioSlotsLivres').textContent = inventory.character.free;
+      if (byId('mochilaSlotsTotalLabel')) byId('mochilaSlotsTotalLabel').textContent = inventory.backpack.totalSlots;
+      if (byId('mochilaSlotsUsados')) byId('mochilaSlotsUsados').textContent = inventory.backpack.used;
+      if (byId('mochilaSlotsLivres')) byId('mochilaSlotsLivres').textContent = inventory.backpack.free;
+
+      updateBars('vidaAtual', vidaMax, 'vidaBar');
+      updateBars('torporAtual', torporMax, 'torporBar');
+      updateBars('staminaAtual', staminaMax, 'staminaBar');
+      const pesoBarPct = capacidade <= 0 ? 0 : clamp((pesoAtual / capacidade) * 100, 0, 100);
+      byId('pesoBar').style.width = `${pesoBarPct}%`;
+
+      const postura = byId('postura').value;
+      const armadura = byId('armadura').value;
+      let posturaResumo = 'Postura ofensiva: funcionamento normal, sem custo.';
+      if (postura === 'defensiva') posturaResumo = 'Postura defensiva: reduz o dano do personagem em 50%, aumenta a defesa em 50% e custa 10 de stamina.';
+      if (postura === 'esquiva') posturaResumo = 'Postura de esquiva: custa 10 de stamina e depende da armadura. Leve usa d100/2 + destreza/2. Média usa d100/4 + destreza/4. Pesada não desvia.';
+      if (armadura === 'media') posturaResumo += ' Armadura média: usa a fórmula reduzida de esquiva.';
+      if (armadura === 'pesada') posturaResumo += ' Armadura pesada: não permite desvio.';
+      byId('posturaResumo').textContent = posturaResumo;
+
+      const armaEscala = byId('armaEscala').value;
+      const escalaBonus = armaEscala === 'forca' ? Math.round(forca * 0.02 * 100) / 100 : armaEscala === 'destreza' ? Math.round(destreza * 0.02 * 100) / 100 : 0;
+      const escalaPercentual = armaEscala === 'forca' ? danoFisico : armaEscala === 'destreza' ? danoDistancia : 0;
+      byId('armaScaleValue').textContent = `+${escalaPercentual}%`;
+      byId('armaScaleText').textContent = armaEscala === 'forca' ? 'escala por Força' : armaEscala === 'destreza' ? 'escala por Destreza' : 'sem escalonamento';
+
+      const roll = clamp(Math.round(num('rolagemD20')), 1, 20);
+      byId('rolagemD20').value = roll;
+      const mult = d20Multiplier(roll);
+      byId('multiD20').textContent = `${Math.round(mult * 100)}%`;
+
+      const dadoBase = Math.max(0, num('danoBaseRolado'));
+      const bonusArma = num('armaBonus');
+      const extra = num('efeitoExtra');
+      const bonusPercentualExtra = num('bonusPercentualExtra');
+      let perkDamageBonus = 0;
+      if (hasPerk('impacto_pesado')) perkDamageBonus += 10;
+      if (hasPerk('derrubar_gigantes') && byId('tamanhoAlvo').value === 'grande') perkDamageBonus += 10;
+      const percentualTotal = escalaPercentual + bonusPercentualExtra + perkDamageBonus;
+      const baseSemMult = dadoBase + bonusArma + extra;
+      const multiplicadorPosturaAtaque = postura === 'defensiva' ? 0.5 : 1;
+      const danoBruto = baseSemMult * (1 + percentualTotal / 100) * mult * multiplicadorPosturaAtaque;
+      const reducaoAlvo = clamp(num('reducaoArmaduraAlvo'), 0, 95);
+      const danoFinal = danoBruto * (1 - reducaoAlvo / 100);
+      const alvoAntes = Math.max(0, num('danoAplicadoAlvo'));
+      const vidaRestanteAlvo = Math.max(0, alvoAntes - danoFinal);
+
+      let damageReduction = clamp(num('reducaoArmadura') + reducaoDanoExtra, 0, 95);
+      if (postura === 'defensiva') damageReduction = clamp(damageReduction + 50, 0, 95);
+
+      const danoRecebidoBruto = Math.max(0, num('danoRecebidoBruto'));
+      const rolagemEsquiva = clamp(Math.round(num('rolagemEsquiva') || 1), 1, 100);
+      byId('rolagemEsquiva').value = rolagemEsquiva;
+      const penalidadeEsquiva = num('penalidadeEsquiva');
+      const esquivaAtiva = postura === 'esquiva';
+      let formulaEsquivaValor = 0;
+      if (esquivaAtiva) {
+        if (armadura === 'leve') {
+          formulaEsquivaValor = (rolagemEsquiva / 2) + (destreza / 2);
+        } else if (armadura === 'media') {
+          formulaEsquivaValor = (rolagemEsquiva / 4) + (destreza / 4);
+        } else {
+          formulaEsquivaValor = 0;
+        }
+      }
+      const danoEsquivado = clamp(formulaEsquivaValor - penalidadeEsquiva, 0, danoRecebidoBruto);
+      const danoAposEsquiva = Math.max(0, danoRecebidoBruto - danoEsquivado);
+      const danoRecebidoFinal = danoAposEsquiva * (1 - damageReduction / 100);
+      const vidaAposDanoRecebido = Math.max(0, num('vidaAtual') - danoRecebidoFinal);
+
+      let esquivaCalcValor = 0;
+      if (armadura === 'leve') esquivaCalcValor = 50 + destreza / 2;
+      else if (armadura === 'media') esquivaCalcValor = 25 + destreza / 4;
+      else esquivaCalcValor = 0;
+      const esquivaCalc = esquivaCalcValor.toFixed(1).replace('.0','');
+
+      byId('percentualTotalDano').textContent = `${percentualTotal >= 0 ? '+' : ''}${percentualTotal}%`;
+      byId('danoBruto').textContent = danoBruto.toFixed(2).replace(/\.00$/, '');
+      byId('danoFinal').textContent = danoFinal.toFixed(2).replace(/\.00$/, '');
+      byId('vidaRestanteAlvo').value = alvoAntes > 0 ? vidaRestanteAlvo.toFixed(2).replace(/\.00$/, '') : '';
+      byId('reducaoArmaduraRecebida').value = `${damageReduction}%`;
+      byId('danoRecebidoFinal').value = danoRecebidoFinal.toFixed(2).replace(/\.00$/, '');
+      byId('vidaAposDanoRecebido').value = vidaAposDanoRecebido.toFixed(2).replace(/\.00$/, '');
+      byId('esquivaCalc').textContent = esquivaCalc;
+      byId('esquivaBox').style.display = esquivaAtiva ? 'block' : 'none';
+      byId('formulaEsquiva').value = formulaEsquivaValor.toFixed(2).replace(/\.00$/, '');
+      byId('danoEsquivado').value = danoEsquivado.toFixed(2).replace(/\.00$/, '');
+      byId('applyReceivedDamageBtn').disabled = danoRecebidoBruto <= 0;
+      byId('ataqueResumo').textContent = `${byId('armaNome').value || 'Arma'} (${byId('armaDado').value || '-'})`;
+
+      saveState();
+    }
+
+    window.applyDelta = function(type) {
+      const currentId = `${type}Atual`;
+      const deltaId = `${type}Delta`;
+      const maxId = `${type}AtualMax`;
+      const current = num(currentId);
+      const delta = num(deltaId);
+      const max = num(maxId);
+      byId(currentId).value = clamp(current + delta, 0, max);
+      byId(deltaId).value = 0;
+      updateAll();
+    }
+
+    function actionCost() {
+      let cost = parseFloat(byId('acaoRapida').value) || 0;
+      if (hasPerk('trabalho_consciente')) cost *= 0.9;
+      if (hasPerk('agilidade') && byId('acaoRapida').selectedOptions[0].text.toLowerCase().includes('ataque leve')) cost *= 0.9;
+      return Math.round(cost * 100) / 100;
+    }
+
+    byId('useActionBtn').addEventListener('click', () => {
+      const current = num('staminaAtual');
+      byId('staminaAtual').value = Math.max(0, current - actionCost());
+      updateAll();
+    });
+
+    byId('recoverStaminaBtn').addEventListener('click', () => {
+      const max = num('staminaAtualMax');
+      const resistencia = num('resistencia');
+      let regenPct = 5 + Math.floor(resistencia / 10);
+      if (hasPerk('senta_e_respira')) regenPct += 2;
+      const amount = Math.round(max * regenPct / 100);
+      byId('staminaAtual').value = clamp(num('staminaAtual') + amount, 0, max);
+      updateAll();
+    });
+
+    byId('recoverHpBtn').addEventListener('click', () => {
+      const max = num('vidaAtualMax');
+      const constituicao = num('constituicao');
+      let regenPct = 2 + Math.floor(constituicao / 10);
+      const amount = Math.round(max * regenPct / 100);
+      byId('vidaAtual').value = clamp(num('vidaAtual') + amount, 0, max);
+      updateAll();
+    });
+
+    byId('dropTorporBtn').addEventListener('click', () => {
+      const current = num('torporAtual');
+      const drop = Math.round(num('torporAtualMax') * 0.05);
+      byId('torporAtual').value = Math.max(0, current - drop);
+      updateAll();
+    });
+
+    byId('applyReceivedDamageBtn').addEventListener('click', () => {
+      const vidaAtual = num('vidaAtual');
+      const danoFinal = Math.max(0, parseFloat(byId('danoRecebidoFinal').value) || 0);
+      byId('vidaAtual').value = Math.max(0, vidaAtual - danoFinal);
+      updateAll();
+    });
+
+    byId('applyDamageToTargetBtn').addEventListener('click', () => {
+      const vidaAlvoAtual = Math.max(0, num('danoAplicadoAlvo'));
+      const danoFinal = Math.max(0, parseFloat(byId('danoFinal').textContent.replace(',', '.')) || 0);
+      byId('danoAplicadoAlvo').value = Math.max(0, vidaAlvoAtual - danoFinal).toFixed(2).replace(/\.00$/, '');
+      updateAll();
+    });
+
+    byId('exportBtn').addEventListener('click', () => {
+      saveState();
+      renderExportChecklist();
+      openModal(exportModal);
+    });
+
+    byId('importBtn').addEventListener('click', () => {
+      pendingImportMode = 'append';
+      const defaultOption = document.querySelector('input[name="importMode"][value="append"]');
+      if (defaultOption) defaultOption.checked = true;
+      openModal(importModal);
+    });
+
+    confirmExportBtn.addEventListener('click', () => {
+      saveState();
+      const mode = document.querySelector('input[name="exportMode"]:checked')?.value || 'active';
+      const active = getActiveTab();
+      if (mode === 'workspace') {
+        downloadJson('ficha_ark_rpg_completa', buildWorkspaceExport(sheetStore.tabs));
+      } else if (mode === 'selected-separate') {
+        const selectedTabs = getSelectedExportTabs();
+        if (!selectedTabs.length) {
+          alert('Selecione pelo menos uma aba para exportar separadamente.');
+          return;
+        }
+        selectedTabs.forEach((tab, index) => {
+          setTimeout(() => downloadJson(normalizeTabName(tab.name, index + 1), tab.data || {}), index * 150);
+        });
+      } else {
+        downloadJson(active?.name || 'ficha_ark_rpg', active?.data || {});
+      }
+      closeModal(exportModal);
+    });
+
+    cancelExportBtn.addEventListener('click', () => closeModal(exportModal));
+
+    document.querySelectorAll('input[name="exportMode"]').forEach(radio => {
+      radio.addEventListener('change', syncExportChecklistState);
+    });
+
+    chooseImportFileBtn.addEventListener('click', () => {
+      pendingImportMode = document.querySelector('input[name="importMode"]:checked')?.value || 'append';
+      closeModal(importModal);
+      if (pendingImportMode === 'replace') {
+        openModal(replaceImportModal);
+        return;
+      }
+      byId('fileInput').click();
+    });
+
+    cancelImportBtn.addEventListener('click', () => closeModal(importModal));
+    cancelReplaceImportBtn.addEventListener('click', () => closeModal(replaceImportModal));
+    confirmReplaceImportBtn.addEventListener('click', () => {
+      closeModal(replaceImportModal);
+      byId('fileInput').click();
+    });
+
+    byId('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const importedTabs = normalizeImportedTabs(parsed, file.name);
+        if (!importedTabs.length) throw new Error('empty');
+        if (pendingImportMode === 'replace') {
+          replaceWorkspaceWithImportedTabs(importedTabs);
+        } else {
+          appendImportedTabs(importedTabs);
+        }
+      } catch (err) {
+        alert('Não foi possível importar o arquivo JSON.');
+      } finally {
+        pendingImportMode = 'append';
+        e.target.value = '';
+      }
+    });
+
+    byId('printBtn').addEventListener('click', () => window.print());
+    byId('resetBtn').addEventListener('click', () => {
+      const active = getActiveTab();
+      if (!active) return;
+      if (!confirm('Isso vai limpar apenas a ficha atual. Deseja continuar?')) return;
+      active.data = makeBlankState();
+      active.name = defaultTabName(sheetStore.tabs.indexOf(active) + 1);
+      persistSheetStore();
+      renderTabs();
+      applyStateToForm(active.data);
+      createInventoryRows(true);
+      updateAll();
+    });
+
+    byId('addTabBtn').addEventListener('click', () => {
+      saveState();
+      createTab({}, defaultTabName(sheetStore.tabs.length + 1));
+    });
+
+    byId('tabsBar').addEventListener('click', (e) => {
+      const closeBtn = e.target.closest('[data-close-tab]');
+      if (closeBtn) {
+        e.stopPropagation();
+        openCloseTabModal(closeBtn.dataset.closeTab);
+        return;
+      }
+      const tabBtn = e.target.closest('[data-tab-id]');
+      if (tabBtn) {
+        switchTab(tabBtn.dataset.tabId);
+      }
+    });
+
+    cancelCloseTabBtn.addEventListener('click', () => {
+      closeCloseTabModal();
+    });
+
+    confirmCloseTabBtn.addEventListener('click', () => {
+      if (pendingCloseTabId) {
+        closeTab(pendingCloseTabId);
+      }
+      closeCloseTabModal();
+    });
+
+    closeTabModal.addEventListener('click', (e) => {
+      if (e.target === closeTabModal) {
+        closeCloseTabModal();
+      }
+    });
+
+    [exportModal, importModal, replaceImportModal].forEach(modal => {
+      if (!modal) return;
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(modal);
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !closeTabModal.classList.contains('hidden')) {
+        closeCloseTabModal();
+        return;
+      }
+      if (e.key === 'Escape') {
+        closeAllSecondaryModals();
+      }
+    });
+
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('input, select, textarea')) updateAll();
+    });
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('input, select, textarea')) updateAll();
+    });
+
+    createPerks();
+    loadState();
+    createInventoryRows(true);
+    updateAll();
+  </script>
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>
