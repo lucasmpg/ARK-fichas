@@ -32,7 +32,7 @@ export async function bindLandingAuth() {
     }
   });
   if (logoutBtn) logoutBtn.addEventListener("click", async () => logout());
-  if (openFichaBtn) openFichaBtn.addEventListener("click", () => window.location.href = "./pages/ficha.html");
+  if (openFichaBtn) openFichaBtn.addEventListener("click", () => window.location.href = "./pages/dashboard.html");
   if (openAdminBtn) openAdminBtn.addEventListener("click", () => window.location.href = "./pages/admin.html");
 
   onAuthStateChanged(auth, async (user) => {
