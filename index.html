@@ -11,18 +11,13 @@
   <div class="page-shell">
     <div class="center-card card">
       <h1 class="hero-title">ARK Fichas Online</h1>
-      <p class="hero-subtitle">Login com Google para cada player usar a própria ficha. O mestre pode abrir o painel e editar qualquer ficha, desde que o e-mail dele esteja listado em <code>ADMIN_EMAILS</code>.</p>
+      <p class="hero-subtitle">Login com Google para cada player usar a própria ficha.</p>
       <div class="notice" id="userInfo">Verificando autenticação...</div>
       <div class="page-actions">
         <button id="loginGoogleBtn" type="button">Entrar com Google</button>
         <button id="logoutBtn" type="button" style="display:none;">Sair</button>
         <button id="openFichaBtn" type="button" style="display:none;">Abrir minha ficha</button>
         <button id="openAdminBtn" type="button" style="display:none;">Painel do mestre</button>
-      </div>
-      <p class="muted" id="adminHint"></p>
-      <div class="notice" style="margin-top:18px;">
-        Estrutura pronta para GitHub Pages + Firebase Authentication + Firestore.
-      </div>
     </div>
   </div>
   <script type="module">
