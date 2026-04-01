@@ -17,8 +17,7 @@
         <div class="authbar-actions">
           <button id="goHomeBtn" type="button">Início</button>
           <button id="goPlayerSheetBtn" type="button">Minha ficha</button>
-          <button id="manageShareBtn" type="button" style="display:none;">Compartilhar visualização</button>
-          <button id="goAdminBtn" type="button" style="display:none;">Painel do mestre</button>
+                    <button id="goAdminBtn" type="button" style="display:none;">Painel do mestre</button>
           <button id="logoutBtn" type="button">Sair</button>
         </div>
       </div>
@@ -43,27 +42,6 @@
       <div class="modal-actions">
         <button type="button" id="cancelCreateCreatureBtn">Cancelar</button>
         <button type="button" id="confirmCreateCreatureBtn">Criar criatura</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="shareWorkspaceModal" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true">
-      <h3>Compartilhar visualização</h3>
-      <div class="footer-note">Selecione quem poderá abrir o dashboard, a ficha do jogador e as fichas das criaturas em modo somente leitura.</div>
-      <div class="modal-grid">
-        <div>
-          <label for="shareTargetUser">Usuário</label>
-          <select id="shareTargetUser"></select>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="cancelShareWorkspaceBtn">Fechar</button>
-        <button type="button" id="addShareWorkspaceBtn">Adicionar acesso</button>
-      </div>
-      <div class="section-space">
-        <div class="footer-note">Usuários com acesso atual</div>
-        <div id="sharedViewerList" class="cards-grid" style="grid-template-columns:1fr;"></div>
       </div>
     </div>
   </div>
