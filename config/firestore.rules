@@ -1,6 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -8,19 +9,15 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn()
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ["moisslucas3@gmail.com"];
-    }
-
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
+        && request.auth.token.email == "moisslucas3@gmail.com";
     }
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, write: if isSignedIn() && request.auth.uid == userId || isAdmin();
     }
 
     match /workspaces/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, write: if isSignedIn() && request.auth.uid == userId || isAdmin();
     }
   }
 }
