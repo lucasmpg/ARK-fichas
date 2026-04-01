@@ -42,7 +42,6 @@ export async function bindLandingAuth() {
       if (openFichaBtn) openFichaBtn.style.display = "none";
       if (openAdminBtn) openAdminBtn.style.display = "none";
       if (userInfo) userInfo.textContent = "Faça login com Google para abrir sua ficha.";
-      if (adminHint) adminHint.textContent = "Para liberar o painel do mestre, troque ADMIN_EMAILS no arquivo assets/js/firebase-config.js.";
       return;
     }
 
