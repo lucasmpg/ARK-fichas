@@ -13,11 +13,11 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId || isAdmin();
+      allow read, write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
 
     match /workspaces/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId || isAdmin();
+      allow read, write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
     }
   }
 }
