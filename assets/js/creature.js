@@ -356,7 +356,8 @@ function updateAll() {
   byId('percepcaoVal').textContent = `${percepcao}`;
   byId('zonaPercepcao').textContent = `zona passiva: ${(percepcao / 2).toFixed(1).replace('.0', '')}`;
   byId('capacidadeVal').textContent = `${capacidade} kg`;
-  byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
+byId('capacidadePesoVisual').value = `${capacidade} kg`;
+byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
   byId('danoDistVal').textContent = `+${danoDistancia}%`;
   byId('oxigenioVal').textContent = `${oxigenio} s`;
   byId('pesoPenalty').textContent = pesoPenaltyText;
