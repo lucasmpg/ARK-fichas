@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(180deg, #040a11 0%, #06101a 55%, #03070d 100%);
+  color: #dff8ff;
+}
+button {
+  min-height: 42px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 12px;
+  background: linear-gradient(180deg, rgba(13,42,61,.96), rgba(8,22,35,.96));
+  border: 1px solid rgba(105,223,255,.34);
+  color: #7de7ff;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.card {
+  background: linear-gradient(180deg, rgba(8,18,30,.95), rgba(5,12,20,.96));
+  border: 1px solid rgba(94,218,255,.26);
+  border-radius: 14px;
+  padding: 20px;
+}
+.hero-title {
+  margin: 0 0 10px;
+  font-size: 30px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #7de7ff;
+}
+.hero-subtitle, .muted { color: #9cc8d6; }
