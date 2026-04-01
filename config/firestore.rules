@@ -12,12 +12,24 @@ service cloud.firestore {
         && request.auth.token.email == "moisslucas3@gmail.com";
     }
 
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isSharedViewer() {
+      return isSignedIn()
+        && request.auth.uid in resource.data.sharedViewerUids;
+    }
+
     match /users/{userId} {
-      allow read, write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /workspaces/{userId} {
-      allow read, write: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin() || isSharedViewer();
+      allow create: if isOwner(userId) || isAdmin();
+      allow update, delete: if isOwner(userId) || isAdmin();
     }
   }
 }
