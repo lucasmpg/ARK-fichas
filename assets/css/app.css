@@ -1380,4 +1380,3 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 .creature-grid { grid-template-columns: 1.1fr 1fr 1fr; }
 .modal-check { display:flex; gap:8px; align-items:center; margin-top:12px; color: var(--muted); text-transform:none; }
 @media (max-width: 1100px) { .creature-grid { grid-template-columns: 1fr; } }
-}
