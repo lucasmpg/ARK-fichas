@@ -4,9 +4,9 @@ import {
   onAuthStateChanged,
   isAdminUser,
   upsertUserProfile,
-  listUsers,
-  listSheetsByOwnerUid,
-  createSheetForUser
+  listAllUsers,
+  getWorkspace,
+  saveWorkspace
 } from "./firebase-config.js";
 
 const adminStatus = document.getElementById('adminStatus');
@@ -27,17 +27,6 @@ document.getElementById('refreshBtn').addEventListener('click', () => loadAdmin(
 
 let allUsers = [];
 let selectedUser = null;
-
-function formatDate(value) {
-  if (!value) return 'sem alteração';
-  try {
-    if (typeof value.toDate === 'function') return value.toDate().toLocaleString('pt-BR');
-    if (value.seconds) return new Date(value.seconds * 1000).toLocaleString('pt-BR');
-    return new Date(value).toLocaleString('pt-BR');
-  } catch {
-    return 'sem alteração';
-  }
-}
 
 function renderUsers(items) {
   const term = (userSearchInput.value || '').trim().toLowerCase();
@@ -73,50 +62,55 @@ function renderUsers(items) {
         <span class="muted">UID: ${item.uid}</span>
       `;
       renderUsers(allUsers);
-      await loadSheetsForSelectedUser();
+      await loadSelectedUserWorkspace();
     });
     usersList.appendChild(div);
   }
 }
 
-function renderSheets(items) {
+function renderWorkspaceCard(user, workspaceExists) {
   sheetsList.innerHTML = '';
 
-  if (!items.length) {
-    sheetsList.innerHTML = '<div class="notice">Nenhuma ficha encontrada para este usuário.</div>';
-    return;
-  }
+  const div = document.createElement('div');
+  div.className = 'sheet-item';
+  div.innerHTML = `
+    <div class="sheet-item-meta">
+      <strong>${user.name || 'Sem nome'}</strong>
+      <span class="muted">${user.email || 'Sem e-mail'}</span>
+      <span class="muted">${workspaceExists ? 'Ficha encontrada' : 'Esse usuário ainda não tem ficha criada'}</span>
+    </div>
+    <div class="sheet-item-actions">
+      <button type="button" id="openSelectedSheetBtn">Abrir ficha</button>
+      ${workspaceExists ? '' : '<button type="button" id="createSelectedSheetBtn">Criar ficha vazia</button>'}
+    </div>
+  `;
 
-  for (const item of items) {
-    const div = document.createElement('div');
-    div.className = 'sheet-item';
-    div.innerHTML = `
-      <div class="sheet-item-meta">
-        <strong>${item.name || 'Ficha sem nome'}</strong>
-        <span class="muted">${item.ownerEmail || ''}</span>
-        <span class="muted">Última alteração: ${formatDate(item.updatedAt)}</span>
-      </div>
-      <div class="sheet-item-actions">
-        <button type="button" data-open="${item.id}">Abrir ficha</button>
-      </div>
-    `;
-    sheetsList.appendChild(div);
-  }
+  sheetsList.appendChild(div);
 
-  sheetsList.querySelectorAll('[data-open]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      window.location.href = `./ficha.html?sheetId=${encodeURIComponent(btn.dataset.open)}&admin=1`;
-    });
+  document.getElementById('openSelectedSheetBtn').addEventListener('click', () => {
+    window.location.href = `./ficha.html?uid=${encodeURIComponent(user.uid)}&admin=1`;
   });
+
+  if (!workspaceExists) {
+    document.getElementById('createSelectedSheetBtn').addEventListener('click', async () => {
+      await saveWorkspace(user.uid, {
+        ownerName: user.name || '',
+        ownerEmail: user.email || '',
+        createdAt: new Date().toISOString()
+      });
+      await loadSelectedUserWorkspace();
+    });
+  }
 }
 
-async function loadSheetsForSelectedUser() {
+async function loadSelectedUserWorkspace() {
   if (!selectedUser) {
     sheetsList.innerHTML = '<div class="notice">Selecione um usuário.</div>';
     return;
   }
-  const sheets = await listSheetsByOwnerUid(selectedUser.uid);
-  renderSheets(sheets);
+
+  const workspace = await getWorkspace(selectedUser.uid);
+  renderWorkspaceCard(selectedUser, !!workspace);
 }
 
 async function loadAdmin() {
@@ -131,11 +125,11 @@ async function loadAdmin() {
   }
 
   adminStatus.textContent = `Painel liberado para ${user.email}`;
-  allUsers = await listUsers();
+  allUsers = await listAllUsers();
   renderUsers(allUsers);
 
   if (selectedUser) {
-    await loadSheetsForSelectedUser();
+    await loadSelectedUserWorkspace();
   }
 }
 
@@ -143,33 +137,33 @@ createMySheetBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (!user) return;
 
-  const nome = prompt('Nome da nova ficha:');
-  if (!nome) return;
+  const workspace = await getWorkspace(user.uid);
 
-  const sheetId = await createSheetForUser({
-    ownerUid: user.uid,
-    ownerEmail: user.email || '',
-    ownerName: user.displayName || '',
-    name: nome
-  });
+  if (!workspace) {
+    await saveWorkspace(user.uid, {
+      ownerName: user.displayName || '',
+      ownerEmail: user.email || '',
+      createdAt: new Date().toISOString()
+    });
+  }
 
-  window.location.href = `./ficha.html?sheetId=${encodeURIComponent(sheetId)}&admin=1`;
+  window.location.href = `./ficha.html?uid=${encodeURIComponent(user.uid)}&admin=1`;
 });
 
 createSelectedUserSheetBtn.addEventListener('click', async () => {
   if (!selectedUser) return;
 
-  const nome = prompt('Nome da nova ficha para este usuário:');
-  if (!nome) return;
+  const workspace = await getWorkspace(selectedUser.uid);
 
-  const sheetId = await createSheetForUser({
-    ownerUid: selectedUser.uid,
-    ownerEmail: selectedUser.email || '',
-    ownerName: selectedUser.name || '',
-    name: nome
-  });
+  if (!workspace) {
+    await saveWorkspace(selectedUser.uid, {
+      ownerName: selectedUser.name || '',
+      ownerEmail: selectedUser.email || '',
+      createdAt: new Date().toISOString()
+    });
+  }
 
-  window.location.href = `./ficha.html?sheetId=${encodeURIComponent(sheetId)}&admin=1`;
+  window.location.href = `./ficha.html?uid=${encodeURIComponent(selectedUser.uid)}&admin=1`;
 });
 
 userSearchInput.addEventListener('input', () => {
