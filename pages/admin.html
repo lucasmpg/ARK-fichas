@@ -9,16 +9,20 @@
 <body>
   <div class="page-shell">
     <div class="card list-card">
-      <div class="authbar-actions">
-        <button id="goHomeBtn" type="button">Início</button>
-        <button id="goMySheetBtn" type="button">Minha ficha</button>
-        <button id="logoutBtn" type="button">Sair</button>
+      <div class="section-row">
+        <div>
+          <h1 class="hero-title">Painel do Mestre</h1>
+        </div>
+        <div class="authbar-actions">
+          <button id="goHomeBtn" type="button">Início</button>
+          <button id="goMySheetBtn" type="button">Minha ficha</button>
+          <button id="logoutBtn" type="button">Sair</button>
+        </div>
       </div>
 
-      <h1 class="hero-title">Painel do Mestre</h1>
       <div class="notice" id="adminStatus">Carregando...</div>
 
-      <div class="page-actions">
+      <div class="page-actions top-spacing">
         <button id="refreshBtn" type="button">Atualizar</button>
         <button id="createMySheetBtn" type="button">Criar minha ficha</button>
         <button id="createSelectedUserSheetBtn" type="button" disabled>Criar ficha para usuário selecionado</button>
@@ -33,7 +37,7 @@
 
         <section class="admin-panel">
           <h2>Fichas</h2>
-          <div class="notice" id="selectedUserBox">Nenhum usuário selecionado.</div>
+          <div class="notice selected-box" id="selectedUserBox">Nenhum usuário selecionado.</div>
           <div id="sheetsList" class="sheet-list"></div>
         </section>
       </div>
