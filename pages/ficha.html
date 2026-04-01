@@ -1,676 +1,548 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ficha ARK RPG</title>
-  <link rel="stylesheet" href="../assets/css/app.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ficha ARK RPG</title>
+<link href="../assets/css/app.css" rel="stylesheet"/>
 </head>
 <body>
-
-  <div class="app-shell-header">
-    <div class="authbar card">
-      <div class="authbar-left">
-        <strong id="authStatus">Entrando...</strong>
-        <span id="authUserInfo" class="muted"></span>
-      </div>
-      <div class="authbar-actions">
-        <button id="goHomeBtn" type="button">Início</button>
-        <button id="goAdminBtn" type="button" style="display:none;">Painel do mestre</button>
-        <button id="logoutBtn" type="button">Sair</button>
-      </div>
-    </div>
-  </div>
-
+<div class="app-shell-header">
+<div class="authbar card">
+<div class="authbar-left">
+<strong id="authStatus">Entrando...</strong>
+<span class="muted" id="authUserInfo"></span>
+</div>
+<div class="authbar-actions">
+<button id="goHomeBtn" type="button">Início</button>
+<button id="goAdminBtn" style="display:none;" type="button">Painel do mestre</button>
+<button id="logoutBtn" type="button">Sair</button>
+</div>
+</div>
+</div>
 <div class="wrap">
-    <div class="topbar">
-      <div>
-        <h1>Ficha Automatizada • ARK RPG</h1>
-        <div class="subtitle">Salva automaticamente no navegador. Pode ser usada como base e expandida depois com armas, criaturas e efeitos avançados.</div>
-      </div>
-      <div class="actions">
-        <button id="exportBtn">Exportar</button>
-        <button id="importBtn">Importar</button>
-        <button id="printBtn">Imprimir / PDF</button>
-        <button class="btn-danger" id="resetBtn">Limpar ficha</button>
-      </div>
-    </div>
+<div class="topbar">
+<div>
+<h1>Ficha Automatizada • ARK RPG</h1>
+<div class="subtitle">Salva automaticamente no navegador. Pode ser usada como base e expandida depois com armas, criaturas e efeitos avançados.</div>
+</div>
+<div class="actions"><button class="btn-danger" id="resetBtn" style="display:none;">Limpar ficha</button></div>
+</div>
 
-    <div class="tabs-shell">
-      <div class="tabs-header">
-        <div class="tabs-title">Fichas abertas</div>
-        <div class="tabs-bar" id="tabsBar"></div>
-        <button type="button" class="tab-add-btn" id="addTabBtn" title="Nova ficha">+</button>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2 class="section-title-horizontal">Identidade e atributos</h2>
-        <div class="row">
-          <div>
-            <label for="nome">Nome</label>
-            <input id="nome" data-save placeholder="Nome do personagem" />
-          </div>
-          <div>
-            <label for="jogador">Jogador</label>
-            <input id="jogador" data-save placeholder="Nome do jogador" />
-          </div>
-          <div>
-            <label for="tribo">Tribo / grupo</label>
-            <input id="tribo" data-save placeholder="Grupo, tribo ou facção" />
-          </div>
-          <div>
-            <label for="origem">Origem</label>
-            <input id="origem" data-save placeholder="Origem, profissão ou conceito" />
-          </div>
-        </div>
-
-        <div class="left-header-grid section-space">
-          <div class="left-header-box level-highlight">
-            <label for="nivel">Nível</label>
-            <input id="nivel" data-save type="number" min="1" value="1" />
-          </div>
-          <div class="left-header-box">
-            <label for="pontosPorNivel">Pontos por nível</label>
-            <input id="pontosPorNivel" type="number" value="5" readonly />
-          </div>
-          <div class="left-header-box">
-            <label for="bonusPontos">Ajuste manual de pontos</label>
-            <input id="bonusPontos" data-save type="number" value="0" />
-          </div>
-          <div class="left-header-box">
-            <label for="perkBonus">Ajuste manual de perks</label>
-            <input id="perkBonus" data-save type="number" value="0" />
-          </div>
-        </div>
-
-        <div class="metric-grid left-metrics section-space">
-          <div class="metric">
-            <div class="name">Pontos totais</div>
-            <div class="value" id="pontosTotais">0</div>
-            <div class="sub">fórmula atual: nível × pontos por nível + ajuste manual</div>
-          </div>
-          <div class="metric">
-            <div class="name">Pontos gastos</div>
-            <div class="value" id="pontosGastos">0</div>
-            <div class="sub">soft cap automático 50+ custa 2, 80+ custa 3</div>
-          </div>
-          <div class="metric">
-            <div class="name">Pontos restantes</div>
-            <div class="value" id="pontosRestantes">0</div>
-            <div class="sub" id="pontosStatus">disponível</div>
-          </div>
-          <div class="metric">
-            <div class="name">Perks totais</div>
-            <div class="value" id="perkTotal">0</div>
-            <div class="sub">1 perk a cada 5 níveis + ajuste manual</div>
-          </div>
-          <div class="metric">
-            <div class="name">Perks marcadas</div>
-            <div class="value" id="perkUsed">0</div>
-            <div class="sub">requisitos básicos por atributo</div>
-          </div>
-          <div class="metric">
-            <div class="name">Perks restantes</div>
-            <div class="value" id="perkLeft">0</div>
-            <div class="sub" id="perkStatus">disponível</div>
-          </div>
-        </div>
-
-        <div class="section-space">
-          
+<div class="grid">
+<div class="card">
+<h2 class="section-title-horizontal">Identidade e atributos</h2>
+<div class="row">
+<div>
+<label for="nome">Nome</label>
+<input data-save="" id="nome" placeholder="Nome do personagem"/>
+</div>
+<div>
+<label for="jogador">Jogador</label>
+<input data-save="" id="jogador" placeholder="Nome do jogador"/>
+</div>
+<div>
+<label for="tribo">Tribo / grupo</label>
+<input data-save="" id="tribo" placeholder="Grupo, tribo ou facção"/>
+</div>
+<div>
+<label for="origem">Origem</label>
+<input data-save="" id="origem" placeholder="Origem, profissão ou conceito"/>
+</div>
+</div>
+<div class="left-header-grid section-space">
+<div class="left-header-box level-highlight">
+<label for="nivel">Nível</label>
+<input data-save="" id="nivel" min="1" type="number" value="1"/>
+</div>
+<div class="left-header-box">
+<label for="pontosPorNivel">Pontos por nível</label>
+<input id="pontosPorNivel" readonly="" type="number" value="5"/>
+</div>
+<div class="left-header-box">
+<label for="bonusPontos">Ajuste manual de pontos</label>
+<input data-save="" id="bonusPontos" type="number" value="0"/>
+</div>
+<div class="left-header-box">
+<label for="perkBonus">Ajuste manual de perks</label>
+<input data-save="" id="perkBonus" type="number" value="0"/>
+</div>
+</div>
+<div class="metric-grid left-metrics section-space">
+<div class="metric">
+<div class="name">Pontos totais</div>
+<div class="value" id="pontosTotais">0</div>
+<div class="sub">fórmula atual: nível × pontos por nível + ajuste manual</div>
+</div>
+<div class="metric">
+<div class="name">Pontos gastos</div>
+<div class="value" id="pontosGastos">0</div>
+<div class="sub">soft cap automático 50+ custa 2, 80+ custa 3</div>
+</div>
+<div class="metric">
+<div class="name">Pontos restantes</div>
+<div class="value" id="pontosRestantes">0</div>
+<div class="sub" id="pontosStatus">disponível</div>
+</div>
+<div class="metric">
+<div class="name">Perks totais</div>
+<div class="value" id="perkTotal">0</div>
+<div class="sub">1 perk a cada 5 níveis + ajuste manual</div>
+</div>
+<div class="metric">
+<div class="name">Perks marcadas</div>
+<div class="value" id="perkUsed">0</div>
+<div class="sub">requisitos básicos por atributo</div>
+</div>
+<div class="metric">
+<div class="name">Perks restantes</div>
+<div class="value" id="perkLeft">0</div>
+<div class="sub" id="perkStatus">disponível</div>
+</div>
+</div>
+<div class="section-space">
 <h2>Atributos</h2>
-          <div class="stat-grid">
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Força</strong>
-                <div class="attr-sub">+2% dano físico / ponto</div>
-              </div>
-              <input id="forca" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="forcaCost" readonly /></div>
-                <div><label>Bônus</label><input id="forcaInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Constituição</strong>
-                <div class="attr-sub">+10 HP / ponto</div>
-              </div>
-              <input id="constituicao" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="constituicaoCost" readonly /></div>
-                <div><label>Bônus</label><input id="constituicaoInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Destreza</strong>
-                <div class="attr-sub">mov., esquiva e distância</div>
-              </div>
-              <input id="destreza" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="destrezaCost" readonly /></div>
-                <div><label>Bônus</label><input id="destrezaInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Inteligência</strong>
-                <div class="attr-sub">crafting</div>
-              </div>
-              <input id="inteligencia" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="inteligenciaCost" readonly /></div>
-                <div><label>Bônus</label><input id="inteligenciaInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Sabedoria</strong>
-                <div class="attr-sub">percepção e oxigênio</div>
-              </div>
-              <input id="sabedoria" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="sabedoriaCost" readonly /></div>
-                <div><label>Bônus</label><input id="sabedoriaInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Carisma</strong>
-                <div class="attr-sub">interações e liderança</div>
-              </div>
-              <input id="carisma" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="carismaCost" readonly /></div>
-                <div><label>Bônus</label><input id="carismaInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Peso</strong>
-                <div class="attr-sub">+10 kg / ponto</div>
-              </div>
-              <input id="peso" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="pesoCost" readonly /></div>
-                <div><label>Bônus</label><input id="pesoInfo" readonly /></div>
-              </div>
-            </div>
-
-            <div class="attr">
-              <div class="attr-head attr-head-center">
-                <strong>Resistência</strong>
-                <div class="attr-sub">stamina e regen</div>
-              </div>
-              <input id="resistencia" data-save class="attr-input" type="number" min="0" max="100" value="0" />
-              <div class="mini">
-                <div><label>Custo total</label><input id="resistenciaCost" readonly /></div>
-                <div><label>Bônus</label><input id="resistenciaInfo" readonly /></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Recursos e derivados</h2>
-        <div class="metric-grid compact-metrics">
-          <div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div>
-          <div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div>
-          <div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div>
-          <div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub">corrida = 2× andar</div></div>
-          <div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div>
-          <div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">fórmula com d100/2 + destreza/2</div></div>
-          <div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div>
-          <div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div>
-          <div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div>
-          <div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">acima de 100% fica imóvel</div></div>
-          <div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">+0%</div><div class="sub">força</div></div>
-          <div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div>
-          <div class="metric"><div class="name">Crafting</div><div class="value" id="craftVelVal">+0%</div><div class="sub" id="craftQualVal">qualidade +0%</div></div>
-        </div>
-
-        <div class="section-space">
-          
+<div class="stat-grid">
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Força</strong>
+<div class="attr-sub">+2% dano físico / ponto</div>
+</div>
+<input class="attr-input" data-save="" id="forca" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="forcaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="forcaInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Constituição</strong>
+<div class="attr-sub">+10 HP / ponto</div>
+</div>
+<input class="attr-input" data-save="" id="constituicao" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="constituicaoCost" readonly=""/></div>
+<div><label>Bônus</label><input id="constituicaoInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Destreza</strong>
+<div class="attr-sub">mov., esquiva e distância</div>
+</div>
+<input class="attr-input" data-save="" id="destreza" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="destrezaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="destrezaInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Inteligência</strong>
+<div class="attr-sub">crafting</div>
+</div>
+<input class="attr-input" data-save="" id="inteligencia" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="inteligenciaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="inteligenciaInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Sabedoria</strong>
+<div class="attr-sub">percepção e oxigênio</div>
+</div>
+<input class="attr-input" data-save="" id="sabedoria" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="sabedoriaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="sabedoriaInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Carisma</strong>
+<div class="attr-sub">interações e liderança</div>
+</div>
+<input class="attr-input" data-save="" id="carisma" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="carismaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="carismaInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Peso</strong>
+<div class="attr-sub">+10 kg / ponto</div>
+</div>
+<input class="attr-input" data-save="" id="peso" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="pesoCost" readonly=""/></div>
+<div><label>Bônus</label><input id="pesoInfo" readonly=""/></div>
+</div>
+</div>
+<div class="attr">
+<div class="attr-head attr-head-center">
+<strong>Resistência</strong>
+<div class="attr-sub">stamina e regen</div>
+</div>
+<input class="attr-input" data-save="" id="resistencia" max="100" min="0" type="number" value="0"/>
+<div class="mini">
+<div><label>Custo total</label><input id="resistenciaCost" readonly=""/></div>
+<div><label>Bônus</label><input id="resistenciaInfo" readonly=""/></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>Recursos e derivados</h2>
+<div class="metric-grid compact-metrics">
+<div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div>
+<div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div>
+<div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div>
+<div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub">corrida = 2× andar</div></div>
+<div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div>
+<div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">fórmula com d100/2 + destreza/2</div></div>
+<div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div>
+<div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div>
+<div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div>
+<div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">acima de 100% fica imóvel</div></div>
+<div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">+0%</div><div class="sub">força</div></div>
+<div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div>
+<div class="metric"><div class="name">Crafting</div><div class="value" id="craftVelVal">+0%</div><div class="sub" id="craftQualVal">qualidade +0%</div></div>
+</div>
+<div class="section-space">
 <h2>Recursos atuais</h2>
-          <div class="resource-box">
-            <div><label>Vida atual</label><input id="vidaAtual" data-save type="number" min="0" value="100" /></div>
-            <div><label>Máxima</label><input id="vidaAtualMax" readonly /></div>
-            <div><label>Variação</label><input id="vidaDelta" type="number" value="0" /></div>
-            <div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button></div>
-            <div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div>
-          </div>
-          <div class="progress"><div class="bar hp" id="vidaBar"></div></div>
+<div class="resource-box">
+<div><label>Vida atual</label><input data-save="" id="vidaAtual" min="0" type="number" value="100"/></div>
+<div><label>Máxima</label><input id="vidaAtualMax" readonly=""/></div>
+<div><label>Variação</label><input id="vidaDelta" type="number" value="0"/></div>
+<div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button></div>
+<div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div>
+</div>
+<div class="progress"><div class="bar hp" id="vidaBar"></div></div>
+<div class="resource-box section-space">
+<div><label>Torpor atual</label><input data-save="" id="torporAtual" min="0" type="number" value="0"/></div>
+<div><label>Máximo</label><input id="torporAtualMax" readonly=""/></div>
+<div><label>Variação</label><input id="torporDelta" type="number" value="0"/></div>
+<div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button></div>
+<div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div>
+</div>
+<div class="progress"><div class="bar torpor" id="torporBar"></div></div>
+<div class="resource-box section-space">
+<div><label>Stamina atual</label><input data-save="" id="staminaAtual" min="0" type="number" value="100"/></div>
+<div><label>Máxima</label><input id="staminaAtualMax" readonly=""/></div>
+<div><label>Variação</label><input id="staminaDelta" type="number" value="0"/></div>
+<div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button></div>
+<div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div>
+</div>
+<div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
+<div class="resource-box section-space">
+<div><label>Peso carregado total</label><input id="pesoAtual" readonly=""/></div>
+<div><label>Capacidade</label><input id="pesoAtualMax" readonly=""/></div>
+<div><label>Uso %</label><input id="pesoUso" readonly=""/></div>
+<div class="resource-main-action"><button onclick="updateAll()" type="button">Atualizar</button></div>
+<div class="resource-side-action"><button onclick="document.getElementById('inventoryBody').scrollIntoView({behavior:'smooth', block:'center'})" type="button">Inventário</button></div>
+</div>
+<div class="progress"><div class="bar peso" id="pesoBar"></div></div>
+</div>
+<div class="section-space section-repositioned" id="posturaSection">
+<h2>Postura, armadura e ação rápida</h2>
+<div class="row">
+<div>
+<label for="postura">Postura atual</label>
+<select data-save="" id="postura">
+<option value="ofensiva">Ofensiva</option>
+<option value="defensiva">Defensiva</option>
+<option value="esquiva">Esquiva</option>
+</select>
+</div>
+<div>
+<label for="armadura">Tipo de armadura</label>
+<select data-save="" id="armadura">
+<option value="leve">Leve</option>
+<option value="media">Média</option>
+<option value="pesada">Pesada</option>
+</select>
+</div>
+<div>
+<label for="reducaoArmadura">Redução de dano da armadura (%)</label>
+<input data-save="" id="reducaoArmadura" max="100" min="0" type="number" value="0"/>
+</div>
+<div>
+<label for="acaoRapida">Consumir stamina por ação</label>
+<select id="acaoRapida">
+<option value="0">Andar (0)</option>
+<option value="5">Correr (5)</option>
+<option value="10">Ataque leve (10)</option>
+<option value="15">Ataque médio (15)</option>
+<option value="25">Ataque pesado (25)</option>
+<option value="12">Ataque à distância (12)</option>
+<option value="18">Ataque à distância pesado (18)</option>
+<option value="10">Postura defensiva (10)</option>
+<option value="10">Postura esquiva (10)</option>
+<option value="5">Usar item em combate (5)</option>
+<option value="5">Comandar criatura (5)</option>
+</select>
+</div>
+</div>
+<div class="actions section-space">
+<button class="btn-accent" id="useActionBtn">Gastar stamina da ação</button>
+</div>
+<div class="footer-note" id="posturaResumo"></div>
+</div>
 
-          <div class="resource-box section-space">
-            <div><label>Torpor atual</label><input id="torporAtual" data-save type="number" min="0" value="0" /></div>
-            <div><label>Máximo</label><input id="torporAtualMax" readonly /></div>
-            <div><label>Variação</label><input id="torporDelta" type="number" value="0" /></div>
-            <div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button></div>
-            <div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div>
-          </div>
-          <div class="progress"><div class="bar torpor" id="torporBar"></div></div>
-
-          <div class="resource-box section-space">
-            <div><label>Stamina atual</label><input id="staminaAtual" data-save type="number" min="0" value="100" /></div>
-            <div><label>Máxima</label><input id="staminaAtualMax" readonly /></div>
-            <div><label>Variação</label><input id="staminaDelta" type="number" value="0" /></div>
-            <div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button></div>
-            <div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div>
-          </div>
-          <div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
-
-          <div class="resource-box section-space">
-            <div><label>Peso carregado total</label><input id="pesoAtual" readonly /></div>
-            <div><label>Capacidade</label><input id="pesoAtualMax" readonly /></div>
-            <div><label>Uso %</label><input id="pesoUso" readonly /></div>
-            <div class="resource-main-action"><button type="button" onclick="updateAll()">Atualizar</button></div>
-            <div class="resource-side-action"><button type="button" onclick="document.getElementById('inventoryBody').scrollIntoView({behavior:'smooth', block:'center'})">Inventário</button></div>
-          </div>
-          <div class="progress"><div class="bar peso" id="pesoBar"></div></div>
-        </div>
-
-        <div class="section-space section-repositioned" id="posturaSection">
-          <h2>Postura, armadura e ação rápida</h2>
-          <div class="row">
-            <div>
-              <label for="postura">Postura atual</label>
-              <select id="postura" data-save>
-                <option value="ofensiva">Ofensiva</option>
-                <option value="defensiva">Defensiva</option>
-                <option value="esquiva">Esquiva</option>
-              </select>
-            </div>
-            <div>
-              <label for="armadura">Tipo de armadura</label>
-              <select id="armadura" data-save>
-                <option value="leve">Leve</option>
-                <option value="media">Média</option>
-                <option value="pesada">Pesada</option>
-              </select>
-            </div>
-            <div>
-              <label for="reducaoArmadura">Redução de dano da armadura (%)</label>
-              <input id="reducaoArmadura" data-save type="number" min="0" max="100" value="0" />
-            </div>
-            <div>
-              <label for="acaoRapida">Consumir stamina por ação</label>
-              <select id="acaoRapida">
-                <option value="0">Andar (0)</option>
-                <option value="5">Correr (5)</option>
-                <option value="10">Ataque leve (10)</option>
-                <option value="15">Ataque médio (15)</option>
-                <option value="25">Ataque pesado (25)</option>
-                <option value="12">Ataque à distância (12)</option>
-                <option value="18">Ataque à distância pesado (18)</option>
-                <option value="10">Postura defensiva (10)</option>
-                <option value="10">Postura esquiva (10)</option>
-                <option value="5">Usar item em combate (5)</option>
-                <option value="5">Comandar criatura (5)</option>
-              </select>
-            </div>
-          </div>
-          <div class="actions section-space">
-            <button class="btn-accent" id="useActionBtn">Gastar stamina da ação</button>
-          </div>
-          <div class="footer-note" id="posturaResumo"></div>
-        </div>
-
-        <div class="section-space inventory-master-section">
-          <h2>Inventário e peso</h2>
-          <div class="metric-grid">
-            <div class="metric"><div class="name">Espaços do personagem</div><div class="value" id="inventarioSlotsTotal">5</div><div class="sub">5 base + 1 por ponto em Peso</div></div>
-            <div class="metric"><div class="name">Espaços usados</div><div class="value" id="inventarioSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
-            <div class="metric"><div class="name">Espaços livres</div><div class="value" id="inventarioSlotsLivres">5</div><div class="sub">itens soltos no personagem</div></div>
-            <div class="metric"><div class="name">Espaços da mochila</div><div class="value" id="mochilaSlotsTotalLabel">10</div><div class="sub">armazenamento separado do personagem</div></div>
-            <div class="metric"><div class="name">Usados na mochila</div><div class="value" id="mochilaSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
-            <div class="metric"><div class="name">Livres na mochila</div><div class="value" id="mochilaSlotsLivres">10</div><div class="sub">itens guardados na mochila</div></div>
-          </div>
-
-          <div class="row section-space inventory-config-row">
-            <div>
-              <label for="mochilaAtiva">Mochila equipada</label>
-              <select id="mochilaAtiva" data-save>
-                <option value="nao">Não</option>
-                <option value="sim">Sim</option>
-              </select>
-            </div>
-            <div id="mochilaSlotsBox" style="display:none;">
-              <label for="mochilaSlots">Slots adicionais da mochila</label>
-              <select id="mochilaSlots" data-save>
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-                <option value="30">30</option>
-                <option value="35">35</option>
-                <option value="40">40</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="inventory-center-card section-space">
-            <div class="inventory-columns">
-              <section class="inventory-column-panel">
-                <div class="inventory-panel-header">
-                  <h3>Inventário</h3>
-                  <div class="footer-note">Itens soltos no personagem.</div>
-                </div>
-                <div class="inventory-table-wrap">
-                  <table class="inventory-table">
-                    <thead>
-                      <tr>
-                        <th>Espaço</th>
-                        <th>Descrição do item</th>
-                        <th>Quantidade</th>
-                        <th>Peso unitário</th>
-                        <th>Peso total</th>
-                      </tr>
-                    </thead>
-                    <tbody id="inventoryBody"></tbody>
-                  </table>
-                </div>
-              </section>
-              <section class="inventory-column-panel" id="mochilaSection">
-                <div class="inventory-panel-header">
-                  <h3>Mochila</h3>
-                  <div class="footer-note" id="mochilaStatusTexto">Ative a mochila para usar este espaço.</div>
-                </div>
-                <div class="inventory-table-wrap">
-                  <table class="inventory-table">
-                    <thead>
-                      <tr>
-                        <th>Espaço</th>
-                        <th>Descrição do item</th>
-                        <th>Quantidade</th>
-                        <th>Peso unitário</th>
-                        <th>Peso total</th>
-                      </tr>
-                    </thead>
-                    <tbody id="backpackBody"></tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
-          </div>
-          <div class="footer-note">O peso total dos itens do personagem e da mochila é calculado automaticamente e já entra no peso carregado do personagem, incluindo as desvantagens de movimento por sobrecarga.</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Combate, armas e observações</h2>
-        <div class="row">
-          <div>
-            <label for="armaNome">Arma atual</label>
-            <input id="armaNome" data-save value="Soco" />
-          </div>
-          <div>
-            <label for="armaDado">Dado da arma</label>
-            <input id="armaDado" data-save value="1d4" />
-          </div>
-          <div>
-            <label for="armaEscala">Dano com base em</label>
-            <select id="armaEscala" data-save>
-              <option value="forca">Força</option>
-              <option value="destreza">Destreza</option>
-              <option value="nenhum">Nenhum</option>
-            </select>
-          </div>
-          <div>
-            <label for="armaBonus">Bônus fixo da arma</label>
-            <input id="armaBonus" data-save type="number" value="0" />
-          </div>
-        </div>
-
-        <div class="combat-box">
-          <h3>Cálculo de dano causado</h3>
-          <div class="row">
-            <div>
-              <label for="rolagemD20">Resultado do d20</label>
-              <input id="rolagemD20" type="number" min="1" max="20" value="11" />
-            </div>
-            <div>
-              <label for="danoBaseRolado">Dano rolado no dado da arma</label>
-              <input id="danoBaseRolado" type="number" min="0" value="1" />
-            </div>
-            <div>
-              <label for="bonusPercentualExtra">Adicional percentual de dano (%)</label>
-              <input id="bonusPercentualExtra" type="number" value="0" />
-            </div>
-            <div>
-              <label for="efeitoExtra">Bônus fixo situacional</label>
-              <input id="efeitoExtra" type="number" value="0" />
-            </div>
-          </div>
-          <div class="row section-space">
-            <div>
-              <label for="tamanhoAlvo">Tamanho do alvo</label>
-              <select id="tamanhoAlvo">
-                <option value="normal">Normal</option>
-                <option value="grande">Criatura grande</option>
-              </select>
-            </div>
-            <div>
-              <label for="reducaoArmaduraAlvo">Redução da armadura do alvo (%)</label>
-              <input id="reducaoArmaduraAlvo" type="number" min="0" max="100" value="0" />
-            </div>
-            <div>
-              <label for="danoAplicadoAlvo">PV do alvo antes do golpe (opcional)</label>
-              <input id="danoAplicadoAlvo" type="number" min="0" value="0" />
-            </div>
-            <div>
-              <label for="vidaRestanteAlvo">PV do alvo após o golpe</label>
-              <input id="vidaRestanteAlvo" readonly />
-            </div>
-          </div>
-          <div class="actions section-space">
-            <button class="btn-accent" id="applyDamageToTargetBtn">Aplicar dano no alvo</button>
-          </div>
-          <div class="metric-grid section-space attack-summary-grid">
-            <div class="metric"><div class="name">Escalonamento</div><div class="value" id="armaScaleValue">+0</div><div class="sub" id="armaScaleText"></div></div>
-            <div class="metric"><div class="name">Multiplicador d20</div><div class="value" id="multiD20">100%</div><div class="sub">1-3=30%, 4-10=50%, 11-17=100%, 18-19=150%, 20=200%</div></div>
-            <div class="metric"><div class="name">Percentual total</div><div class="value" id="percentualTotalDano">+0%</div><div class="sub">atributo + adicional + perks</div></div>
-            <div class="metric"><div class="name">Dano bruto causado</div><div class="value" id="danoBruto">0</div><div class="sub">(dado + bônus fixos) × multiplicadores</div></div>
-            <div class="metric"><div class="name">Dano final no alvo</div><div class="value" id="danoFinal">0</div><div class="sub">com redução da armadura do alvo</div></div>
-            <div class="metric"><div class="name">Resumo</div><div class="value" id="ataqueResumo">Pronto</div><div class="sub">ajuste manual livre</div></div>
-          </div>
-        </div>
-
-        <div class="combat-box">
-          <h3>Cálculo de dano recebido</h3>
-          <div class="row">
-            <div>
-              <label for="danoRecebidoBruto">Dano bruto recebido</label>
-              <input id="danoRecebidoBruto" type="number" min="0" value="0" />
-            </div>
-            <div>
-              <label for="reducaoArmaduraRecebida">Redução usada (%)</label>
-              <input id="reducaoArmaduraRecebida" readonly />
-            </div>
-            <div>
-              <label for="danoRecebidoFinal">Dano final após redução</label>
-              <input id="danoRecebidoFinal" readonly />
-            </div>
-            <div>
-              <label for="vidaAposDanoRecebido">Vida após dano</label>
-              <input id="vidaAposDanoRecebido" readonly />
-            </div>
-          </div>
-          <div class="actions section-space">
-            <button class="btn-danger" id="applyReceivedDamageBtn">Descontar dano da vida</button>
-          </div>
-          <div class="footer-note">Leva em conta a redução da armadura e, se a postura atual estiver em defensiva, soma mais 50% de redução. Na postura de esquiva, a ficha primeiro reduz o dano bruto pelo valor esquivado e só depois aplica a redução percentual da armadura.</div>
-        </div>
-
-        <div class="combat-box" id="esquivaBox" style="display:none;">
-          <h3>Quadro de esquiva</h3>
-          <div class="row">
-            <div>
-              <label for="rolagemEsquiva">Resultado do d100</label>
-              <input id="rolagemEsquiva" type="number" min="1" max="100" value="1" />
-            </div>
-            <div>
-              <label for="penalidadeEsquiva">Penalidade manual da esquiva</label>
-              <input id="penalidadeEsquiva" type="number" value="0" />
-            </div>
-            <div>
-              <label for="formulaEsquiva">Resultado da fórmula de esquiva</label>
-              <input id="formulaEsquiva" readonly />
-            </div>
-            <div>
-              <label for="danoEsquivado">Dano esquivado</label>
-              <input id="danoEsquivado" readonly />
-            </div>
-          </div>
-          <div class="footer-note">Armadura leve: d100/2 + destreza/2. Armadura média: d100/4 + destreza/4. Armadura pesada: não desvia. O cálculo segue este caminho: (dano bruto recebido - dano esquivado) e depois aplica a % de redução da armadura. O dano esquivado é uma redução em valor real, não em porcentagem.</div>
-        </div>
-
-        <div class="metric-grid section-space">
-          <div class="metric"><div class="name">Esquiva estimada</div><div class="value" id="esquivaCalc">0</div><div class="sub">estimativa conforme a armadura atual</div></div>
-        </div>
-
-        
-      </div>
-    </div>
-
-    <div class="layout-wide">
-      <div class="card wide-card perks-shell">
-        <div class="perks-inner">
-          <h2>Perks</h2>
-          <div class="footer-note">As perks ficam centralizadas aqui para leitura e marcação mais confortável, com melhor distribuição visual.</div>
-          <div class="section-space">
-            <div class="perk-grid" id="perkGrid"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card wide-card">
-        <div class="notes-stack">
-          <div>
-            <h2>Anotações</h2>
-            <div class="footer-note">Container amplo para equipamentos, criaturas, observações gerais e qualquer outra informação narrativa ou técnica da ficha.</div>
-          </div>
-          <div>
-            <label for="equipamentos">Equipamentos</label>
-            <textarea id="equipamentos" data-save placeholder="Armas, armaduras, ferramentas, munição..."></textarea>
-          </div>
-          <div>
-            <label for="criaturas">Criaturas / domados</label>
-            <textarea id="criaturas" data-save placeholder="Nome da criatura, função, sela, comandos..."></textarea>
-          </div>
-          <div>
-            <label for="notas">Notas gerais</label>
-            <textarea id="notas" data-save placeholder="Missões, acordos, observações, regras da mesa..."></textarea>
-          </div>
-          <div class="footer-note">
+</div>
+<div class="card">
+<h2>Combate, armas e observações</h2>
+<div class="row">
+<div>
+<label for="armaNome">Arma atual</label>
+<input data-save="" id="armaNome" value="Soco"/>
+</div>
+<div>
+<label for="armaDado">Dado da arma</label>
+<input data-save="" id="armaDado" value="1d4"/>
+</div>
+<div>
+<label for="armaEscala">Dano com base em</label>
+<select data-save="" id="armaEscala">
+<option value="forca">Força</option>
+<option value="destreza">Destreza</option>
+<option value="nenhum">Nenhum</option>
+</select>
+</div>
+<div>
+<label for="armaBonus">Bônus fixo da arma</label>
+<input data-save="" id="armaBonus" type="number" value="0"/>
+</div>
+</div>
+<div class="combat-box">
+<h3>Cálculo de dano causado</h3>
+<div class="row">
+<div>
+<label for="rolagemD20">Resultado do d20</label>
+<input id="rolagemD20" max="20" min="1" type="number" value="11"/>
+</div>
+<div>
+<label for="danoBaseRolado">Dano rolado no dado da arma</label>
+<input id="danoBaseRolado" min="0" type="number" value="1"/>
+</div>
+<div>
+<label for="bonusPercentualExtra">Adicional percentual de dano (%)</label>
+<input id="bonusPercentualExtra" type="number" value="0"/>
+</div>
+<div>
+<label for="efeitoExtra">Bônus fixo situacional</label>
+<input id="efeitoExtra" type="number" value="0"/>
+</div>
+</div>
+<div class="row section-space">
+<div>
+<label for="tamanhoAlvo">Tamanho do alvo</label>
+<select id="tamanhoAlvo">
+<option value="normal">Normal</option>
+<option value="grande">Criatura grande</option>
+</select>
+</div>
+<div>
+<label for="reducaoArmaduraAlvo">Redução da armadura do alvo (%)</label>
+<input id="reducaoArmaduraAlvo" max="100" min="0" type="number" value="0"/>
+</div>
+<div>
+<label for="danoAplicadoAlvo">PV do alvo antes do golpe (opcional)</label>
+<input id="danoAplicadoAlvo" min="0" type="number" value="0"/>
+</div>
+<div>
+<label for="vidaRestanteAlvo">PV do alvo após o golpe</label>
+<input id="vidaRestanteAlvo" readonly=""/>
+</div>
+</div>
+<div class="actions section-space">
+<button class="btn-accent" id="applyDamageToTargetBtn">Aplicar dano no alvo</button>
+</div>
+<div class="metric-grid section-space attack-summary-grid">
+<div class="metric"><div class="name">Escalonamento</div><div class="value" id="armaScaleValue">+0</div><div class="sub" id="armaScaleText"></div></div>
+<div class="metric"><div class="name">Multiplicador d20</div><div class="value" id="multiD20">100%</div><div class="sub">1-3=30%, 4-10=50%, 11-17=100%, 18-19=150%, 20=200%</div></div>
+<div class="metric"><div class="name">Percentual total</div><div class="value" id="percentualTotalDano">+0%</div><div class="sub">atributo + adicional + perks</div></div>
+<div class="metric"><div class="name">Dano bruto causado</div><div class="value" id="danoBruto">0</div><div class="sub">(dado + bônus fixos) × multiplicadores</div></div>
+<div class="metric"><div class="name">Dano final no alvo</div><div class="value" id="danoFinal">0</div><div class="sub">com redução da armadura do alvo</div></div>
+<div class="metric"><div class="name">Resumo</div><div class="value" id="ataqueResumo">Pronto</div><div class="sub">ajuste manual livre</div></div>
+</div>
+</div>
+<div class="combat-box">
+<h3>Cálculo de dano recebido</h3>
+<div class="row">
+<div>
+<label for="danoRecebidoBruto">Dano bruto recebido</label>
+<input id="danoRecebidoBruto" min="0" type="number" value="0"/>
+</div>
+<div>
+<label for="reducaoArmaduraRecebida">Redução usada (%)</label>
+<input id="reducaoArmaduraRecebida" readonly=""/>
+</div>
+<div>
+<label for="danoRecebidoFinal">Dano final após redução</label>
+<input id="danoRecebidoFinal" readonly=""/>
+</div>
+<div>
+<label for="vidaAposDanoRecebido">Vida após dano</label>
+<input id="vidaAposDanoRecebido" readonly=""/>
+</div>
+</div>
+<div class="actions section-space">
+<button class="btn-danger" id="applyReceivedDamageBtn">Descontar dano da vida</button>
+</div>
+<div class="footer-note">Leva em conta a redução da armadura e, se a postura atual estiver em defensiva, soma mais 50% de redução. Na postura de esquiva, a ficha primeiro reduz o dano bruto pelo valor esquivado e só depois aplica a redução percentual da armadura.</div>
+</div>
+<div class="combat-box" id="esquivaBox" style="display:none;">
+<h3>Quadro de esquiva</h3>
+<div class="row">
+<div>
+<label for="rolagemEsquiva">Resultado do d100</label>
+<input id="rolagemEsquiva" max="100" min="1" type="number" value="1"/>
+</div>
+<div>
+<label for="penalidadeEsquiva">Penalidade manual da esquiva</label>
+<input id="penalidadeEsquiva" type="number" value="0"/>
+</div>
+<div>
+<label for="formulaEsquiva">Resultado da fórmula de esquiva</label>
+<input id="formulaEsquiva" readonly=""/>
+</div>
+<div>
+<label for="danoEsquivado">Dano esquivado</label>
+<input id="danoEsquivado" readonly=""/>
+</div>
+</div>
+<div class="footer-note">Armadura leve: d100/2 + destreza/2. Armadura média: d100/4 + destreza/4. Armadura pesada: não desvia. O cálculo segue este caminho: (dano bruto recebido - dano esquivado) e depois aplica a % de redução da armadura. O dano esquivado é uma redução em valor real, não em porcentagem.</div>
+</div>
+<div class="metric-grid section-space">
+<div class="metric"><div class="name">Esquiva estimada</div><div class="value" id="esquivaCalc">0</div><div class="sub">estimativa conforme a armadura atual</div></div>
+</div>
+</div>
+</div><div class="card inventory-standalone-card"><div class="section-space inventory-master-section">
+<h2>Inventário e peso</h2>
+<div class="metric-grid">
+<div class="metric"><div class="name">Espaços do personagem</div><div class="value" id="inventarioSlotsTotal">5</div><div class="sub">5 base + 1 por ponto em Peso</div></div>
+<div class="metric"><div class="name">Espaços usados</div><div class="value" id="inventarioSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
+<div class="metric"><div class="name">Espaços livres</div><div class="value" id="inventarioSlotsLivres">5</div><div class="sub">itens soltos no personagem</div></div>
+<div class="metric"><div class="name">Espaços da mochila</div><div class="value" id="mochilaSlotsTotalLabel">10</div><div class="sub">armazenamento separado do personagem</div></div>
+<div class="metric"><div class="name">Usados na mochila</div><div class="value" id="mochilaSlotsUsados">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
+<div class="metric"><div class="name">Livres na mochila</div><div class="value" id="mochilaSlotsLivres">10</div><div class="sub">itens guardados na mochila</div></div>
+</div>
+<div class="row section-space inventory-config-row">
+<div>
+<label for="mochilaAtiva">Mochila equipada</label>
+<select data-save="" id="mochilaAtiva">
+<option value="nao">Não</option>
+<option value="sim">Sim</option>
+</select>
+</div>
+<div id="mochilaSlotsBox" style="display:none;">
+<label for="mochilaSlots">Slots adicionais da mochila</label>
+<select data-save="" id="mochilaSlots">
+<option value="5">5</option>
+<option selected="" value="10">10</option>
+<option value="15">15</option>
+<option value="20">20</option>
+<option value="25">25</option>
+<option value="30">30</option>
+<option value="35">35</option>
+<option value="40">40</option>
+</select>
+</div>
+</div>
+<div class="inventory-center-card section-space">
+<div class="inventory-columns">
+<section class="inventory-column-panel">
+<div class="inventory-panel-header">
+<h3>Inventário</h3>
+<div class="footer-note">Itens soltos no personagem.</div>
+</div>
+<div class="inventory-table-wrap">
+<table class="inventory-table">
+<thead>
+<tr>
+<th>Espaço</th>
+<th>Descrição do item</th>
+<th>Quantidade</th>
+<th>Peso unitário</th>
+<th>Peso total</th>
+</tr>
+</thead>
+<tbody id="inventoryBody"></tbody>
+</table>
+</div>
+</section>
+<section class="inventory-column-panel" id="mochilaSection">
+<div class="inventory-panel-header">
+<h3>Mochila</h3>
+<div class="footer-note" id="mochilaStatusTexto">Ative a mochila para usar este espaço.</div>
+</div>
+<div class="inventory-table-wrap">
+<table class="inventory-table">
+<thead>
+<tr>
+<th>Espaço</th>
+<th>Descrição do item</th>
+<th>Quantidade</th>
+<th>Peso unitário</th>
+<th>Peso total</th>
+</tr>
+</thead>
+<tbody id="backpackBody"></tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<div class="footer-note">O peso total dos itens do personagem e da mochila é calculado automaticamente e já entra no peso carregado do personagem, incluindo as desvantagens de movimento por sobrecarga.</div>
+</div></div>
+<div class="layout-wide">
+<div class="card wide-card perks-shell">
+<div class="perks-inner">
+<h2>Perks</h2>
+<div class="footer-note">As perks ficam centralizadas aqui para leitura e marcação mais confortável, com melhor distribuição visual.</div>
+<div class="section-space">
+<div class="perk-grid" id="perkGrid"></div>
+</div>
+</div>
+</div>
+<div class="card wide-card">
+<div class="notes-stack">
+<div>
+<h2>Anotações</h2>
+<div class="footer-note">Container amplo para equipamentos, criaturas, observações gerais e qualquer outra informação narrativa ou técnica da ficha.</div>
+</div>
+<div>
+<label for="equipamentos">Equipamentos</label>
+<textarea data-save="" id="equipamentos" placeholder="Armas, armaduras, ferramentas, munição..."></textarea>
+</div>
+<div>
+<label for="criaturas">Criaturas / domados</label>
+<textarea data-save="" id="criaturas" placeholder="Nome da criatura, função, sela, comandos..."></textarea>
+</div>
+<div>
+<label for="notas">Notas gerais</label>
+<textarea data-save="" id="notas" placeholder="Missões, acordos, observações, regras da mesa..."></textarea>
+</div>
+<div class="footer-note">
             Esta versão já automatiza os recursos centrais do sistema. O campo de arma foi deixado simples de propósito para você poder adicionar futuramente os danos e efeitos específicos de cada armamento sem reestruturar a ficha inteira.
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+</div>
+</div>
 
 
 
-  <div id="closeTabModal" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="closeTabModalTitle">
-      <h3 id="closeTabModalTitle">Fechar aba</h3>
-      <p id="closeTabMessage">Você tem certeza que quer fechar esta aba?</p>
-      <div class="modal-actions">
-        <button type="button" id="cancelCloseTabBtn">Cancelar</button>
-        <button type="button" id="confirmCloseTabBtn" class="btn-danger">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="exportModal" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
-      <h3 id="exportModalTitle">Exportar JSON</h3>
-      <div class="footer-note">Escolha como deseja exportar. Os cálculos da ficha continuam no arquivo HTML; o JSON salva apenas os dados preenchidos.</div>
-      <div class="modal-option-list">
-        <label class="modal-option">
-          <input type="radio" name="exportMode" value="active" checked />
-          <div>
-            <strong>Exportar apenas a aba atual</strong>
-            <div class="small">Gera um JSON somente da ficha aberta neste momento.</div>
-          </div>
-        </label>
-        <label class="modal-option">
-          <input type="radio" name="exportMode" value="workspace" />
-          <div>
-            <strong>Exportar o arquivo completo</strong>
-            <div class="small">Gera um único JSON com todas as abas do arquivo.</div>
-          </div>
-        </label>
-        <label class="modal-option">
-          <input type="radio" name="exportMode" value="selected-separate" />
-          <div>
-            <strong>Exportar abas separadas</strong>
-            <div class="small">Gera um JSON separado para cada aba marcada abaixo.</div>
-          </div>
-        </label>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-title">Abas para exportação separada</div>
-        <div id="exportTabsChecklist" class="checklist-box"></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="cancelExportBtn">Cancelar</button>
-        <button type="button" id="confirmExportBtn" class="btn-accent">Exportar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="importModal" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
-      <h3 id="importModalTitle">Importar JSON</h3>
-      <div class="footer-note">Ao importar, as fichas entram em abas novas por padrão. Só haverá substituição total se você escolher essa opção.</div>
-      <div class="modal-option-list">
-        <label class="modal-option">
-          <input type="radio" name="importMode" value="append" checked />
-          <div>
-            <strong>Importar em abas novas</strong>
-            <div class="small">Mantém tudo que já existe e cria novas abas para o conteúdo importado.</div>
-          </div>
-        </label>
-        <label class="modal-option">
-          <input type="radio" name="importMode" value="replace" />
-          <div>
-            <strong>Importar ficha completa substituindo tudo</strong>
-            <div class="small">Apaga todas as abas atuais e carrega somente o conteúdo do arquivo importado.</div>
-          </div>
-        </label>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="cancelImportBtn">Cancelar</button>
-        <button type="button" id="chooseImportFileBtn" class="btn-accent">Escolher arquivo</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="replaceImportModal" class="modal-overlay hidden" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="replaceImportModalTitle">
-      <h3 id="replaceImportModalTitle">Confirmar importação completa</h3>
-      <p id="replaceImportMessage">Ao importar uma ficha completa, os dados antigos serão perdidos permanentemente, sem chance de recuperar.</p>
-      <div class="modal-actions">
-        <button type="button" id="cancelReplaceImportBtn">Cancelar</button>
-        <button type="button" id="confirmReplaceImportBtn" class="btn-danger">Confirmar</button>
-      </div>
-    </div>
-  </div>
 
 
-  <input type="file" id="fileInput" accept="application/json" style="display:none" />
-  <script type="module" src="../assets/js/app.js"></script>
+
+<div id="resetSheetModal" class="modal-overlay hidden" aria-hidden="true"><div class="modal-box compact-modal" role="dialog" aria-modal="true"><h3>Limpar ficha</h3><p class="modal-text">Tem certeza que deseja limpar a ficha do personagem? Esta ação apaga todos os dados atuais desta ficha.</p><div class="modal-actions"><button type="button" id="cancelResetSheetBtn">Cancelar</button><button type="button" id="confirmResetSheetBtn" class="btn-danger">Confirmar</button></div></div></div>
+<div id="pointConfirmModal" class="modal-overlay hidden" aria-hidden="true"><div class="modal-box compact-modal" role="dialog" aria-modal="true"><h3>Confirmar ponto</h3><p class="modal-text" id="pointConfirmText">Deseja adicionar 1 ponto?</p><label class="modal-check"><input id="skipPointConfirmCheckbox" type="checkbox"/> Não mostrar novamente</label><div class="modal-actions"><button type="button" id="cancelPointConfirmBtn">Cancelar</button><button type="button" id="confirmPointConfirmBtn" class="btn-accent">Confirmar</button></div></div></div>
+<script src="../assets/js/app.js" type="module"></script>
 </body>
 </html>
