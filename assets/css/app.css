@@ -1431,18 +1431,149 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 
 
 /* ajustes finais criatura e atributos */
-.attr { grid-template-columns: minmax(0, 1.15fr) minmax(132px, 152px) minmax(58px, 72px) minmax(0, 0.9fr) minmax(0, 1.1fr); }
-.attr-input-wrap { grid-template-columns: minmax(44px, 52px) minmax(96px, 120px) minmax(44px, 52px); justify-content: center; }
-.attr-step-btn { min-width: 48px; width: 48px; min-height: 56px; }
-.attr-input { min-width: 104px; width: 104px; max-width: 104px; text-align: center !important; font-size: 32px; padding: 0 10px; display:flex; align-items:center; justify-content:center; }
-.creature-layout { display:grid; grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.4fr) minmax(260px, .9fr); gap: 16px; align-items:start; }
+.attr {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(170px, 210px) minmax(120px, 150px) minmax(120px, 150px);
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.attr-head,
+.attr-head-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  gap: 6px;
+  min-width: 0;
+}
+
+.attr-head-center strong {
+  font-size: 17px;
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+}
+
+.attr-sub {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.attr-input-wrap {
+  display: grid;
+  grid-template-columns: 54px 96px 54px;
+  justify-content: start;
+  align-items: center;
+  gap: 0;
+}
+
+.attr-step-btn {
+  min-width: 54px;
+  width: 54px;
+  min-height: 54px;
+  height: 54px;
+  font-size: 28px;
+  z-index: 1;
+}
+
+.attr-minus-btn {
+  border-radius: 14px 0 0 14px;
+}
+
+.attr-plus-btn {
+  border-radius: 0 14px 14px 0;
+  margin-left: 8px; /* empurra o + um pouco para a direita */
+}
+
+.attr-input {
+  min-width: 96px;
+  width: 96px;
+  max-width: 96px;
+  height: 54px;
+  text-align: center !important;
+  font-size: 34px;
+  padding: 0 8px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attr .mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.attr .mini label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.creature-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(420px, 1.45fr) minmax(260px, .95fr);
+  gap: 16px;
+  align-items: start;
+}
+
 .creature-section-identity { grid-column: 1; }
 .creature-section-derived { grid-column: 2; }
 .creature-section-calculator { grid-column: 3; }
 .creature-section-inventory { grid-column: 1 / -1; }
 .creature-section-notes { grid-column: 1 / -1; }
-.creature-section-inventory .inventory-table th:nth-child(2), .creature-section-inventory .inventory-table td:nth-child(2) { min-width: 320px; }
-.creature-section-notes textarea { min-height: 180px; }
-#creaturePesoBar { width: 0%; }
-@media (max-width: 1280px) { .creature-layout { grid-template-columns: 1fr; } .creature-section-identity,.creature-section-derived,.creature-section-calculator,.creature-section-inventory,.creature-section-notes { grid-column: 1; } }
-@media (max-width: 980px) { .attr { grid-template-columns: 1fr; } .attr-input-wrap { grid-template-columns: 46px 92px 46px; } .attr-input { min-width: 92px; width: 92px; max-width: 92px; font-size: 28px; } }
+
+.creature-section-inventory .inventory-table th:nth-child(2),
+.creature-section-inventory .inventory-table td:nth-child(2) {
+  min-width: 320px;
+}
+
+.creature-section-notes textarea {
+  min-height: 180px;
+}
+
+#creaturePesoBar {
+  width: 0%;
+}
+
+@media (max-width: 1280px) {
+  .creature-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .creature-section-identity,
+  .creature-section-derived,
+  .creature-section-calculator,
+  .creature-section-inventory,
+  .creature-section-notes {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 980px) {
+  .attr {
+    grid-template-columns: 1fr;
+  }
+
+  .attr-input-wrap {
+    grid-template-columns: 50px 88px 50px;
+    justify-content: start;
+  }
+
+  .attr-plus-btn {
+    margin-left: 6px;
+  }
+
+  .attr-input {
+    min-width: 88px;
+    width: 88px;
+    max-width: 88px;
+    font-size: 28px;
+  }
+
+  .attr .mini {
+    grid-template-columns: 1fr 1fr;
+  }
+}
