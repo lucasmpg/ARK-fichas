@@ -1,4 +1,4 @@
-import { auth, logout, isAdminUser, getWorkspace, saveWorkspace, upsertUserProfile } from "./firebase-config.js";
+import { auth, logout, isAdminUser, getWorkspace, saveWorkspace, upsertUserProfile, userCanViewWorkspace } from "./firebase-config.js";
 import { requireAuth } from "./auth.js";
 
 const CLOUD_WORKSPACE_VERSION = 1;
@@ -8,6 +8,10 @@ let remoteWorkspaceSeed = null;
 let remoteReady = false;
 let suppressCloudSave = false;
 let cloudSaveTimer = null;
+let userCanAdminEdit = false;
+let isSharedViewerMode = false;
+let skipPointConfirmation = false;
+let pendingAttributeIncrement = null;
 
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
@@ -57,12 +61,9 @@ async function bootstrapCloud() {
 
   const requestedUid = getQueryParam('uid');
   const admin = isAdminUser(firebaseUser);
-  targetWorkspaceUid = admin && requestedUid ? requestedUid : firebaseUser.uid;
-
-  if (!admin && requestedUid && requestedUid !== firebaseUser.uid) {
-    window.location.href = './ficha.html';
-    return;
-  }
+  userCanAdminEdit = admin;
+  window.__isAdminUser = admin;
+  targetWorkspaceUid = admin && requestedUid ? requestedUid : (requestedUid || firebaseUser.uid);
 
   const authStatus = document.getElementById('authStatus');
   const authUserInfo = document.getElementById('authUserInfo');
@@ -75,14 +76,21 @@ async function bootstrapCloud() {
   cloudStatus.textContent = 'Carregando ficha da nuvem...';
   authUserInfo?.insertAdjacentElement('afterend', cloudStatus);
 
-  if (authStatus) authStatus.textContent = admin && targetWorkspaceUid !== firebaseUser.uid ? 'Editando ficha de outro jogador' : 'Minha ficha';
+  if (authStatus) authStatus.textContent = admin && targetWorkspaceUid !== firebaseUser.uid ? 'Editando ficha de outro jogador' : (isSharedViewerMode ? 'Visualização compartilhada da ficha' : 'Minha ficha');
   if (authUserInfo) authUserInfo.textContent = `${firebaseUser.displayName || 'Usuário'} • ${firebaseUser.email || ''}`;
   if (goAdminBtn) goAdminBtn.style.display = admin ? 'inline-block' : 'none';
   if (logoutBtn) logoutBtn.addEventListener('click', async () => { await logout(); window.location.href = '../index.html'; });
-  if (goHomeBtn) goHomeBtn.addEventListener('click', () => window.location.href = '../index.html');
+  if (goHomeBtn) goHomeBtn.addEventListener('click', () => { const qs = new URLSearchParams({ uid: targetWorkspaceUid }); if (admin && targetWorkspaceUid !== firebaseUser.uid) qs.set('admin', '1'); if (isSharedViewerMode) qs.set('view', '1'); window.location.href = `./dashboard.html?${qs.toString()}`; });
   if (goAdminBtn) goAdminBtn.addEventListener('click', () => window.location.href = './admin.html');
 
   const workspace = await getWorkspace(targetWorkspaceUid);
+  if (!admin && requestedUid && requestedUid !== firebaseUser.uid) {
+    if (!workspace || !userCanViewWorkspace(firebaseUser, { ...workspace, ownerUid: targetWorkspaceUid })) {
+      window.location.href = './dashboard.html';
+      return;
+    }
+    isSharedViewerMode = true;
+  }
   if (workspace?.sheetStore) {
     remoteWorkspaceSeed = cloneWorkspaceStore(workspace.sheetStore);
     window.__workspaceOwnerEmail = workspace.ownerEmail || '';
@@ -315,13 +323,16 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       });
     }
 
-    function saveActiveTabState() {
+    function saveActiveTabState(renderAfter = false) {
       const active = getActiveTab();
       if (!active) return;
+      const previousName = active.name;
       active.data = captureCurrentState();
       active.name = normalizeTabName(active.data.nome, sheetStore.tabs.indexOf(active) + 1);
       persistSheetStore();
-      renderTabs();
+      if (renderAfter || previousName !== active.name) {
+        renderTabs();
+      }
     }
 
     function renderTabs() {
@@ -545,8 +556,10 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const totalBackpackSlots = backpackSlotCount();
       const mochilaSection = byId('mochilaSection');
       const mochilaSlotsBox = byId('mochilaSlotsBox');
-      if (mochilaSection) mochilaSection.style.display = backpackEnabled() ? '' : 'none';
+      const mochilaStatusTexto = byId('mochilaStatusTexto');
+      if (mochilaSection) mochilaSection.classList.toggle('disabled-panel', !backpackEnabled());
       if (mochilaSlotsBox) mochilaSlotsBox.style.display = backpackEnabled() ? '' : 'none';
+      if (mochilaStatusTexto) mochilaStatusTexto.textContent = backpackEnabled() ? 'Itens guardados na mochila.' : 'Ative a mochila para usar este espaço.';
 
       if (force || totalBackpackSlots !== currentBackpackSlots) {
         currentBackpackSlots = totalBackpackSlots;
@@ -603,6 +616,200 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       return 0.3;
     }
 
+
+    const playerManagedAttributes = ['forca','constituicao','destreza','inteligencia','sabedoria','carisma','peso','resistencia'];
+
+    function remainingPointBudgetForCurrentValues() {
+      const nivel = Math.max(1, Math.round(num('nivel')) || 1);
+      const pontosPorNivel = Math.max(0, num('pontosPorNivel'));
+      const bonusPontos = num('bonusPontos');
+      const pontosTotais = nivel * pontosPorNivel + bonusPontos;
+      const pontosGastos = playerManagedAttributes.reduce((sum, id) => sum + attrCost(clamp(Math.round(num(id)), 0, 100)), 0);
+      return pontosTotais - pontosGastos;
+    }
+
+    function ensureAttributeControls() {
+      playerManagedAttributes.forEach(id => {
+        const input = byId(id);
+        if (!input || input.dataset.controlsReady === '1') return;
+        const wrap = document.createElement('div');
+        wrap.className = 'attr-input-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        const minusBtn = document.createElement('button');
+        minusBtn.type = 'button';
+        minusBtn.className = 'attr-step-btn attr-minus-btn';
+        minusBtn.textContent = '−';
+        minusBtn.dataset.attrTarget = id;
+        minusBtn.dataset.action = 'minus';
+        const plusBtn = document.createElement('button');
+        plusBtn.type = 'button';
+        plusBtn.className = 'attr-step-btn attr-plus-btn';
+        plusBtn.textContent = '+';
+        plusBtn.dataset.attrTarget = id;
+        plusBtn.dataset.action = 'plus';
+        input.classList.add('player-locked');
+        wrap.append(minusBtn, input, plusBtn);
+        input.dataset.controlsReady = '1';
+      });
+    }
+
+    function updateManualPermissionUI() {
+      const bonusPontosField = byId('bonusPontos');
+      const perkBonusField = byId('perkBonus');
+      [bonusPontosField, perkBonusField].forEach(field => {
+        if (!field) return;
+        const box = field.closest('.left-header-box');
+        field.readOnly = !userCanAdminEdit;
+        field.disabled = !userCanAdminEdit;
+        if (box) box.classList.toggle('is-hidden-admin-field', !userCanAdminEdit);
+      });
+
+      playerManagedAttributes.forEach(id => {
+        const input = byId(id);
+        if (!input) return;
+        input.readOnly = !userCanAdminEdit;
+        const wrap = input.closest('.attr-input-wrap');
+        const minusBtn = wrap?.querySelector('.attr-minus-btn');
+        const plusBtn = wrap?.querySelector('.attr-plus-btn');
+        if (minusBtn) minusBtn.classList.toggle('hidden', !userCanAdminEdit);
+        if (plusBtn) plusBtn.classList.remove('hidden');
+      });
+    }
+
+    function openPointConfirm(attrId) {
+      pendingAttributeIncrement = attrId;
+      const modal = byId('pointConfirmModal');
+      const checkbox = byId('skipPointConfirmCheckbox');
+      const labelMap = {
+        forca: 'Força', constituicao: 'Constituição', destreza: 'Destreza', inteligencia: 'Inteligência', sabedoria: 'Sabedoria', carisma: 'Carisma', peso: 'Peso', resistencia: 'Resistência'
+      };
+      const current = clamp(Math.round(num(attrId)), 0, 100);
+      const nextCost = attrCost(current + 1) - attrCost(current);
+      byId('pointConfirmText').textContent = `Deseja adicionar 1 ponto em ${labelMap[attrId] || attrId}? Este clique é definitivo e consumirá ${nextCost} ponto${nextCost > 1 ? 's' : ''} disponível${nextCost > 1 ? 'eis' : ''} pelas regras atuais.`;
+      if (checkbox) checkbox.checked = skipPointConfirmation;
+      openModal(modal);
+    }
+
+    function applyAttributeIncrement(attrId) {
+      const input = byId(attrId);
+      if (!input) return;
+      const current = clamp(Math.round(num(attrId)), 0, 100);
+      if (current >= 100) return;
+      const nextCost = attrCost(current + 1) - attrCost(current);
+      const remaining = remainingPointBudgetForCurrentValues();
+      if (remaining < nextCost) {
+        alert('Você não tem pontos suficientes para aumentar este atributo.');
+        return;
+      }
+      input.value = current + 1;
+      updateAll();
+    }
+
+    function applyAttributeDeltaAdmin(attrId, delta) {
+      const input = byId(attrId);
+      if (!input) return;
+      const current = clamp(Math.round(num(attrId)), 0, 100);
+      input.value = clamp(current + delta, 0, 100);
+      updateAll();
+    }
+
+    function initPointConfirmModal() {
+      const cancelBtn = byId('cancelPointConfirmBtn');
+      const confirmBtn = byId('confirmPointConfirmBtn');
+      const modal = byId('pointConfirmModal');
+      const checkbox = byId('skipPointConfirmCheckbox');
+      cancelBtn?.addEventListener('click', () => {
+        pendingAttributeIncrement = null;
+        closeModal(modal);
+      });
+      confirmBtn?.addEventListener('click', () => {
+        skipPointConfirmation = !!checkbox?.checked;
+        if (pendingAttributeIncrement) applyAttributeIncrement(pendingAttributeIncrement);
+        pendingAttributeIncrement = null;
+        closeModal(modal);
+      });
+      modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          pendingAttributeIncrement = null;
+          closeModal(modal);
+        }
+      });
+    }
+
+    function initAttributeButtons() {
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.attr-step-btn');
+        if (!btn) return;
+        const attrId = btn.dataset.attrTarget;
+        const action = btn.dataset.action;
+        if (!attrId || !action) return;
+        if (action === 'minus') {
+          if (!userCanAdminEdit) return;
+          applyAttributeDeltaAdmin(attrId, -1);
+          return;
+        }
+        if (userCanAdminEdit) {
+          applyAttributeDeltaAdmin(attrId, 1);
+          return;
+        }
+        if (skipPointConfirmation) {
+          applyAttributeIncrement(attrId);
+          return;
+        }
+        openPointConfirm(attrId);
+      });
+    }
+
+    function initCustomSelects() {
+      const selects = [...document.querySelectorAll('select')];
+      selects.forEach(select => {
+        if (select.dataset.customized === '1') return;
+        select.dataset.customized = '1';
+        select.classList.add('select-hidden-native');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select';
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'custom-select-trigger';
+        const menu = document.createElement('div');
+        menu.className = 'custom-select-menu';
+        wrapper.append(trigger, menu);
+
+        const rebuild = () => {
+          menu.innerHTML = '';
+          [...select.options].forEach(option => {
+            const item = document.createElement('div');
+            item.className = 'custom-select-option' + (option.value === select.value ? ' active' : '');
+            item.textContent = option.textContent;
+            item.dataset.value = option.value;
+            item.addEventListener('click', () => {
+              select.value = option.value;
+              trigger.textContent = option.textContent;
+              wrapper.classList.remove('open');
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            menu.appendChild(item);
+          });
+          trigger.textContent = select.options[select.selectedIndex]?.textContent || '';
+        };
+        rebuild();
+        trigger.addEventListener('click', () => {
+          document.querySelectorAll('.custom-select.open').forEach(other => {
+            if (other !== wrapper) other.classList.remove('open');
+          });
+          wrapper.classList.toggle('open');
+        });
+        select.addEventListener('change', rebuild);
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+          document.querySelectorAll('.custom-select.open').forEach(el => el.classList.remove('open'));
+        }
+      });
+    }
+
     function createPerks() {
       const host = byId('perkGrid');
       const labels = {
@@ -629,8 +836,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       }
     }
 
-    function saveState() {
-      saveActiveTabState();
+    function saveState(renderAfter = false) {
+      saveActiveTabState(renderAfter);
     }
 
     function loadState() {
@@ -1096,6 +1303,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       }
       if (e.key === 'Escape') {
         closeAllSecondaryModals();
+        closeModal(byId('pointConfirmModal'));
+        pendingAttributeIncrement = null;
       }
     });
 
@@ -1106,15 +1315,48 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       if (e.target.matches('input, select, textarea')) updateAll();
     });
 
+
+    function applySharedViewerReadOnlyUI() {
+      if (!isSharedViewerMode) return;
+      document.querySelectorAll('input, textarea, select').forEach(field => {
+        const id = field.id || '';
+        const calculatorIds = new Set([
+          'danoBaseRolado','bonusPercentualExtra','rolagemD20','danoAplicadoAlvo',
+          'danoRecebidoBruto','reducaoArmadura','danoRecebidoFinal','vidaAposDanoRecebido'
+        ]);
+        if (calculatorIds.has(id)) {
+          field.readOnly = field.tagName !== 'SELECT';
+          field.disabled = false;
+          return;
+        }
+        if (field.tagName === 'TEXTAREA' || field.tagName === 'SELECT') field.disabled = true;
+        else field.readOnly = true;
+      });
+      document.querySelectorAll('button').forEach(btn => {
+        const keepIds = new Set(['goHomeBtn','goAdminBtn','logoutBtn','applyDamageToTargetBtn','applyReceivedDamageBtn']);
+        if (keepIds.has(btn.id)) return;
+        if (btn.closest('#pointConfirmModal')) return;
+        btn.disabled = true;
+      });
+      const status = document.getElementById('cloudStatus');
+      if (status) status.textContent = 'Modo compartilhado: somente leitura';
+    }
+
     async function startApp() {
       await bootstrapCloud();
       suppressCloudSave = true;
       createPerks();
+      ensureAttributeControls();
+      initPointConfirmModal();
+      initAttributeButtons();
       loadState();
+      initCustomSelects();
       createInventoryRows(true);
+      updateManualPermissionUI();
       updateAll();
-      suppressCloudSave = false;
-      scheduleCloudSave();
+      applySharedViewerReadOnlyUI();
+      suppressCloudSave = isSharedViewerMode;
+      if (!isSharedViewerMode) scheduleCloudSave();
     }
 
     startApp();
