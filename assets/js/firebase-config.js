@@ -20,19 +20,17 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBwg5k0wXPZ4ZOeCfCjPHe95yDFJNSu_ww",
-  authDomain: "ark-fichas.firebaseapp.com",
-  projectId: "ark-fichas",
-  storageBucket: "ark-fichas.firebasestorage.app",
-  messagingSenderId: "1097313250279",
-  appId: "1:1097313250279:web:050f40ceca2ca90da36b42",
-  measurementId: "G-3HX09H36Q5"
-};
+const firebaseConfig = window.__ARK_FIREBASE_CONFIG__;
 
-export const ADMIN_EMAILS = [
-  "moisslucas3@gmail.com"
-];
+if (!firebaseConfig?.apiKey || !firebaseConfig?.projectId || !firebaseConfig?.appId) {
+  throw new Error(
+    "Configuração Firebase ausente. Crie o arquivo assets/js/runtime-config.js a partir de assets/js/runtime-config.example.js antes de publicar o projeto."
+  );
+}
+
+export const ADMIN_EMAILS = Array.isArray(window.__ARK_ADMIN_EMAILS__)
+  ? window.__ARK_ADMIN_EMAILS__
+  : ["moisslucas3@gmail.com"];
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -100,6 +98,31 @@ export async function saveWorkspace(uid, payload) {
 export async function listAllUsers() {
   const snap = await getDocs(query(collection(db, "users"), orderBy("name", "asc")));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export function normalizeSharedViewers(value) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const item of value) {
+    const uid = String(item?.uid || "").trim();
+    if (!uid || seen.has(uid)) continue;
+    seen.add(uid);
+    out.push({
+      uid,
+      name: String(item?.name || "").trim(),
+      email: String(item?.email || "").trim()
+    });
+  }
+  return out;
+}
+
+export function userCanViewWorkspace(user, workspace) {
+  if (!user || !workspace) return false;
+  if (isAdminUser(user)) return true;
+  if (workspace.ownerUid && workspace.ownerUid === user.uid) return true;
+  const viewers = normalizeSharedViewers(workspace.sharedViewers);
+  return viewers.some((item) => item.uid === user.uid);
 }
 
 export { app, auth, db, doc, getDoc, setDoc, updateDoc, serverTimestamp, onAuthStateChanged };
