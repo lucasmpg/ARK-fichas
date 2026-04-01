@@ -116,6 +116,7 @@ function saveCreatureToWorkspace() {
   creature.baseDano = Math.max(0, num('baseDano'));
   creature.baseMovimento = Math.max(0, num('baseMovimento'));
   creature.basePeso = Math.max(0, num('basePeso'));
+  creature.sexo = byId('sexo').value.trim();
   creature.pontosPorNivel = Math.max(0, num('pontosPorNivel'));
   creature.bonusPontos = num('bonusPontos');
   creature.stats = creature.stats || {};
@@ -171,6 +172,7 @@ function applyCreatureToForm() {
   byId('nome').value = creature.nome || '';
   byId('especie').value = creature.especie || '';
   byId('donoNome').value = creature.ownerName || workspace.ownerName || '';
+  byId('sexo').value = creature.sexo || '';
   byId('nivel').value = creature.nivel || 1;
   byId('baseVida').value = creature.baseVida ?? 100;
   byId('baseDano').value = creature.baseDano ?? 0;
@@ -202,11 +204,13 @@ function remainingPointBudget() {
 }
 
 function setEditableState() {
-  ['especie', 'baseVida', 'baseDano', 'baseMovimento', 'basePeso', 'pontosPorNivel', 'bonusPontos'].forEach((id) => {
+  ['especie', 'sexo', 'baseVida', 'baseDano', 'baseMovimento', 'basePeso', 'pontosPorNivel', 'bonusPontos'].forEach((id) => {
     byId(id).readOnly = !canAdminEdit;
     byId(id).disabled = !canAdminEdit;
   });
   byId('nome').readOnly = !canEdit;
+  byId('sexo').readOnly = !canAdminEdit;
+  byId('sexo').disabled = !canAdminEdit;
   byId('nivel').readOnly = !canEdit && !canAdminEdit;
   byId('adminNotas').readOnly = !canAdminEdit;
   byId('notas').readOnly = !canEdit;
@@ -316,6 +320,20 @@ function updateAll() {
   const esquiva = destreza;
   const oxigenio = 60 + sabedoria * 5;
 
+  let andarFinal = andar;
+  let correrFinal = correr;
+  let pesoPenaltyText = 'sem penalidade';
+  const cargaPct = capacidade <= 0 ? 0 : (pesoAtual / capacidade) * 100;
+  if (cargaPct > 100) {
+    andarFinal = 0;
+    correrFinal = 0;
+    pesoPenaltyText = 'imóvel por excesso de carga';
+  } else if (cargaPct > 80) {
+    andarFinal *= 0.7;
+    correrFinal *= 0.7;
+    pesoPenaltyText = 'deslocamento reduzido em 30% acima de 80% de carga';
+  }
+
   byId('forcaInfo').value = `+${danoFisicoPercent}% dano`;
   byId('constituicaoInfo').value = `HP +${constituicao * 10}`;
   byId('destrezaInfo').value = `mov. e distância +${destreza * 2}%`;
@@ -337,12 +355,6 @@ function updateAll() {
   byId('furtividadeVal').textContent = `${furtividade}`;
   byId('percepcaoVal').textContent = `${percepcao}`;
   byId('zonaPercepcao').textContent = `zona passiva: ${(percepcao / 2).toFixed(1).replace('.0', '')}`;
-  let andarFinal = andar;
-  let correrFinal = correr;
-  let pesoPenaltyText = 'sem penalidade';
-  const cargaPct = capacidade <= 0 ? 0 : (pesoAtual / capacidade) * 100;
-  if (cargaPct > 100) { andarFinal = 0; correrFinal = 0; pesoPenaltyText = 'imóvel por excesso de carga'; }
-  else if (cargaPct > 80) { andarFinal *= 0.7; correrFinal *= 0.7; pesoPenaltyText = 'deslocamento reduzido em 30% acima de 80% de carga'; }
   byId('capacidadeVal').textContent = `${capacidade} kg`;
   byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
   byId('danoDistVal').textContent = `+${danoDistancia}%`;
@@ -350,6 +362,8 @@ function updateAll() {
   byId('pesoPenalty').textContent = pesoPenaltyText;
   byId('creaturePesoAtual').value = pesoAtual.toFixed(2).replace(/\.00$/, '');
   byId('creaturePesoUso').value = `${cargaPct.toFixed(1)}%`;
+  const weightBar = byId('creaturePesoBar');
+  if (weightBar) weightBar.style.width = `${Math.min(100, Math.max(0, cargaPct))}%`;
   byId('creatureSlotsTotal').textContent = inventory.totalSlots;
   byId('creatureSlotsUsed').textContent = inventory.used;
   byId('creatureSlotsFree').textContent = inventory.free;
