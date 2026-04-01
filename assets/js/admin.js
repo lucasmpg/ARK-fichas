@@ -77,18 +77,23 @@ function renderWorkspaceCard(user, workspaceExists) {
     <div class="sheet-item-meta">
       <strong>${user.name || 'Sem nome'}</strong>
       <span class="muted">${user.email || 'Sem e-mail'}</span>
-      <span class="muted">${workspaceExists ? 'Ficha encontrada' : 'Esse usuário ainda não tem ficha criada'}</span>
+      <span class="muted">${workspaceExists ? 'Workspace encontrado' : 'Esse usuário ainda não tem workspace criado'}</span>
     </div>
     <div class="sheet-item-actions">
-      <button type="button" id="openSelectedSheetBtn">Abrir ficha</button>
-      ${workspaceExists ? '' : '<button type="button" id="createSelectedSheetBtn">Criar ficha vazia</button>'}
+      <button type="button" id="openSelectedDashboardBtn">Abrir dashboard</button>
+      <button type="button" id="openSelectedSheetBtn">Abrir ficha do player</button>
+      ${workspaceExists ? '' : '<button type="button" id="createSelectedSheetBtn">Criar workspace vazio</button>'}
     </div>
   `;
 
   sheetsList.appendChild(div);
 
+  document.getElementById('openSelectedDashboardBtn').addEventListener('click', () => {
+    window.location.href = `./dashboard.html?uid=${encodeURIComponent(user.uid)}&admin=1`;
+  });
+
   document.getElementById('openSelectedSheetBtn').addEventListener('click', () => {
-    window.location.href = `./ficha.html?uid=${encodeURIComponent(user.uid)}&admin=1`;
+    window.location.href = `./dashboard.html?uid=${encodeURIComponent(user.uid)}&admin=1`;
   });
 
   if (!workspaceExists) {
@@ -120,7 +125,7 @@ async function loadAdmin() {
   await upsertUserProfile(user);
 
   if (!isAdminUser(user)) {
-    window.location.href = './ficha.html';
+    window.location.href = './dashboard.html';
     return;
   }
 
@@ -163,7 +168,7 @@ createSelectedUserSheetBtn.addEventListener('click', async () => {
     });
   }
 
-  window.location.href = `./ficha.html?uid=${encodeURIComponent(selectedUser.uid)}&admin=1`;
+  window.location.href = `./dashboard.html?uid=${encodeURIComponent(selectedUser.uid)}&admin=1`;
 });
 
 userSearchInput.addEventListener('input', () => {
