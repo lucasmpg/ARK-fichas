@@ -22,54 +22,32 @@
 </div>
 <div class="card creature-section creature-section-derived">
 <h2>Recursos e derivados</h2>
-<div class="metric-grid compact-metrics"><div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div><div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div><div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div><div class="metric"><div class="name">Andar</div><div class="value" id="andarVal" tabindex="-1">5 m</div><div class="sub">corrida = 2× andar</div></div><div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div><div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div><div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div><div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">peso base + atributo peso</div></div><div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">0</div><div class="sub">dano base + força</div></div><div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div></div>
+<div class="metric-grid compact-metrics"><div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div><div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div><div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div><div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub">corrida = 2× andar</div></div><div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div><div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div><div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div><div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">peso base + atributo peso</div></div><div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">0</div><div class="sub">dano base + força</div></div><div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div></div>
 <div class="section-space">
 <h2>Recursos atuais</h2>
 <div class="resource-box"><div><label for="vidaAtual">Vida atual</label><input id="vidaAtual" min="0" type="number" value="100"/></div><div><label for="vidaAtualMax">Máxima</label><input id="vidaAtualMax" readonly=""/></div><div><label for="vidaDelta">Variação</label><input id="vidaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyVidaBtn">Aplicar</button></div><div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div></div><div class="progress"><div class="bar hp" id="vidaBar"></div></div>
 <div class="resource-box section-space"><div><label for="torporAtual">Torpor atual</label><input id="torporAtual" min="0" type="number" value="0"/></div><div><label for="torporAtualMax">Máximo</label><input id="torporAtualMax" readonly=""/></div><div><label for="torporDelta">Variação</label><input id="torporDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyTorporBtn">Aplicar</button></div><div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div></div><div class="progress"><div class="bar torpor" id="torporBar"></div></div>
 <div class="resource-box section-space"><div><label for="staminaAtual">Stamina atual</label><input id="staminaAtual" min="0" type="number" value="100"/></div><div><label for="staminaAtualMax">Máxima</label><input id="staminaAtualMax" readonly=""/></div><div><label for="staminaDelta">Variação</label><input id="staminaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyStaminaBtn">Aplicar</button></div><div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div></div><div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
-
-<div class="metric-grid section-space creature-inventory-summary-grid">
-<div class="metric">
-<div class="name">Espaços totais</div>
-<div class="value" id="creatureSlotsTotal">5</div>
-<div class="sub">definidos pelo admin</div>
+<div class="resource-box section-space">
+  <div>
+    <label for="creaturePesoAtual">Peso atual</label>
+    <input id="creaturePesoAtual" readonly />
+  </div>
+  <div>
+    <label for="creaturePesoUso">Uso da carga</label>
+    <input id="creaturePesoUso" readonly />
+  </div>
+  <div>
+    <label for="capacidadePesoVisual">Capacidade</label>
+    <input id="capacidadePesoVisual" readonly />
+  </div>
+  <div class="resource-main-action">
+    <button type="button" disabled>Carga</button>
+  </div>
+  <div class="resource-side-action">
+    <button type="button" disabled>Movimento</button>
+  </div>
 </div>
-<div class="metric">
-<div class="name">Espaços usados</div>
-<div class="value" id="creatureSlotsUsed">0</div>
-<div class="sub">linha conta como usada quando tiver descrição</div>
-</div>
-<div class="metric">
-<div class="name">Espaços livres</div>
-<div class="value" id="creatureSlotsFree">5</div>
-<div class="sub">itens carregados pela criatura</div>
-</div>
-<div class="metric creature-slot-select-card">
-<div class="name">Slots da criatura</div>
-<div class="sub" style="margin-bottom:8px;">ajustado pelo admin</div>
-<select id="inventorySlotsBase">
-<option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option>
-</select>
-</div>
-</div>
-<div class="resource-box section-space creature-jump-box">
-<div>
-<label for="creaturePesoAtual">Peso atual</label>
-<input id="creaturePesoAtual" readonly=""/>
-</div>
-<div>
-<label for="capacidadePesoVisual">Capacidade</label>
-<input id="capacidadePesoVisual" readonly=""/>
-</div>
-<div class="resource-main-action">
-<button id="jumpToCreatureInventoryBtn" onclick="document.getElementById('creatureInventorySection')?.scrollIntoView({behavior:'smooth', block:'start'});document.getElementById('creatureInventorySection')?.focus?.();" type="button">Carga</button>
-</div>
-<div class="resource-side-action">
-<button id="jumpToCreatureMovementBtn" onclick="document.getElementById('andarVal')?.scrollIntoView({behavior:'smooth', block:'center'});document.getElementById('andarVal')?.focus?.();" type="button">Movimento</button>
-</div>
-</div>
-
 <div class="progress"><div class="bar peso" id="creaturePesoBar"></div></div>
 </div>
 </div>
@@ -78,11 +56,28 @@
 <div class="section-space"><div class="row"><div><label for="danoBaseRolado">Dano rolado</label><input id="danoBaseRolado" type="number" value="0"/></div><div><label for="bonusPercentualExtra">Bônus percentual extra</label><input id="bonusPercentualExtra" type="number" value="0"/></div><div><label for="rolagemD20">Rolagem d20</label><input id="rolagemD20" max="20" min="1" type="number" value="10"/></div><div><label for="danoAplicadoAlvo">Vida atual do alvo</label><input id="danoAplicadoAlvo" type="number" value="0"/></div></div><div class="metric-grid section-space"><div class="metric"><div class="name">Multiplicador do d20</div><div class="value" id="multiD20">100%</div><div class="sub">mesma regra aprovada</div></div><div class="metric"><div class="name">Dano bruto</div><div class="value" id="danoBruto">0</div><div class="sub">base + escalonamentos</div></div><div class="metric"><div class="name">Dano final</div><div class="value" id="danoFinal">0</div><div class="sub">pronto para aplicar</div></div></div><div class="actions section-space"><button id="applyDamageToTargetBtn">Aplicar dano ao alvo</button></div></div>
 <div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button></div></div>
 </div>
+
 </div>
-<div class="card inventory-standalone-card creature-section creature-section-inventory" id="creatureInventorySection">
+
+<div class="card inventory-standalone-card creature-section creature-section-inventory">
 <h2>Inventário e peso</h2>
-
-
+<div class="metric-grid compact-metrics">
+<div class="metric"><div class="name">Espaços totais</div><div class="value" id="creatureSlotsTotal">5</div><div class="sub">definidos pelo admin</div></div>
+<div class="metric"><div class="name">Espaços usados</div><div class="value" id="creatureSlotsUsed">0</div><div class="sub">linha conta como usada quando tiver descrição</div></div>
+<div class="metric"><div class="name">Espaços livres</div><div class="value" id="creatureSlotsFree">5</div><div class="sub">itens carregados pela criatura</div></div>
+</div>
+<div class="row section-space inventory-config-row">
+<div>
+<label for="inventorySlotsBase">Slots da criatura</label>
+<select id="inventorySlotsBase">
+<option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option>
+</select>
+</div>
+<div>
+<label for="creaturePesoUso">Uso da carga</label>
+<input id="creaturePesoUso" readonly=""/>
+</div>
+</div>
 <div class="inventory-center-card section-space">
 <section class="inventory-column-panel">
 <div class="inventory-panel-header">
@@ -106,30 +101,7 @@
 <div aria-hidden="true" class="modal-overlay hidden" id="pointConfirmModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Confirmar ponto</h3><p id="pointConfirmText">Deseja adicionar 1 ponto?</p><label class="modal-check"><input id="skipPointConfirmCheckbox" type="checkbox"/> Não mostrar novamente</label><div class="modal-actions"><button id="cancelPointConfirmBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmPointConfirmBtn" type="button">Confirmar</button></div></div></div>
 <div aria-hidden="true" class="modal-overlay hidden" id="transferCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Transferir criatura</h3><div><label for="transferTargetUser">Novo dono</label><select id="transferTargetUser"></select></div><div class="modal-actions"><button id="cancelTransferCreatureBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmTransferCreatureBtn" type="button">Transferir</button></div></div></div>
 <div aria-hidden="true" class="modal-overlay hidden" id="shareCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Compartilhar visualização da criatura</h3><div class="footer-note">Selecione quem poderá abrir apenas esta criatura em modo somente leitura + calculadora.</div><div class="modal-grid"><div><label for="shareTargetUser">Usuário</label><select id="shareTargetUser"></select></div></div><div class="modal-actions"><button id="cancelShareCreatureBtn" type="button">Fechar</button><button class="btn-accent" id="addShareCreatureBtn" type="button">Adicionar acesso</button></div><div class="section-space"><div class="footer-note">Usuários com acesso atual</div><div class="cards-grid" id="sharedViewerList" style="grid-template-columns:1fr;"></div></div></div></div>
-<script>
-(function(){
-  const sync = () => {
-    const total = document.getElementById('creatureSlotsTotal')?.textContent || '';
-    const used = document.getElementById('creatureSlotsUsed')?.textContent || '';
-    const free = document.getElementById('creatureSlotsFree')?.textContent || '';
-    const slots = document.getElementById('inventorySlotsBase')?.value || '';
-    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-    set('creatureSlotsTotalMirror', total);
-    set('creatureSlotsUsedMirror', used);
-    set('creatureSlotsFreeMirror', free);
-    set('inventorySlotsBaseMirror', slots);
-  };
-  document.addEventListener('DOMContentLoaded', () => {
-    sync();
-    document.getElementById('inventorySlotsBase')?.addEventListener('change', sync);
-    const observer = new MutationObserver(sync);
-    ['creatureSlotsTotal','creatureSlotsUsed','creatureSlotsFree'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el, { childList: true, subtree: true, characterData: true });
-    });
-  });
-})();
-</script>
+
 <script src="../assets/js/creature.js" type="module"></script>
-</div></body>
+</body>
 </html>
