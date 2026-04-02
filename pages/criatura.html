@@ -106,6 +106,30 @@
 <div aria-hidden="true" class="modal-overlay hidden" id="pointConfirmModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Confirmar ponto</h3><p id="pointConfirmText">Deseja adicionar 1 ponto?</p><label class="modal-check"><input id="skipPointConfirmCheckbox" type="checkbox"/> Não mostrar novamente</label><div class="modal-actions"><button id="cancelPointConfirmBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmPointConfirmBtn" type="button">Confirmar</button></div></div></div>
 <div aria-hidden="true" class="modal-overlay hidden" id="transferCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Transferir criatura</h3><div><label for="transferTargetUser">Novo dono</label><select id="transferTargetUser"></select></div><div class="modal-actions"><button id="cancelTransferCreatureBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmTransferCreatureBtn" type="button">Transferir</button></div></div></div>
 <div aria-hidden="true" class="modal-overlay hidden" id="shareCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Compartilhar visualização da criatura</h3><div class="footer-note">Selecione quem poderá abrir apenas esta criatura em modo somente leitura + calculadora.</div><div class="modal-grid"><div><label for="shareTargetUser">Usuário</label><select id="shareTargetUser"></select></div></div><div class="modal-actions"><button id="cancelShareCreatureBtn" type="button">Fechar</button><button class="btn-accent" id="addShareCreatureBtn" type="button">Adicionar acesso</button></div><div class="section-space"><div class="footer-note">Usuários com acesso atual</div><div class="cards-grid" id="sharedViewerList" style="grid-template-columns:1fr;"></div></div></div></div>
+<script>
+(function(){
+  const sync = () => {
+    const total = document.getElementById('creatureSlotsTotal')?.textContent || '';
+    const used = document.getElementById('creatureSlotsUsed')?.textContent || '';
+    const free = document.getElementById('creatureSlotsFree')?.textContent || '';
+    const slots = document.getElementById('inventorySlotsBase')?.value || '';
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    set('creatureSlotsTotalMirror', total);
+    set('creatureSlotsUsedMirror', used);
+    set('creatureSlotsFreeMirror', free);
+    set('inventorySlotsBaseMirror', slots);
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    sync();
+    document.getElementById('inventorySlotsBase')?.addEventListener('change', sync);
+    const observer = new MutationObserver(sync);
+    ['creatureSlotsTotal','creatureSlotsUsed','creatureSlotsFree'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el, { childList: true, subtree: true, characterData: true });
+    });
+  });
+})();
+</script>
 <script src="../assets/js/creature.js" type="module"></script>
 </div></body>
 </html>
