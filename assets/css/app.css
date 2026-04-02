@@ -1261,7 +1261,21 @@ html, body {
 }
 
 html { overflow-y: scroll; }
-body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
+
+body,
+.wrap,
+.card {
+  backface-visibility: hidden;
+}
+
+body {
+  transform: none !important;
+}
+
+.wrap,
+.card {
+  transform: none !important;
+}
 
 .select-hidden-native {
   position: absolute !important;
@@ -1577,3 +1591,44 @@ display: grid;
 grid-template-columns: repeat(4, minmax(0, 1fr));
 gap: 10px;
 {
+/* ===== correção dos modais ===== */
+.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999 !important;
+  background: rgba(3, 10, 18, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal-box {
+  position: relative;
+  width: min(100%, 720px);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(8, 18, 30, 0.98), rgba(5, 12, 20, 0.98));
+  border: 1px solid rgba(94, 218, 255, 0.26);
+  border-radius: 14px;
+  box-shadow: 0 0 24px rgba(0, 210, 255, 0.08);
+}
+      /* ===== selects escuros dentro dos modais ===== */
+.modal-box select {
+  background: linear-gradient(180deg, rgba(10, 25, 39, 0.96), rgba(6, 15, 25, 0.98));
+  color: #ecfbff;
+  border: 1px solid rgba(95, 193, 219, 0.28);
+}
+
+.modal-box option,
+.modal-box optgroup {
+  background: #091523;
+  color: #ecfbff;
+}
