@@ -96,9 +96,52 @@
 <div class="section-space"><label for="adminNotas">Anotações do admin</label><textarea id="adminNotas"></textarea></div>
 </div>
 <div aria-hidden="true" class="modal-overlay hidden" id="pointConfirmModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Confirmar ponto</h3><p id="pointConfirmText">Deseja adicionar 1 ponto?</p><label class="modal-check"><input id="skipPointConfirmCheckbox" type="checkbox"/> Não mostrar novamente</label><div class="modal-actions"><button id="cancelPointConfirmBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmPointConfirmBtn" type="button">Confirmar</button></div></div></div>
-<div aria-hidden="true" class="modal-overlay hidden" id="transferCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Transferir criatura</h3><div><label for="transferTargetUser">Novo dono</label><select id="transferTargetUser"></select></div><div class="modal-actions"><button id="cancelTransferCreatureBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmTransferCreatureBtn" type="button">Transferir</button></div></div></div>
-<div aria-hidden="true" class="modal-overlay hidden" id="shareCreatureModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Compartilhar visualização da criatura</h3><div class="footer-note">Selecione quem poderá abrir apenas esta criatura em modo somente leitura + calculadora.</div><div class="modal-grid"><div><label for="shareTargetUser">Usuário</label><select id="shareTargetUser"></select></div></div><div class="modal-actions"><button id="cancelShareCreatureBtn" type="button">Fechar</button><button class="btn-accent" id="addShareCreatureBtn" type="button">Adicionar acesso</button></div><div class="section-space"><div class="footer-note">Usuários com acesso atual</div><div class="cards-grid" id="sharedViewerList" style="grid-template-columns:1fr;"></div></div></div></div>
+<div aria-hidden="true" class="modal-overlay hidden" id="transferCreatureModal">
+  <div aria-modal="true" class="modal-box" role="dialog">
+    <h3>Transferir criatura</h3>
+    <div>
+      <label for="transferTargetUser">Novo dono</label>
 
+      <div class="custom-select" data-for="transferTargetUser">
+        <select class="select-hidden-native" id="transferTargetUser"></select>
+        <button class="custom-select-trigger" type="button">Selecione um usuário</button>
+        <div class="custom-select-menu"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="cancelTransferCreatureBtn" type="button">Cancelar</button>
+      <button class="btn-accent" id="confirmTransferCreatureBtn" type="button">Transferir</button>
+    </div>
+  </div>
+<div aria-hidden="true" class="modal-overlay hidden" id="shareCreatureModal">
+  <div aria-modal="true" class="modal-box" role="dialog">
+    <h3>Compartilhar visualização da criatura</h3>
+    <div class="footer-note">Selecione quem poderá abrir apenas esta criatura em modo somente leitura + calculadora.</div>
+
+    <div class="modal-grid">
+      <div>
+        <label for="shareTargetUser">Usuário</label>
+
+        <div class="custom-select" data-for="shareTargetUser">
+          <select class="select-hidden-native" id="shareTargetUser"></select>
+          <button class="custom-select-trigger" type="button">Selecione um usuário</button>
+          <div class="custom-select-menu"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="cancelShareCreatureBtn" type="button">Fechar</button>
+      <button class="btn-accent" id="addShareCreatureBtn" type="button">Adicionar acesso</button>
+    </div>
+
+    <div class="section-space">
+      <div class="footer-note">Usuários com acesso atual</div>
+      <div class="cards-grid" id="sharedViewerList" style="grid-template-columns:1fr;"></div>
+    </div>
+  </div>
+</div>
 <script src="../assets/js/creature.js" type="module"></script>
 </body>
 </html>
