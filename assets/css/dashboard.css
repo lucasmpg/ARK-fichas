@@ -8,3 +8,65 @@ button,select,input{min-height:44px;border-radius:12px;border:1px solid rgba(105
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px;margin-top:20px}.card-mini{padding:18px;background:linear-gradient(180deg,var(--panel-2) 0%,var(--panel-3) 100%)}.card-mini h2{margin:0 0 10px;color:var(--title);font-size:22px}.meta-stack{display:grid;gap:8px;color:var(--muted);font-size:14px}.card-actions{margin-top:16px;justify-content:flex-start}.card-accent{border-style:dashed;display:flex;flex-direction:column;justify-content:center;min-height:220px}
 .modal-overlay.hidden{display:none}.modal-overlay{position:fixed;inset:0;background:rgba(2,8,14,.72);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}.modal-box{width:min(560px,100%);padding:20px}.modal-box h3{margin:0 0 14px;color:var(--title);font-size:24px}.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;margin-bottom:6px}
 @media (max-width:700px){.section-row{flex-direction:column}.modal-grid{grid-template-columns:1fr}}
+
+
+/* ===== custom select escuro ===== */
+.select-hidden-native{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  padding:0 !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0,0,0,0) !important;
+  white-space:nowrap !important;
+  border:0 !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.custom-select{position:relative;width:100%}
+.custom-select-trigger{
+  width:100%;
+  min-height:44px;
+  border-radius:12px;
+  border:1px solid rgba(105,223,255,.34);
+  background:linear-gradient(180deg,rgba(13,42,61,.96),rgba(8,22,35,.96));
+  color:var(--text);
+  padding:10px 42px 10px 14px;
+  text-align:left;
+  position:relative;
+}
+.custom-select-trigger::after{
+  content:"▾";
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+}
+.custom-select-menu{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 8px);
+  z-index:10050;
+  display:none;
+  max-height:260px;
+  overflow:auto;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(180deg,var(--panel-2) 0%,var(--panel-3) 100%);
+  box-shadow:var(--shadow-soft);
+}
+.custom-select.open .custom-select-menu{display:block}
+.custom-select-option{
+  padding:10px 12px;
+  border-radius:10px;
+  color:var(--text);
+  cursor:pointer;
+}
+.custom-select-option:hover,
+.custom-select-option.active{
+  background:rgba(105,223,255,.12);
+}
