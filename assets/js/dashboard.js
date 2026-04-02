@@ -35,8 +35,70 @@ let accessMode = 'owner';
 
 const qp = (name) => new URLSearchParams(window.location.search).get(name);
 const clone = (value) => JSON.parse(JSON.stringify(value));
-const closeModal = (modal) => { if (!modal) return; modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); };
+const closeModal = (modal) => { if (!modal) return; modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); closeAllCustomSelects(); };
 const openModal = (modal) => { if (!modal) return; modal.classList.remove('hidden'); modal.setAttribute('aria-hidden', 'false'); };
+
+function closeAllCustomSelects(exceptSelect = null) {
+  document.querySelectorAll('.custom-select.open').forEach((host) => {
+    const nativeSelect = host.querySelector('select');
+    if (!exceptSelect || nativeSelect !== exceptSelect) host.classList.remove('open');
+  });
+}
+
+function refreshCustomSelect(select) {
+  if (!select) return;
+  const host = select.closest('.custom-select');
+  if (!host) return;
+  const trigger = host.querySelector('.custom-select-trigger');
+  const menu = host.querySelector('.custom-select-menu');
+  if (!trigger || !menu) return;
+
+  const placeholder = select.dataset.placeholder || 'Selecione';
+  const options = [...select.options];
+  const selectedOption = options.find((option) => option.value === select.value) || options[0] || null;
+
+  trigger.textContent = selectedOption ? selectedOption.textContent : placeholder;
+  menu.innerHTML = '';
+
+  options.forEach((option) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'custom-select-option';
+    if (option.value === select.value) item.classList.add('active');
+    item.textContent = option.textContent || placeholder;
+    item.disabled = option.disabled;
+    item.addEventListener('click', () => {
+      select.value = option.value;
+      refreshCustomSelect(select);
+      host.classList.remove('open');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    menu.appendChild(item);
+  });
+}
+
+function initCustomSelect(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  const host = select.closest('.custom-select');
+  if (!host || host.dataset.bound === '1') {
+    refreshCustomSelect(select);
+    return;
+  }
+  const trigger = host.querySelector('.custom-select-trigger');
+  host.dataset.bound = '1';
+
+  trigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const willOpen = !host.classList.contains('open');
+    closeAllCustomSelects(select);
+    if (willOpen) host.classList.add('open');
+  });
+
+  select.addEventListener('change', () => refreshCustomSelect(select));
+  refreshCustomSelect(select);
+}
+
 const canManageWorkspace = () => accessMode === 'owner' || accessMode === 'admin';
 
 function ensureWorkspaceShape(data) {
@@ -71,6 +133,7 @@ async function loadUsers() {
     .filter((user) => user.uid !== targetUid)
     .map((user) => `<option value="${user.uid}">${user.name || 'Sem nome'} • ${user.email || 'Sem e-mail'}</option>`)
     .join('');
+  initCustomSelect('transferTargetUser');
 }
 
 function renderCards() {
@@ -259,6 +322,7 @@ async function init() {
 
   statusEl.textContent = `Workspace pronto. ${workspace.creatures.length} criatura(s) encontrada(s).`;
   templateSelect.innerHTML = TEMPLATES.map((item) => `<option value="${item.key}">${item.label}</option>`).join('');
+  initCustomSelect('newCreatureTemplate');
   await loadUsers();
   renderCards();
 
@@ -279,6 +343,9 @@ async function init() {
     closeModal(transferModal);
   });
   document.getElementById('confirmTransferCreatureBtn').addEventListener('click', transferCreature);
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.custom-select')) closeAllCustomSelects();
+  });
 
   [createModal, transferModal].forEach((modal) => {
     modal?.addEventListener('click', (event) => {
