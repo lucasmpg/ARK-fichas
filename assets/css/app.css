@@ -1570,3 +1570,7 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
   font-weight: 700;
   padding: 0 8px;
 }
+
+.inventory-grid, .inventory-metrics {
+grid-template-columns: repeat(4, minmax(0, 1fr))
+{
