@@ -1649,3 +1649,11 @@ gap: 10px;
   background: linear-gradient(180deg, rgba(11,18,32,0.99), rgba(16,26,42,0.99));
   border: 1px solid rgba(95, 193, 219, 0.28);
 }
+
+
+/* ===== reforço custom select em modais ===== */
+.modal-box .custom-select{width:100%}
+.modal-box .custom-select-menu{
+  z-index:10050;
+  background:linear-gradient(180deg, rgba(11,18,32,.99), rgba(16,26,42,.99));
+}
