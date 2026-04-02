@@ -1417,7 +1417,7 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
   padding-inline: 8px;
 }
 .inventory-standalone-card {
-  margin-top: 22px;
+  margin: 22px;
 }
 .inventory-standalone-card .inventory-master-section {
   margin-top: 0;
@@ -1572,5 +1572,6 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 }
 
 .inventory-grid, .inventory-metrics {
-grid-template-columns: repeat(4, minmax(0, 1fr))
+display: grid;
+grid-template-columns: repeat(4, minmax(0, 1fr));
 {
