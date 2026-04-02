@@ -935,7 +935,7 @@ textarea {
 
 @media (max-width: 1200px) {
   .attr {
-    grid-template-columns: minmax(170px, 1fr) 132px 96px 96px;
+    grid-template-columns: minmax(120px, 1fr) 1px 96px 96px;
   }
 }
 
@@ -1436,9 +1436,9 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 /* ===== Atributos da criatura - layout corrigido ===== */
 .attr {
   display: grid;
-  grid-template-columns: minmax(185px, 1.25fr) 132px 96px 96px;
+  grid-template-columns: minmax(125px, 1.25fr) 120px 96px 96px;
   align-items: center;
-  gap: 14px;
+  gap: 1px;
   padding: 12px 14px;
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(9, 23, 36, 0.96), rgba(6, 15, 24, 0.98));
@@ -1515,13 +1515,13 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 
 .attr-plus-btn {
   border-radius: 0 12px 12px 0;
-  margin-left: 6px;
+  margin-left: 30px;
 }
 
 .attr-input {
-  width: 52px;
-  min-width: 52px;
-  max-width: 52px;
+  width: 70px;
+  min-width: 70px;
+  max-width: 70px;
   height: 42px;
   min-height: 42px;
   padding: 0;
