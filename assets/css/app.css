@@ -641,7 +641,7 @@ body {
 
 .topbar {
   padding: 12px 14px;
-  border: 1px solid var(--ark-line);
+  border: 4px solid var(--ark-line);
   border-radius: 14px;
   background: linear-gradient(180deg, rgba(8, 19, 31, 0.88), rgba(5, 12, 20, 0.92));
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 22px rgba(0, 210, 255, 0.06);
@@ -689,7 +689,7 @@ button:hover {
 .card,
 .wide-card {
   background: linear-gradient(180deg, rgba(8, 18, 30, 0.95), rgba(5, 12, 20, 0.96));
-  border: 1px solid var(--ark-line);
+  border: 4px solid var(--ark-line);
   border-radius: 14px;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(0, 210, 255, 0.05);
   padding: 14px;
