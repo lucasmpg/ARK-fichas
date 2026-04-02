@@ -1632,3 +1632,20 @@ gap: 10px;
   background: #091523;
   color: #ecfbff;
 }
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  width: 100%;
+}
+
+.custom-select-menu {
+  z-index: 10050;
+}
+
+.modal-box .custom-select-menu {
+  background: linear-gradient(180deg, rgba(11,18,32,0.99), rgba(16,26,42,0.99));
+  border: 1px solid rgba(95, 193, 219, 0.28);
+}
