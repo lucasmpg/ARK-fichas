@@ -36,7 +36,11 @@
         </div>
         <div>
           <label for="newCreatureTemplate">Espécie / template</label>
-          <select id="newCreatureTemplate"></select>
+          <div class="custom-select" data-for="newCreatureTemplate">
+            <select class="select-hidden-native" data-placeholder="Selecione um template" id="newCreatureTemplate"></select>
+            <button class="custom-select-trigger" type="button">Selecione um template</button>
+            <div class="custom-select-menu"></div>
+          </div>
         </div>
       </div>
       <div class="modal-actions">
@@ -53,7 +57,11 @@
       <div class="modal-grid">
         <div>
           <label for="transferTargetUser">Novo dono</label>
-          <select id="transferTargetUser"></select>
+          <div class="custom-select" data-for="transferTargetUser">
+            <select class="select-hidden-native" data-placeholder="Selecione um usuário" id="transferTargetUser"></select>
+            <button class="custom-select-trigger" type="button">Selecione um usuário</button>
+            <div class="custom-select-menu"></div>
+          </div>
         </div>
       </div>
       <div class="modal-actions">
