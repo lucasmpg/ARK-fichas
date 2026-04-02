@@ -1342,6 +1342,9 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 }
 .inventory-center-card {
   background: linear-gradient(180deg, rgba(11,18,33,.94), rgba(16,26,42,.94));
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
   border: 1px solid rgba(71,96,150,.48);
   border-radius: 18px;
   padding: 16px;
@@ -1353,6 +1356,11 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 }
 .inventory-column-panel {
   border: 1px solid rgba(71,96,150,.48);
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
   border-radius: 16px;
   padding: 14px;
   background: linear-gradient(180deg, rgba(9,16,29,.92), rgba(15,25,43,.92));
