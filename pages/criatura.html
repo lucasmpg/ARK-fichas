@@ -51,6 +51,11 @@
 <div class="progress"><div class="bar peso" id="creaturePesoBar"></div></div>
 </div>
 </div>
+<div class="card creature-section creature-section-calculator">
+<h2>Calculadoras</h2>
+<div class="section-space"><div class="row"><div><label for="danoBaseRolado">Dano rolado</label><input id="danoBaseRolado" type="number" value="0"/></div><div><label for="bonusPercentualExtra">Bônus percentual extra</label><input id="bonusPercentualExtra" type="number" value="0"/></div><div><label for="rolagemD20">Rolagem d20</label><input id="rolagemD20" max="20" min="1" type="number" value="10"/></div><div><label for="danoAplicadoAlvo">Vida atual do alvo</label><input id="danoAplicadoAlvo" type="number" value="0"/></div></div><div class="metric-grid section-space"><div class="metric"><div class="name">Multiplicador do d20</div><div class="value" id="multiD20">100%</div><div class="sub">mesma regra aprovada</div></div><div class="metric"><div class="name">Dano bruto</div><div class="value" id="danoBruto">0</div><div class="sub">base + escalonamentos</div></div><div class="metric"><div class="name">Dano final</div><div class="value" id="danoFinal">0</div><div class="sub">pronto para aplicar</div></div></div><div class="actions section-space"><button id="applyDamageToTargetBtn">Aplicar dano ao alvo</button></div></div>
+<div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button></div></div>
+</div>
 <div class="card inventory-standalone-card creature-section creature-section-inventory">
 <h2>Inventário e peso</h2>
 <div class="metric-grid compact-metrics">
@@ -85,12 +90,7 @@
 </section>
 </div>
 <div class="footer-note">As penalidades de peso e movimento da ficha principal também se aplicam às criaturas.</div>
-</div><div class="card creature-section creature-section-calculator">
-<h2>Calculadoras</h2>
-<div class="section-space"><div class="row"><div><label for="danoBaseRolado">Dano rolado</label><input id="danoBaseRolado" type="number" value="0"/></div><div><label for="bonusPercentualExtra">Bônus percentual extra</label><input id="bonusPercentualExtra" type="number" value="0"/></div><div><label for="rolagemD20">Rolagem d20</label><input id="rolagemD20" max="20" min="1" type="number" value="10"/></div><div><label for="danoAplicadoAlvo">Vida atual do alvo</label><input id="danoAplicadoAlvo" type="number" value="0"/></div></div><div class="metric-grid section-space"><div class="metric"><div class="name">Multiplicador do d20</div><div class="value" id="multiD20">100%</div><div class="sub">mesma regra aprovada</div></div><div class="metric"><div class="name">Dano bruto</div><div class="value" id="danoBruto">0</div><div class="sub">base + escalonamentos</div></div><div class="metric"><div class="name">Dano final</div><div class="value" id="danoFinal">0</div><div class="sub">pronto para aplicar</div></div></div><div class="actions section-space"><button id="applyDamageToTargetBtn">Aplicar dano ao alvo</button></div></div>
-<div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button></div></div>
-</div>
-<div class="card creature-section creature-section-notes">
+</div><div class="card creature-section creature-section-notes">
 <h2>Anotações</h2>
 <div><label for="notas">Anotações da criatura</label><textarea id="notas"></textarea></div>
 <div class="section-space"><label for="adminNotas">Anotações do admin</label><textarea id="adminNotas"></textarea></div>
