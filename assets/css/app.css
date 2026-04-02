@@ -935,21 +935,24 @@ textarea {
 
 @media (max-width: 1200px) {
   .attr {
-    grid-template-columns: minmax(0, 1fr) minmax(88px, 112px) minmax(0, 1fr);
+    grid-template-columns: minmax(170px, 1fr) 132px 96px 96px;
+  }
+}
+
+@media (max-width: 900px) {
+  .attr {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
-  .attr .mini {
-    grid-column: 1 / -1;
+  .attr-input-wrap {
+    margin-left: 0;
+  }
+
+  .mini {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .attr .mini > div {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 }
 
