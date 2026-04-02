@@ -1444,7 +1444,7 @@ body, .wrap, .card { backface-visibility: hidden; transform: translateZ(0); }
 /* ===== Atributos da criatura - layout corrigido ===== */
 .attr {
   display: grid;
-  grid-template-columns: minmax(125px, 1.25fr) 120px 96px 96px;
+  grid-template-columns: minmax(125px, 1.25fr) 120px 40px 175px;
   align-items: center;
   gap: 1px;
   padding: 12px 14px;
