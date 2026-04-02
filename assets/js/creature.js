@@ -36,8 +36,70 @@ const byId = (id) => document.getElementById(id);
 const num = (id) => parseFloat(byId(id)?.value || 0) || 0;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const clone = (value) => JSON.parse(JSON.stringify(value));
-const closeModal = (modal) => { modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); };
+const closeModal = (modal) => { modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); closeAllCustomSelects(); };
 const openModal = (modal) => { modal.classList.remove('hidden'); modal.setAttribute('aria-hidden', 'false'); };
+
+function closeAllCustomSelects(exceptSelect = null) {
+  document.querySelectorAll('.custom-select.open').forEach((host) => {
+    const nativeSelect = host.querySelector('select');
+    if (!exceptSelect || nativeSelect !== exceptSelect) host.classList.remove('open');
+  });
+}
+
+function refreshCustomSelect(select) {
+  if (!select) return;
+  const host = select.closest('.custom-select');
+  if (!host) return;
+  const trigger = host.querySelector('.custom-select-trigger');
+  const menu = host.querySelector('.custom-select-menu');
+  if (!trigger || !menu) return;
+
+  const placeholder = select.dataset.placeholder || 'Selecione';
+  const options = [...select.options];
+  const selectedOption = options.find((option) => option.value === select.value) || options[0] || null;
+
+  trigger.textContent = selectedOption ? selectedOption.textContent : placeholder;
+  menu.innerHTML = '';
+
+  options.forEach((option) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'custom-select-option';
+    if (option.value === select.value) item.classList.add('active');
+    item.textContent = option.textContent || placeholder;
+    item.disabled = option.disabled;
+    item.addEventListener('click', () => {
+      select.value = option.value;
+      refreshCustomSelect(select);
+      host.classList.remove('open');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    menu.appendChild(item);
+  });
+}
+
+function initCustomSelect(selectId) {
+  const select = byId ? byId(selectId) : document.getElementById(selectId);
+  if (!select) return;
+  const host = select.closest('.custom-select');
+  if (!host || host.dataset.bound === '1') {
+    refreshCustomSelect(select);
+    return;
+  }
+  const trigger = host.querySelector('.custom-select-trigger');
+  host.dataset.bound = '1';
+
+  trigger?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const willOpen = !host.classList.contains('open');
+    closeAllCustomSelects(select);
+    if (willOpen) host.classList.add('open');
+  });
+
+  select.addEventListener('change', () => refreshCustomSelect(select));
+  refreshCustomSelect(select);
+}
+
 
 const normalizeSharedViewers = (value) => Array.isArray(value) ? value.filter((item, index, arr) => item && item.uid && arr.findIndex((x) => x.uid === item.uid) === index) : [];
 const creatureCanView = (user, currentCreature) => !!(user && currentCreature && normalizeSharedViewers(currentCreature.sharedViewers).some((item) => item.uid === user.uid));
@@ -581,6 +643,9 @@ async function init() {
     .filter((user) => user.uid !== creature.ownerUid)
     .map((user) => `<option value="${user.uid}">${user.name || 'Sem nome'} • ${user.email || 'Sem e-mail'}</option>`)
     .join('');
+
+  initCustomSelect('transferTargetUser');
+  initCustomSelect('shareTargetUser');
 
   const renderSharedViewers = () => {
     const host = byId('sharedViewerList');
