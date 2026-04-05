@@ -15,8 +15,8 @@
 <span class="muted" id="authUserInfo"></span>
 </div>
 <div class="authbar-actions">
-<button id="goHomeBtn" type="button">Início</button>
-<button id="goAdminBtn" style="display:none;" type="button">Painel do mestre</button>
+<a class="nav-button" href="./dashboard.html" id="goHomeBtn">Início</a>
+<a class="nav-button" href="./admin.html" id="goAdminBtn" style="display:none;">Painel do mestre</a>
 <button id="logoutBtn" type="button">Sair</button>
 </div>
 </div>
@@ -218,7 +218,7 @@
 <div><label>Vida atual</label><input data-save="" id="vidaAtual" min="0" type="number" value="100"/></div>
 <div><label>Máxima</label><input id="vidaAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="vidaDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button></div>
+<div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button><div class="action-feedback" id="vidaFeedback"></div></div>
 <div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div>
 </div>
 <div class="progress"><div class="bar hp" id="vidaBar"></div></div>
@@ -226,7 +226,7 @@
 <div><label>Torpor atual</label><input data-save="" id="torporAtual" min="0" type="number" value="0"/></div>
 <div><label>Máximo</label><input id="torporAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="torporDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button></div>
+<div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button><div class="action-feedback" id="torporFeedback"></div></div>
 <div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div>
 </div>
 <div class="progress"><div class="bar torpor" id="torporBar"></div></div>
@@ -234,7 +234,7 @@
 <div><label>Stamina atual</label><input data-save="" id="staminaAtual" min="0" type="number" value="100"/></div>
 <div><label>Máxima</label><input id="staminaAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="staminaDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button></div>
+<div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button><div class="action-feedback" id="staminaFeedback"></div></div>
 <div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div>
 </div>
 <div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
@@ -273,22 +273,23 @@
 <div>
 <label for="acaoRapida">Consumir stamina por ação</label>
 <select id="acaoRapida">
-<option value="0">Andar (0)</option>
-<option value="5">Correr (5)</option>
-<option value="10">Ataque leve (10)</option>
-<option value="15">Ataque médio (15)</option>
-<option value="25">Ataque pesado (25)</option>
-<option value="12">Ataque à distância (12)</option>
-<option value="18">Ataque à distância pesado (18)</option>
-<option value="10">Postura defensiva (10)</option>
-<option value="10">Postura esquiva (10)</option>
-<option value="5">Usar item em combate (5)</option>
-<option value="5">Comandar criatura (5)</option>
+<option data-cost="0" value="andar">Andar (0)</option>
+<option data-cost="5" value="correr">Correr (5)</option>
+<option data-cost="10" value="ataque_leve">Ataque leve (10)</option>
+<option data-cost="15" value="ataque_medio">Ataque médio (15)</option>
+<option data-cost="25" value="ataque_pesado">Ataque pesado (25)</option>
+<option data-cost="12" value="ataque_distancia">Ataque à distância (12)</option>
+<option data-cost="18" value="ataque_distancia_pesado">Ataque à distância pesado (18)</option>
+<option data-cost="10" value="postura_defensiva">Postura defensiva (10)</option>
+<option data-cost="10" value="postura_esquiva">Postura esquiva (10)</option>
+<option data-cost="5" value="usar_item_combate">Usar item em combate (5)</option>
+<option data-cost="5" value="comandar_criatura">Comandar criatura (5)</option>
 </select>
 </div>
 </div>
 <div class="actions section-space">
 <button class="btn-accent" id="useActionBtn">Gastar stamina da ação</button>
+<div class="action-feedback action-feedback-inline" id="actionFeedback"></div>
 </div>
 <div class="footer-note" id="posturaResumo"></div>
 </div>
