@@ -1657,3 +1657,63 @@ gap: 10px;
   z-index:10050;
   background:linear-gradient(180deg, rgba(11,18,32,.99), rgba(16,26,42,.99));
 }
+
+
+.nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+}
+.nav-button:hover { filter: brightness(1.06); }
+.action-feedback {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .2s ease, transform .2s ease;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 0;
+  pointer-events: none;
+  border-radius: 12px;
+  background: rgba(120, 26, 26, 0);
+  color: rgba(255,255,255,0);
+  font-size: 12px;
+  font-weight: 700;
+}
+.action-feedback.show {
+  opacity: 1;
+  transform: translateY(0);
+  padding: 9px 12px;
+  background: rgba(120, 26, 26, .24);
+  box-shadow: 0 8px 18px rgba(120, 26, 26, .18);
+  color: #fff;
+}
+.action-feedback-inline {
+  width: 100%;
+  margin-top: 0;
+}
+.custom-select-menu .custom-select-option,
+.custom-select-option {
+  background: transparent;
+}
+.custom-select-option:hover,
+.custom-select-option.active {
+  background: rgba(121,168,255,.14);
+}
+.custom-select-option,
+.custom-select-menu {
+  color: var(--text);
+}
+.inventory-config-row .custom-select-trigger,
+.inventory-config-row .custom-select-menu {
+  background: linear-gradient(180deg, rgba(9,16,29,.98), rgba(15,25,43,.98));
+  color: var(--text);
+}
