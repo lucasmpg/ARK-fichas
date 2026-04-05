@@ -30,3 +30,32 @@ button {
   color: #7de7ff;
 }
 .hero-subtitle, .muted { color: #9cc8d6; }
+
+.google-login-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 18px;
+  background:linear-gradient(180deg, rgba(18,30,46,.98), rgba(8,18,30,.98));
+  color:#f3fbff;
+}
+.google-mark{
+  position:relative;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:inline-block;
+  background:conic-gradient(#4285f4 0 25%, #ea4335 25% 50%, #fbbc05 50% 75%, #34a853 75% 100%);
+  box-shadow:0 0 0 2px rgba(255,255,255,.08);
+}
+.google-mark::after{
+  content:"G";
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  color:#fff;
+  font-size:12px;
+}
