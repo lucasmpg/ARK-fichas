@@ -26,6 +26,7 @@ export async function bindLandingAuth() {
   if (loginBtn) loginBtn.addEventListener("click", async () => {
     try {
       await loginWithGoogle();
+      window.location.href = "./pages/dashboard.html";
     } catch (error) {
       console.error(error);
       alert("Não foi possível entrar com Google.");
@@ -47,6 +48,10 @@ export async function bindLandingAuth() {
 
     await upsertUserProfile(user);
     if (loginBtn) loginBtn.style.display = "none";
+    if (window.location.pathname.endsWith("/index.html") || window.location.pathname === "/") {
+      window.location.href = "./pages/dashboard.html";
+      return;
+    }
     if (logoutBtn) logoutBtn.style.display = "inline-block";
     if (openFichaBtn) openFichaBtn.style.display = "inline-block";
     if (userInfo) userInfo.textContent = `${user.displayName || "Usuário"} • ${user.email || ""}`;
