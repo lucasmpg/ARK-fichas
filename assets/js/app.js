@@ -80,8 +80,8 @@ async function bootstrapCloud() {
   if (authUserInfo) authUserInfo.textContent = `${firebaseUser.displayName || 'Usuário'} • ${firebaseUser.email || ''}`;
   if (goAdminBtn) goAdminBtn.style.display = admin ? 'inline-block' : 'none';
   if (logoutBtn) logoutBtn.addEventListener('click', async () => { await logout(); window.location.href = '../index.html'; });
-  if (goHomeBtn) goHomeBtn.addEventListener('click', () => { const qs = new URLSearchParams({ uid: targetWorkspaceUid }); if (admin && targetWorkspaceUid !== firebaseUser.uid) qs.set('admin', '1'); if (isSharedViewerMode) qs.set('view', '1'); window.location.href = `./dashboard.html?${qs.toString()}`; });
-  if (goAdminBtn) goAdminBtn.addEventListener('click', () => window.location.href = './admin.html');
+  if (goHomeBtn) { const qs = new URLSearchParams({ uid: targetWorkspaceUid }); if (admin && targetWorkspaceUid !== firebaseUser.uid) qs.set('admin', '1'); if (isSharedViewerMode) qs.set('view', '1'); goHomeBtn.setAttribute('href', `./dashboard.html?${qs.toString()}`); }
+  if (goAdminBtn) goAdminBtn.setAttribute('href', './admin.html');
 
   const workspace = await getWorkspace(targetWorkspaceUid);
   if (!admin && requestedUid && requestedUid !== firebaseUser.uid) {
@@ -457,13 +457,13 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
     const perkData = {
       forca: [
         { id: 'golpe_firme', nome: 'Golpe Firme', efeito: '+10% de dano em ataques corpo a corpo' },
-        { id: 'impacto_pesado', nome: 'Impacto Pesado', efeito: '+10% de dano com armas pesadas' },
+        { id: 'impacto_pesado', nome: 'Impacto Pesado', efeito: '+10% de dano com base em Força no ataque pesado ao gastar stamina por ação' },
         { id: 'derrubar_gigantes', nome: 'Derrubar Gigantes', efeito: '+10% de dano contra criaturas grandes' }
       ],
       destreza: [
         { id: 'passo_leve', nome: 'Passo Leve', efeito: '+1,5 m de movimento' },
         { id: 'reflexo', nome: 'Reflexo', efeito: '+5% redução de dano' },
-        { id: 'agilidade', nome: 'Agilidade', efeito: '-10% custo de stamina em ataques leves' }
+        { id: 'agilidade', nome: 'Agilidade', efeito: '-10% custo de stamina em ataques à distância' }
       ],
       inteligencia: [
         { id: 'oficio_inicial', nome: 'Ofício Inicial', efeito: '+10% velocidade de criação' },
@@ -492,6 +492,39 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       return Number.isFinite(v) ? v : 0;
     }
     function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+    const feedbackTimers = {};
+    function showActionFeedback(id, text) {
+      const el = byId(id);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(feedbackTimers[id]);
+      feedbackTimers[id] = setTimeout(() => {
+        el.classList.remove('show');
+        el.textContent = '';
+      }, 5000);
+    }
+    function getSelectedActionOption() {
+      const select = byId('acaoRapida');
+      if (!select) return null;
+      return select.options[select.selectedIndex] || null;
+    }
+    function getActionCostBase() {
+      const option = getSelectedActionOption();
+      return parseFloat(option?.dataset.cost || option?.value || 0) || 0;
+    }
+    function isActionValue(actionId) {
+      return (byId('acaoRapida')?.value || '') === actionId;
+    }
+    function numberOrBlank(id, max) {
+      const field = byId(id);
+      if (!field) return null;
+      const raw = String(field.value ?? '').trim();
+      if (!raw) return null;
+      const parsed = parseInt(raw, 10);
+      if (!Number.isFinite(parsed)) return null;
+      return clamp(parsed, 1, max);
+    }
 
     function inventorySlotCount() {
       return 5 + Math.max(0, Math.round(num('peso')));
@@ -579,7 +612,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
         const rowTotal = qty * unit;
         totalEl.value = rowTotal.toFixed(2).replace(/\.00$/, '');
         if (desc) used += 1;
-        totalWeight += rowTotal;
+        totalWeight += hasPerk('organizacao_basica') ? rowTotal * 0.9 : rowTotal;
       }
       return { used, totalWeight, totalSlots, free: Math.max(0, totalSlots - used) };
     }
@@ -1027,17 +1060,16 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId('armaScaleValue').textContent = `+${escalaPercentual}%`;
       byId('armaScaleText').textContent = armaEscala === 'forca' ? 'escala por Força' : armaEscala === 'destreza' ? 'escala por Destreza' : 'sem escalonamento';
 
-      const roll = clamp(Math.round(num('rolagemD20')), 1, 20);
-      byId('rolagemD20').value = roll;
-      const mult = d20Multiplier(roll);
-      byId('multiD20').textContent = `${Math.round(mult * 100)}%`;
+      const roll = numberOrBlank('rolagemD20', 20);
+      const mult = roll == null ? 1 : d20Multiplier(roll);
+      byId('multiD20').textContent = roll == null ? '—' : `${Math.round(mult * 100)}%`;
 
       const dadoBase = Math.max(0, num('danoBaseRolado'));
       const bonusArma = num('armaBonus');
       const extra = num('efeitoExtra');
       const bonusPercentualExtra = num('bonusPercentualExtra');
       let perkDamageBonus = 0;
-      if (hasPerk('impacto_pesado')) perkDamageBonus += 10;
+      if (hasPerk('impacto_pesado') && isActionValue('ataque_pesado') && armaEscala === 'forca') perkDamageBonus += 10;
       if (hasPerk('derrubar_gigantes') && byId('tamanhoAlvo').value === 'grande') perkDamageBonus += 10;
       const percentualTotal = escalaPercentual + bonusPercentualExtra + perkDamageBonus;
       const baseSemMult = dadoBase + bonusArma + extra;
@@ -1052,16 +1084,15 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       if (postura === 'defensiva') damageReduction = clamp(damageReduction + 50, 0, 95);
 
       const danoRecebidoBruto = Math.max(0, num('danoRecebidoBruto'));
-      const rolagemEsquiva = clamp(Math.round(num('rolagemEsquiva') || 1), 1, 100);
-      byId('rolagemEsquiva').value = rolagemEsquiva;
+      const rolagemEsquiva = numberOrBlank('rolagemEsquiva', 100);
       const penalidadeEsquiva = num('penalidadeEsquiva');
       const esquivaAtiva = postura === 'esquiva';
       let formulaEsquivaValor = 0;
       if (esquivaAtiva) {
         if (armadura === 'leve') {
-          formulaEsquivaValor = (rolagemEsquiva / 2) + (destreza / 2);
+          formulaEsquivaValor = ((rolagemEsquiva ?? 0) / 2) + (destreza / 2);
         } else if (armadura === 'media') {
-          formulaEsquivaValor = (rolagemEsquiva / 4) + (destreza / 4);
+          formulaEsquivaValor = ((rolagemEsquiva ?? 0) / 4) + (destreza / 4);
         } else {
           formulaEsquivaValor = 0;
         }
@@ -1086,8 +1117,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId('vidaAposDanoRecebido').value = vidaAposDanoRecebido.toFixed(2).replace(/\.00$/, '');
       byId('esquivaCalc').textContent = esquivaCalc;
       byId('esquivaBox').style.display = esquivaAtiva ? 'block' : 'none';
-      byId('formulaEsquiva').value = formulaEsquivaValor.toFixed(2).replace(/\.00$/, '');
-      byId('danoEsquivado').value = danoEsquivado.toFixed(2).replace(/\.00$/, '');
+      byId('formulaEsquiva').value = rolagemEsquiva == null ? '' : formulaEsquivaValor.toFixed(2).replace(/\.00$/, '');
+      byId('danoEsquivado').value = rolagemEsquiva == null ? '' : danoEsquivado.toFixed(2).replace(/\.00$/, '');
       byId('applyReceivedDamageBtn').disabled = danoRecebidoBruto <= 0;
       byId('ataqueResumo').textContent = `${byId('armaNome').value || 'Arma'} (${byId('armaDado').value || '-'})`;
 
@@ -1104,12 +1135,15 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId(currentId).value = clamp(current + delta, 0, max);
       byId(deltaId).value = 0;
       updateAll();
+      if (type === 'vida') showActionFeedback('vidaFeedback', 'Vida aplicada com sucesso.');
+      if (type === 'stamina') showActionFeedback('staminaFeedback', 'Stamina aplicada com sucesso.');
+      if (type === 'torpor') showActionFeedback('torporFeedback', 'Variação aplicada com sucesso.');
     }
 
     function actionCost() {
-      let cost = parseFloat(byId('acaoRapida').value) || 0;
+      let cost = getActionCostBase();
       if (hasPerk('trabalho_consciente')) cost *= 0.9;
-      if (hasPerk('agilidade') && byId('acaoRapida').selectedOptions[0].text.toLowerCase().includes('ataque leve')) cost *= 0.9;
+      if (hasPerk('agilidade') && (isActionValue('ataque_distancia') || isActionValue('ataque_distancia_pesado'))) cost *= 0.9;
       return Math.round(cost * 100) / 100;
     }
 
@@ -1117,6 +1151,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const current = num('staminaAtual');
       byId('staminaAtual').value = Math.max(0, current - actionCost());
       updateAll();
+      showActionFeedback('actionFeedback', 'Stamina foi reduzida com sucesso.');
     });
 
     byId('recoverStaminaBtn').addEventListener('click', () => {
@@ -1127,6 +1162,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const amount = Math.round(max * regenPct / 100);
       byId('staminaAtual').value = clamp(num('staminaAtual') + amount, 0, max);
       updateAll();
+      showActionFeedback('staminaFeedback', 'Stamina regenerada com sucesso.');
     });
 
     byId('recoverHpBtn').addEventListener('click', () => {
@@ -1136,6 +1172,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const amount = Math.round(max * regenPct / 100);
       byId('vidaAtual').value = clamp(num('vidaAtual') + amount, 0, max);
       updateAll();
+      showActionFeedback('vidaFeedback', 'Vida regenerada com sucesso.');
     });
 
     byId('dropTorporBtn').addEventListener('click', () => {
@@ -1143,6 +1180,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const drop = Math.round(num('torporAtualMax') * 0.05);
       byId('torporAtual').value = Math.max(0, current - drop);
       updateAll();
+      showActionFeedback('torporFeedback', 'Torpor reduzido com sucesso.');
     });
 
     byId('applyReceivedDamageBtn').addEventListener('click', () => {
@@ -1150,6 +1188,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const danoFinal = Math.max(0, parseFloat(byId('danoRecebidoFinal').value) || 0);
       byId('vidaAtual').value = Math.max(0, vidaAtual - danoFinal);
       updateAll();
+      showActionFeedback('receivedDamageFeedback', 'Dano recebido foi aplicado na vida com sucesso.');
     });
 
     byId('applyDamageToTargetBtn').addEventListener('click', () => {
