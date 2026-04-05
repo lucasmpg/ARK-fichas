@@ -150,13 +150,14 @@ function renderCards() {
       <div><strong>Criaturas:</strong> ${workspace.creatures.length}</div>
       <div><strong>Modo:</strong> ${isAdmin ? 'Admin' : 'Dono'}</div>
     </div>
-    <div class="card-actions"><button type="button" data-open-sheet>Abrir ficha</button></div>
+    <div class="card-actions"><a class="nav-button" data-open-sheet href="./ficha.html">Abrir ficha</a></div>
   `;
-  player.querySelector('[data-open-sheet]').addEventListener('click', () => {
+  const playerLink = player.querySelector('[data-open-sheet]');
+  if (playerLink) {
     const qs = new URLSearchParams({ uid: targetUid });
     if (accessMode === 'admin') qs.set('admin', '1');
-    window.location.href = `./ficha.html?${qs.toString()}`;
-  });
+    playerLink.setAttribute('href', `./ficha.html?${qs.toString()}`);
+  }
   cardsEl.appendChild(player);
 
   workspace.creatures.forEach((creature) => {
@@ -170,17 +171,18 @@ function renderCards() {
         <div><strong>Dono:</strong> ${creature.ownerName || workspace.ownerName || 'Sem dono'}</div>
       </div>
       <div class="card-actions">
-        <button type="button" data-open>Abrir ficha</button>
+        <a class="nav-button" data-open href="./criatura.html">Abrir ficha</a>
         <button type="button" data-transfer>Transferir</button>
         <button type="button" data-delete>Apagar</button>
       </div>
     `;
 
-    card.querySelector('[data-open]').addEventListener('click', () => {
+    const openLink = card.querySelector('[data-open]');
+    if (openLink) {
       const qs = new URLSearchParams({ uid: targetUid, cid: creature.id });
       if (accessMode === 'admin') qs.set('admin', '1');
-      window.location.href = `./criatura.html?${qs.toString()}`;
-    });
+      openLink.setAttribute('href', `./criatura.html?${qs.toString()}`);
+    }
 
     const canManageCreature = canManageWorkspace() || currentUser.uid === creature.ownerUid;
     card.querySelector('[data-transfer]').disabled = !canManageCreature;
