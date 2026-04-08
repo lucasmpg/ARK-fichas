@@ -35,7 +35,7 @@ body {
 }
 
 .login-logo {
-  width: min(92vw, 760px);
+  width: min(92vw, 1000px);
   max-height: 72vh;
   object-fit: contain;
   display: block;
