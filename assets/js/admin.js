@@ -80,7 +80,7 @@ function renderWorkspaceCard(user, workspaceExists) {
       <span class="muted">${workspaceExists ? 'Workspace encontrado' : 'Esse usuário ainda não tem workspace criado'}</span>
     </div>
     <div class="sheet-item-actions">
-      <a class="nav-button" href="./dashboard.html" id="openSelectedDashboardBtn">Abrir dashboard</a>
+      <button type="button" id="openSelectedDashboardBtn">Abrir dashboard</button>
       <button type="button" id="openSelectedSheetBtn">Abrir ficha do player</button>
       ${workspaceExists ? '' : '<button type="button" id="createSelectedSheetBtn">Criar workspace vazio</button>'}
     </div>
