@@ -1,33 +1,41 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Ficha da Criatura</title>
+<link rel="icon" type="image/png" href="../img/fav_rex.png" />
 <link href="../assets/css/app.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="app-shell-header"><div class="authbar card"><div class="authbar-left"><strong id="authStatus">Carregando criatura...</strong><span class="muted" id="authUserInfo"></span></div><div class="authbar-actions"><a class="nav-button" href="./dashboard.html" id="goDashboardBtn">Dashboard</a><a class="nav-button" href="./admin.html" id="goAdminBtn" style="display:none;">Painel do mestre</a><button id="logoutBtn" type="button">Sair</button></div></div></div>
+<div class="app-shell-header"><div class="authbar card"><div class="authbar-left"><strong id="authStatus">Carregando criatura...</strong><span class="muted" id="authUserInfo"></span></div><div class="authbar-actions"><a id="goDashboardBtn" class="button-link" href="./dashboard.html">Dashboard</a><a id="goAdminBtn" class="button-link" href="./admin.html" style="display:none;">Painel do mestre</a><button id="logoutBtn" type="button">Sair</button></div></div></div>
 <div class="wrap">
-<div class="topbar"><div><h1>Ficha de Criatura</h1><div class="subtitle">Campos estruturais protegidos para dono. Admin pode corrigir tudo.</div></div><div class="actions"><button id="shareCreatureBtn" type="button">Compartilhar visualização</button><button id="transferCreatureBtn">Transferir</button><button class="btn-danger" id="deleteCreatureBtn">Apagar criatura</button></div></div>
+<div class="topbar"><div><h1>Ficha de Criatura</h1><div class="subtitle">Campos estruturais protegidos para dono. Admin pode corrigir tudo.</div></div><div class="actions"><button id="shareCreatureBtn">Compartilhar visualização</button><button id="transferCreatureBtn">Transferir</button><button class="btn-danger" id="deleteCreatureBtn">Apagar criatura</button></div></div>
 <div class="grid creature-grid creature-layout">
 <div class="card creature-section creature-section-identity">
 <h2 class="section-title-horizontal">Identidade e bases</h2>
 <div class="row">
 <div><label for="nome">Nome</label><input id="nome" type="text"/></div><div><label for="especie">Espécie</label><input id="especie" type="text"/></div><div><label for="donoNome">Dono</label><input id="donoNome" readonly="" type="text"/></div><div><label for="sexo">Sexo</label><input id="sexo" type="text"/></div><div><label for="nivel">Nível</label><input id="nivel" min="1" type="number" value="1"/></div><div><label for="baseVida">Vida base</label><input id="baseVida" min="0" type="number" value="100"/></div><div><label for="baseDano">Dano base</label><input id="baseDano" min="0" type="number" value="0"/></div><div><label for="baseMovimento">Movimento base</label><input id="baseMovimento" min="0" type="number" value="5"/></div><div><label for="basePeso">Peso base</label><input id="basePeso" min="0" type="number" value="50"/></div><div><label for="pontosPorNivel">Pontos por nível</label><input id="pontosPorNivel" min="0" type="number" value="5"/></div><div><label for="bonusPontos">Ajuste manual de pontos</label><input id="bonusPontos" type="number" value="0"/></div>
 </div>
-<div class="metric-grid left-metrics section-space"><div class="metric"><div class="name">Pontos totais</div><div class="value" id="pontosTotais">0</div><div class="sub">nível × pontos por nível + ajuste manual</div></div><div class="metric"><div class="name">Pontos gastos</div><div class="value" id="pontosGastos">0</div><div class="sub">soft cap automático 50+ custa 2, 80+ custa 3</div></div><div class="metric"><div class="name">Pontos restantes</div><div class="value" id="pontosRestantes">0</div><div class="sub" id="pontosStatus">disponível</div></div></div>
-<div class="section-space"><h2>Atributos</h2><div class="stat-grid" id="creatureAttributes"></div></div>
+<div class="metric-grid left-metrics section-space"><div class="metric"><div class="name">Pontos totais</div><div class="value" id="pontosTotais">0</div><div class="sub">nível × pontos por nível + ajuste manual</div></div><div class="metric"><div class="name">Pontos gastos</div><div class="value" id="pontosGastos">0</div><div class="sub">custos por atributo</div></div><div class="metric"><div class="name">Pontos restantes</div><div class="value" id="pontosRestantes">0</div><div class="sub" id="pontosStatus">disponível</div></div></div>
 </div>
-<div class="card creature-section creature-section-derived">
-<h2>Recursos e derivados</h2>
-<div class="metric-grid compact-metrics"><div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div><div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div><div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div><div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub">corrida = 2× andar</div></div><div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub" id="pesoPenalty"></div></div><div class="metric"><div class="name">Esquiva base</div><div class="value" id="esquivaVal">0</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div><div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div><div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">peso base + atributo peso</div></div><div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">0</div><div class="sub">dano base + força</div></div><div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div></div>
+<div class="card creature-section creature-section-attributes">
+<h2>Atributos</h2>
+<div class="stat-grid" id="creatureAttributes"></div>
+</div>
+<div class="card creature-section creature-section-right">
+<h2>Resumo da criatura</h2>
+<div class="metric-grid left-metrics"><div class="metric"><div class="name">Vida máxima</div><div class="value" id="vidaMax">100</div><div class="sub" id="vidaRegen"></div></div><div class="metric"><div class="name">Torpor máximo</div><div class="value" id="torporMax">100</div><div class="sub" id="torporInfo"></div></div><div class="metric"><div class="name">Stamina máxima</div><div class="value" id="staminaMax">100</div><div class="sub" id="staminaRegen"></div></div><div class="metric"><div class="name">Andar</div><div class="value" id="andarVal">5 m</div><div class="sub" id="pesoPenalty"></div></div><div class="metric"><div class="name">Correr</div><div class="value" id="correrVal">10 m</div><div class="sub">andar × 2</div></div><div class="metric"><div class="name">Esquiva</div><div class="value" id="esquivaVal">0</div><div class="sub">base em destreza</div></div><div class="metric"><div class="name">Furtividade</div><div class="value" id="furtividadeVal">0</div><div class="sub">base 0 + destreza</div></div><div class="metric"><div class="name">Percepção</div><div class="value" id="percepcaoVal">10</div><div class="sub" id="zonaPercepcao"></div></div><div class="metric"><div class="name">Capacidade de carga</div><div class="value" id="capacidadeVal">50 kg</div><div class="sub">peso base + atributo peso</div></div><div class="metric"><div class="name">Dano físico</div><div class="value" id="danoFisicoVal">0</div><div class="sub">dano base + força</div></div><div class="metric"><div class="name">Dano à distância</div><div class="value" id="danoDistVal">+0%</div><div class="sub">destreza</div></div><div class="metric"><div class="name">Oxigênio</div><div class="value" id="oxigenioVal">60 s</div><div class="sub">+5 s por ponto de sabedoria</div></div></div>
 <div class="section-space">
 <h2>Recursos atuais</h2>
-<div class="resource-box"><div><label for="vidaAtual">Vida atual</label><input id="vidaAtual" min="0" type="number" value="100"/></div><div><label for="vidaAtualMax">Máxima</label><input id="vidaAtualMax" readonly=""/></div><div><label for="vidaDelta">Variação</label><input id="vidaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyVidaBtn">Aplicar</button><div class="action-feedback" id="creatureVidaFeedback"></div></div><div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div></div><div class="progress"><div class="bar hp" id="vidaBar"></div></div>
-<div class="resource-box section-space"><div><label for="torporAtual">Torpor atual</label><input id="torporAtual" min="0" type="number" value="0"/></div><div><label for="torporAtualMax">Máximo</label><input id="torporAtualMax" readonly=""/></div><div><label for="torporDelta">Variação</label><input id="torporDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyTorporBtn">Aplicar</button><div class="action-feedback" id="creatureTorporFeedback"></div></div><div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div></div><div class="progress"><div class="bar torpor" id="torporBar"></div></div>
-<div class="resource-box section-space"><div><label for="staminaAtual">Stamina atual</label><input id="staminaAtual" min="0" type="number" value="100"/></div><div><label for="staminaAtualMax">Máxima</label><input id="staminaAtualMax" readonly=""/></div><div><label for="staminaDelta">Variação</label><input id="staminaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyStaminaBtn">Aplicar</button><div class="action-feedback" id="creatureStaminaFeedback"></div></div><div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div></div><div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
+<div class="resource-box"><div><label for="vidaAtual">Vida atual</label><input id="vidaAtual" min="0" type="number" value="100"/></div><div><label for="vidaAtualMax">Máxima</label><input id="vidaAtualMax" readonly=""/></div><div><label for="vidaDelta">Variação</label><input id="vidaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyVidaBtn">Aplicar</button></div><div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div></div><div class="progress"><div class="bar hp" id="vidaBar"></div></div>
+<div class="resource-box section-space"><div><label for="torporAtual">Torpor atual</label><input id="torporAtual" min="0" type="number" value="0"/></div><div><label for="torporAtualMax">Máximo</label><input id="torporAtualMax" readonly=""/></div><div><label for="torporDelta">Variação</label><input id="torporDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyTorporBtn">Aplicar</button></div><div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div></div><div class="progress"><div class="bar torpor" id="torporBar"></div></div>
+<div class="resource-box section-space"><div><label for="staminaAtual">Stamina atual</label><input id="staminaAtual" min="0" type="number" value="100"/></div><div><label for="staminaAtualMax">Máxima</label><input id="staminaAtualMax" readonly=""/></div><div><label for="staminaDelta">Variação</label><input id="staminaDelta" type="number" value="0"/></div><div class="resource-main-action"><button id="applyStaminaBtn">Aplicar</button></div><div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div></div><div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
+<div class="actions section-space creature-stamina-actions">
+  <button id="creatureLightAttackBtn" type="button" data-stamina-cost="10">Ataque leve (-10)</button>
+  <button id="creatureMediumAttackBtn" type="button" data-stamina-cost="15">Ataque médio (-15)</button>
+  <button id="creatureHeavyAttackBtn" type="button" data-stamina-cost="25">Ataque pesado (-25)</button>
+</div>
 <div class="resource-box section-space creature-jump-box">
   <div>
     <label for="creaturePesoAtual">Peso atual</label>
@@ -49,13 +57,20 @@
   </div>
 </div>
 <div class="progress"><div class="bar peso" id="creaturePesoBar"></div></div>
-<div class="progress"><div class="bar peso" id="creaturePesoBar"></div></div>
 </div>
 </div>
 <div class="card creature-section creature-section-calculator">
 <h2>Calculadoras</h2>
-<div class="section-space"><div class="row"><div><label for="danoBaseRolado">Dano rolado</label><input id="danoBaseRolado" type="number" value="0"/></div><div><label for="bonusPercentualExtra">Bônus percentual extra</label><input id="bonusPercentualExtra" type="number" value="0"/></div><div><label for="danoEscalaAttr">Escalonamento do dano</label><select id="danoEscalaAttr"><option value="forca">Força</option><option value="destreza">Destreza</option></select></div><div><label for="rolagemD20">Rolagem d20</label><input id="rolagemD20" max="20" type="number" value="10"/></div><div><label for="danoAplicadoAlvo">Vida atual do alvo</label><input id="danoAplicadoAlvo" type="number" value="0"/></div></div><div class="metric-grid section-space"><div class="metric"><div class="name">Multiplicador do d20</div><div class="value" id="multiD20">100%</div><div class="sub">mesma regra aprovada</div></div><div class="metric"><div class="name">Dano bruto</div><div class="value" id="danoBruto">0</div><div class="sub">base + escalonamentos</div></div><div class="metric"><div class="name">Dano final</div><div class="value" id="danoFinal">0</div><div class="sub">pronto para aplicar</div></div></div><div class="actions section-space"><button id="applyDamageToTargetBtn">Aplicar dano ao alvo</button><div class="action-feedback action-feedback-inline" id="creatureTargetDamageFeedback"></div></div></div>
-<div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button><div class="action-feedback action-feedback-inline" id="creatureReceivedDamageFeedback"></div></div></div>
+<div class="section-space">
+  <div class="row">
+    <div><label for="danoBaseRolado">Dano rolado</label><input id="danoBaseRolado" type="number" value="0"/></div>
+    <div><label for="bonusPercentualExtra">Bônus percentual extra</label><input id="bonusPercentualExtra" type="number" value="0"/></div>
+    <div><label for="rolagemD20">Rolagem d20</label><input id="rolagemD20" max="20" min="1" type="number" value="10"/></div>
+    <div><label for="danoAplicadoAlvo">Vida atual do alvo</label><input id="danoAplicadoAlvo" type="number" value="0"/></div>
+    <div><label for="creatureDamageScaling">Dano com base em</label><select id="creatureDamageScaling"><option value="forca">Força</option><option value="destreza">Destreza</option><option value="nenhum">Nenhum</option></select></div>
+  </div>
+  <div class="metric-grid section-space"><div class="metric"><div class="name">Multiplicador do d20</div><div class="value" id="multiD20">100%</div><div class="sub">mesma regra aprovada</div></div><div class="metric"><div class="name">Dano bruto</div><div class="value" id="danoBruto">0</div><div class="sub">base + escalonamentos</div></div><div class="metric"><div class="name">Dano final</div><div class="value" id="danoFinal">0</div><div class="sub">pronto para aplicar</div></div></div><div class="actions section-space"><button id="applyDamageToTargetBtn">Aplicar dano ao alvo</button></div></div>
+<div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button></div></div>
 </div>
 
 </div>
@@ -89,7 +104,7 @@
 </div>
 </section>
 </div>
-<div class="footer-note">As penalidades de peso e movimento da ficha principal também se aplicam às criaturas.</div><div class="section-space"><h3>Gastar stamina por ataque</h3><div class="actions"><button id="creatureLightAttackBtn" type="button">Ataque leve (-10)</button><button id="creatureMediumAttackBtn" type="button">Ataque médio (-15)</button><button id="creatureHeavyAttackBtn" type="button">Ataque pesado (-25)</button></div><div class="action-feedback action-feedback-inline" id="creatureAttackFeedback"></div></div>
+<div class="footer-note">As penalidades de peso e movimento da ficha principal também se aplicam às criaturas.</div>
 </div><div class="card creature-section creature-section-notes">
 <h2>Anotações</h2>
 <div><label for="notas">Anotações da criatura</label><textarea id="notas"></textarea></div>
@@ -101,19 +116,18 @@
     <h3>Transferir criatura</h3>
     <div>
       <label for="transferTargetUser">Novo dono</label>
-
       <div class="custom-select" data-for="transferTargetUser">
         <select class="select-hidden-native" id="transferTargetUser"></select>
         <button class="custom-select-trigger" type="button">Selecione um usuário</button>
         <div class="custom-select-menu"></div>
       </div>
     </div>
-
     <div class="modal-actions">
       <button id="cancelTransferCreatureBtn" type="button">Cancelar</button>
       <button class="btn-accent" id="confirmTransferCreatureBtn" type="button">Transferir</button>
     </div>
   </div>
+</div>
 <div aria-hidden="true" class="modal-overlay hidden" id="shareCreatureModal">
   <div aria-modal="true" class="modal-box" role="dialog">
     <h3>Compartilhar visualização da criatura</h3>
@@ -122,7 +136,6 @@
     <div class="modal-grid">
       <div>
         <label for="shareTargetUser">Usuário</label>
-
         <div class="custom-select" data-for="shareTargetUser">
           <select class="select-hidden-native" id="shareTargetUser"></select>
           <button class="custom-select-trigger" type="button">Selecione um usuário</button>
