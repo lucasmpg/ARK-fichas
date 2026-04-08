@@ -40,7 +40,7 @@ export async function bindLandingAuth() {
       if (logoutBtn) logoutBtn.style.display = "none";
       if (openFichaBtn) openFichaBtn.style.display = "none";
       if (openAdminBtn) openAdminBtn.style.display = "none";
-      if (userInfo) userInfo.textContent = "Faça login com Google para abrir sua ficha.";
+      if (userInfo) userInfo.textContent = "none";
       return;
     }
 
