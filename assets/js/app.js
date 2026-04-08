@@ -78,9 +78,14 @@ async function bootstrapCloud() {
 
   if (authStatus) authStatus.textContent = admin && targetWorkspaceUid !== firebaseUser.uid ? 'Editando ficha de outro jogador' : (isSharedViewerMode ? 'Visualização compartilhada da ficha' : 'Minha ficha');
   if (authUserInfo) authUserInfo.textContent = `${firebaseUser.displayName || 'Usuário'} • ${firebaseUser.email || ''}`;
-  if (goAdminBtn) goAdminBtn.style.display = admin ? 'inline-block' : 'none';
+  if (goAdminBtn) goAdminBtn.style.display = admin ? 'inline-flex' : 'none';
   if (logoutBtn) logoutBtn.addEventListener('click', async () => { await logout(); window.location.href = '../index.html'; });
-  if (goHomeBtn) { const qs = new URLSearchParams({ uid: targetWorkspaceUid }); if (admin && targetWorkspaceUid !== firebaseUser.uid) qs.set('admin', '1'); if (isSharedViewerMode) qs.set('view', '1'); goHomeBtn.setAttribute('href', `./dashboard.html?${qs.toString()}`); }
+  if (goHomeBtn) {
+    const qs = new URLSearchParams({ uid: targetWorkspaceUid });
+    if (admin && targetWorkspaceUid !== firebaseUser.uid) qs.set('admin', '1');
+    if (isSharedViewerMode) qs.set('view', '1');
+    goHomeBtn.setAttribute('href', `./dashboard.html?${qs.toString()}`);
+  }
   if (goAdminBtn) goAdminBtn.setAttribute('href', './admin.html');
 
   const workspace = await getWorkspace(targetWorkspaceUid);
@@ -457,7 +462,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
     const perkData = {
       forca: [
         { id: 'golpe_firme', nome: 'Golpe Firme', efeito: '+10% de dano em ataques corpo a corpo' },
-        { id: 'impacto_pesado', nome: 'Impacto Pesado', efeito: '+10% de dano com base em Força no ataque pesado ao gastar stamina por ação' },
+        { id: 'impacto_pesado', nome: 'Impacto Pesado', efeito: '+10% de dano em ataque pesado com base em Força' },
         { id: 'derrubar_gigantes', nome: 'Derrubar Gigantes', efeito: '+10% de dano contra criaturas grandes' }
       ],
       destreza: [
@@ -472,7 +477,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       ],
       peso: [
         { id: 'mulinha', nome: 'Mulinha', efeito: '+25 kg de capacidade' },
-        { id: 'organizacao_basica', nome: 'Organização Básica', efeito: '-10% em peso dos itens' },
+        { id: 'organizacao_basica', nome: 'Organização Básica', efeito: '-10% do peso carregado total' },
         { id: 'costas_de_ferro', nome: 'Costas de Ferro', efeito: 'Penalidade de movimento só começa em 90%' }
       ],
       resistencia: [
@@ -492,38 +497,53 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       return Number.isFinite(v) ? v : 0;
     }
     function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
-    const feedbackTimers = {};
-    function showActionFeedback(id, text) {
-      const el = byId(id);
-      if (!el) return;
-      el.textContent = text;
-      el.classList.add('show');
-      clearTimeout(feedbackTimers[id]);
-      feedbackTimers[id] = setTimeout(() => {
-        el.classList.remove('show');
-        el.textContent = '';
-      }, 5000);
-    }
-    function getSelectedActionOption() {
-      const select = byId('acaoRapida');
-      if (!select) return null;
-      return select.options[select.selectedIndex] || null;
-    }
-    function getActionCostBase() {
-      const option = getSelectedActionOption();
-      return parseFloat(option?.dataset.cost || option?.value || 0) || 0;
-    }
-    function isActionValue(actionId) {
-      return (byId('acaoRapida')?.value || '') === actionId;
-    }
-    function numberOrBlank(id, max) {
+
+    function getOptionalIntFieldValue(id, min, max) {
       const field = byId(id);
       if (!field) return null;
       const raw = String(field.value ?? '').trim();
-      if (!raw) return null;
-      const parsed = parseInt(raw, 10);
+      if (raw === '') return null;
+      const parsed = Math.round(parseFloat(raw));
       if (!Number.isFinite(parsed)) return null;
-      return clamp(parsed, 1, max);
+      const value = clamp(parsed, min, max);
+      field.value = value;
+      return value;
+    }
+
+    function currentActionOption() {
+      return byId('acaoRapida')?.selectedOptions?.[0] || null;
+    }
+
+    function currentActionId() {
+      return currentActionOption()?.value || '';
+    }
+
+    function currentActionLabel() {
+      const option = currentActionOption();
+      return option?.dataset.label || option?.textContent || 'Ação';
+    }
+
+    function baseActionCost() {
+      const option = currentActionOption();
+      return Math.max(0, parseFloat(option?.dataset.cost || '0') || 0);
+    }
+
+    function showActionNotice(buttonOrHost, text) {
+      const host = buttonOrHost?.closest?.('.resource-box, .actions') || buttonOrHost;
+      if (!host) return;
+      host.classList.add('action-feedback-host');
+      let notice = host.querySelector('.action-feedback');
+      if (!notice) {
+        notice = document.createElement('div');
+        notice.className = 'action-feedback';
+        host.appendChild(notice);
+      }
+      if (notice._hideTimer) window.clearTimeout(notice._hideTimer);
+      notice.textContent = text;
+      requestAnimationFrame(() => notice.classList.add('is-visible'));
+      notice._hideTimer = window.setTimeout(() => {
+        notice.classList.remove('is-visible');
+      }, 5000);
     }
 
     function inventorySlotCount() {
@@ -612,7 +632,7 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
         const rowTotal = qty * unit;
         totalEl.value = rowTotal.toFixed(2).replace(/\.00$/, '');
         if (desc) used += 1;
-        totalWeight += hasPerk('organizacao_basica') ? rowTotal * 0.9 : rowTotal;
+        totalWeight += rowTotal;
       }
       return { used, totalWeight, totalSlots, free: Math.max(0, totalSlots - used) };
     }
@@ -620,11 +640,14 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
     function inventoryTotals() {
       const character = collectStorageTotals(inventorySlotCount(), inventoryValueKey);
       const backpack = backpackEnabled() ? collectStorageTotals(backpackSlotCount(), backpackValueKey) : { used: 0, totalWeight: 0, totalSlots: 0, free: 0 };
+      const rawTotalWeight = character.totalWeight + backpack.totalWeight;
+      const totalWeight = hasPerk('organizacao_basica') ? rawTotalWeight * 0.9 : rawTotalWeight;
       return {
         character,
         backpack,
         used: character.used + backpack.used,
-        totalWeight: character.totalWeight + backpack.totalWeight,
+        totalWeight,
+        rawTotalWeight,
         totalSlots: character.totalSlots + backpack.totalSlots,
         free: character.free + backpack.free
       };
@@ -1060,16 +1083,17 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId('armaScaleValue').textContent = `+${escalaPercentual}%`;
       byId('armaScaleText').textContent = armaEscala === 'forca' ? 'escala por Força' : armaEscala === 'destreza' ? 'escala por Destreza' : 'sem escalonamento';
 
-      const roll = numberOrBlank('rolagemD20', 20);
-      const mult = roll == null ? 1 : d20Multiplier(roll);
-      byId('multiD20').textContent = roll == null ? '—' : `${Math.round(mult * 100)}%`;
+      const rollInput = getOptionalIntFieldValue('rolagemD20', 1, 20);
+      const roll = rollInput ?? 11;
+      const mult = d20Multiplier(roll);
+      byId('multiD20').textContent = `${Math.round(mult * 100)}%`;
 
       const dadoBase = Math.max(0, num('danoBaseRolado'));
       const bonusArma = num('armaBonus');
       const extra = num('efeitoExtra');
       const bonusPercentualExtra = num('bonusPercentualExtra');
       let perkDamageBonus = 0;
-      if (hasPerk('impacto_pesado') && isActionValue('ataque_pesado') && armaEscala === 'forca') perkDamageBonus += 10;
+      if (hasPerk('impacto_pesado') && currentActionId() === 'ataque_pesado') perkDamageBonus += 10;
       if (hasPerk('derrubar_gigantes') && byId('tamanhoAlvo').value === 'grande') perkDamageBonus += 10;
       const percentualTotal = escalaPercentual + bonusPercentualExtra + perkDamageBonus;
       const baseSemMult = dadoBase + bonusArma + extra;
@@ -1084,15 +1108,16 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       if (postura === 'defensiva') damageReduction = clamp(damageReduction + 50, 0, 95);
 
       const danoRecebidoBruto = Math.max(0, num('danoRecebidoBruto'));
-      const rolagemEsquiva = numberOrBlank('rolagemEsquiva', 100);
+      const rolagemEsquivaInput = getOptionalIntFieldValue('rolagemEsquiva', 1, 100);
+      const rolagemEsquiva = rolagemEsquivaInput ?? 1;
       const penalidadeEsquiva = num('penalidadeEsquiva');
       const esquivaAtiva = postura === 'esquiva';
       let formulaEsquivaValor = 0;
       if (esquivaAtiva) {
         if (armadura === 'leve') {
-          formulaEsquivaValor = ((rolagemEsquiva ?? 0) / 2) + (destreza / 2);
+          formulaEsquivaValor = (rolagemEsquiva / 2) + (destreza / 2);
         } else if (armadura === 'media') {
-          formulaEsquivaValor = ((rolagemEsquiva ?? 0) / 4) + (destreza / 4);
+          formulaEsquivaValor = (rolagemEsquiva / 4) + (destreza / 4);
         } else {
           formulaEsquivaValor = 0;
         }
@@ -1117,8 +1142,8 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId('vidaAposDanoRecebido').value = vidaAposDanoRecebido.toFixed(2).replace(/\.00$/, '');
       byId('esquivaCalc').textContent = esquivaCalc;
       byId('esquivaBox').style.display = esquivaAtiva ? 'block' : 'none';
-      byId('formulaEsquiva').value = rolagemEsquiva == null ? '' : formulaEsquivaValor.toFixed(2).replace(/\.00$/, '');
-      byId('danoEsquivado').value = rolagemEsquiva == null ? '' : danoEsquivado.toFixed(2).replace(/\.00$/, '');
+      byId('formulaEsquiva').value = formulaEsquivaValor.toFixed(2).replace(/\.00$/, '');
+      byId('danoEsquivado').value = danoEsquivado.toFixed(2).replace(/\.00$/, '');
       byId('applyReceivedDamageBtn').disabled = danoRecebidoBruto <= 0;
       byId('ataqueResumo').textContent = `${byId('armaNome').value || 'Arma'} (${byId('armaDado').value || '-'})`;
 
@@ -1135,26 +1160,36 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       byId(currentId).value = clamp(current + delta, 0, max);
       byId(deltaId).value = 0;
       updateAll();
-      if (type === 'vida') showActionFeedback('vidaFeedback', 'Vida aplicada com sucesso.');
-      if (type === 'stamina') showActionFeedback('staminaFeedback', 'Stamina aplicada com sucesso.');
-      if (type === 'torpor') showActionFeedback('torporFeedback', 'Variação aplicada com sucesso.');
     }
 
+    byId('applyVidaBtn')?.addEventListener('click', (event) => {
+      window.applyDelta('vida');
+      showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
+    });
+    byId('applyTorporBtn')?.addEventListener('click', (event) => {
+      window.applyDelta('torpor');
+      showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
+    });
+    byId('applyStaminaBtn')?.addEventListener('click', (event) => {
+      window.applyDelta('stamina');
+      showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
+    });
+
     function actionCost() {
-      let cost = getActionCostBase();
+      let cost = baseActionCost();
       if (hasPerk('trabalho_consciente')) cost *= 0.9;
-      if (hasPerk('agilidade') && (isActionValue('ataque_distancia') || isActionValue('ataque_distancia_pesado'))) cost *= 0.9;
+      if (hasPerk('agilidade') && ['ataque_distancia', 'ataque_distancia_pesado'].includes(currentActionId())) cost *= 0.9;
       return Math.round(cost * 100) / 100;
     }
 
-    byId('useActionBtn').addEventListener('click', () => {
+    byId('useActionBtn').addEventListener('click', (event) => {
       const current = num('staminaAtual');
       byId('staminaAtual').value = Math.max(0, current - actionCost());
       updateAll();
-      showActionFeedback('actionFeedback', 'Stamina foi reduzida com sucesso.');
+      showActionNotice(event.currentTarget, `${currentActionLabel()}: stamina reduzida com sucesso.`);
     });
 
-    byId('recoverStaminaBtn').addEventListener('click', () => {
+    byId('recoverStaminaBtn').addEventListener('click', (event) => {
       const max = num('staminaAtualMax');
       const resistencia = num('resistencia');
       let regenPct = 5 + Math.floor(resistencia / 10);
@@ -1162,40 +1197,41 @@ const STORAGE_KEY = 'ark-rpg-ficha-tabs-v1';
       const amount = Math.round(max * regenPct / 100);
       byId('staminaAtual').value = clamp(num('staminaAtual') + amount, 0, max);
       updateAll();
-      showActionFeedback('staminaFeedback', 'Stamina regenerada com sucesso.');
+      showActionNotice(event.currentTarget, 'Stamina regenerada com sucesso.');
     });
 
-    byId('recoverHpBtn').addEventListener('click', () => {
+    byId('recoverHpBtn').addEventListener('click', (event) => {
       const max = num('vidaAtualMax');
       const constituicao = num('constituicao');
       let regenPct = 2 + Math.floor(constituicao / 10);
       const amount = Math.round(max * regenPct / 100);
       byId('vidaAtual').value = clamp(num('vidaAtual') + amount, 0, max);
       updateAll();
-      showActionFeedback('vidaFeedback', 'Vida regenerada com sucesso.');
+      showActionNotice(event.currentTarget, 'Vida regenerada com sucesso.');
     });
 
-    byId('dropTorporBtn').addEventListener('click', () => {
+    byId('dropTorporBtn').addEventListener('click', (event) => {
       const current = num('torporAtual');
       const drop = Math.round(num('torporAtualMax') * 0.05);
       byId('torporAtual').value = Math.max(0, current - drop);
       updateAll();
-      showActionFeedback('torporFeedback', 'Torpor reduzido com sucesso.');
+      showActionNotice(event.currentTarget, 'Torpor reduzido com sucesso.');
     });
 
-    byId('applyReceivedDamageBtn').addEventListener('click', () => {
+    byId('applyReceivedDamageBtn').addEventListener('click', (event) => {
       const vidaAtual = num('vidaAtual');
       const danoFinal = Math.max(0, parseFloat(byId('danoRecebidoFinal').value) || 0);
       byId('vidaAtual').value = Math.max(0, vidaAtual - danoFinal);
       updateAll();
-      showActionFeedback('receivedDamageFeedback', 'Dano recebido foi aplicado na vida com sucesso.');
+      showActionNotice(event.currentTarget, 'Dano recebido aplicado na vida com sucesso.');
     });
 
-    byId('applyDamageToTargetBtn').addEventListener('click', () => {
+    byId('applyDamageToTargetBtn').addEventListener('click', (event) => {
       const vidaAlvoAtual = Math.max(0, num('danoAplicadoAlvo'));
       const danoFinal = Math.max(0, parseFloat(byId('danoFinal').textContent.replace(',', '.')) || 0);
       byId('danoAplicadoAlvo').value = Math.max(0, vidaAlvoAtual - danoFinal).toFixed(2).replace(/\.00$/, '');
       updateAll();
+      showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
     });
 
     if (byId('exportBtn')) byId('exportBtn').addEventListener('click', () => {
