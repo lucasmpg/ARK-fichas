@@ -93,3 +93,23 @@ html, body {
   .authbar, .sheet-item { flex-direction: column; align-items: stretch; }
   .app-shell-header, .page-shell { padding: 14px; }
 }
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(180deg, rgba(13,42,61,.96), rgba(8,22,35,.96));
+  border: 1px solid rgba(105,223,255,.34);
+  color: #7de7ff;
+  cursor: pointer;
+}
+.button-link:hover { filter: brightness(1.06); }
+.button-link[style*="display:none"] { display:none !important; }
