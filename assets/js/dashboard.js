@@ -142,6 +142,8 @@ function renderCards() {
 
   const player = document.createElement('div');
   player.className = 'card-mini';
+  const playerQs = new URLSearchParams({ uid: targetUid });
+  if (accessMode === 'admin') playerQs.set('admin', '1');
   player.innerHTML = `
     <h2>Minha ficha</h2>
     <div class="meta-stack">
@@ -150,14 +152,8 @@ function renderCards() {
       <div><strong>Criaturas:</strong> ${workspace.creatures.length}</div>
       <div><strong>Modo:</strong> ${isAdmin ? 'Admin' : 'Dono'}</div>
     </div>
-    <div class="card-actions"><a class="nav-button" data-open-sheet href="./ficha.html">Abrir ficha</a></div>
+    <div class="card-actions"><a class="card-action-link" data-open-sheet href="./ficha.html?${playerQs.toString()}">Abrir ficha</a></div>
   `;
-  const playerLink = player.querySelector('[data-open-sheet]');
-  if (playerLink) {
-    const qs = new URLSearchParams({ uid: targetUid });
-    if (accessMode === 'admin') qs.set('admin', '1');
-    playerLink.setAttribute('href', `./ficha.html?${qs.toString()}`);
-  }
   cardsEl.appendChild(player);
 
   workspace.creatures.forEach((creature) => {
@@ -171,18 +167,11 @@ function renderCards() {
         <div><strong>Dono:</strong> ${creature.ownerName || workspace.ownerName || 'Sem dono'}</div>
       </div>
       <div class="card-actions">
-        <a class="nav-button" data-open href="./criatura.html">Abrir ficha</a>
+        <a class="card-action-link" data-open href="./criatura.html?${(() => { const qs = new URLSearchParams({ uid: targetUid, cid: creature.id }); if (accessMode === 'admin') qs.set('admin', '1'); return qs.toString(); })()}">Abrir ficha</a>
         <button type="button" data-transfer>Transferir</button>
         <button type="button" data-delete>Apagar</button>
       </div>
     `;
-
-    const openLink = card.querySelector('[data-open]');
-    if (openLink) {
-      const qs = new URLSearchParams({ uid: targetUid, cid: creature.id });
-      if (accessMode === 'admin') qs.set('admin', '1');
-      openLink.setAttribute('href', `./criatura.html?${qs.toString()}`);
-    }
 
     const canManageCreature = canManageWorkspace() || currentUser.uid === creature.ownerUid;
     card.querySelector('[data-transfer]').disabled = !canManageCreature;
@@ -248,6 +237,7 @@ async function createCreature() {
     stats: { forca: 0, constituicao: 0, destreza: 0, inteligencia: 0, sabedoria: 0, carisma: 0, peso: 0, resistencia: 0 },
     current: { vidaAtual: template.baseVida, torporAtual: 0, staminaAtual: 100 },
     inventory: { slotsBase: 5, slotsExtra: 0, items: [] },
+    damageScaling: 'forca',
     sharedViewers: [],
     notes: '',
     adminNotas: ''
@@ -259,7 +249,6 @@ async function createCreature() {
   document.getElementById('newCreatureName').value = '';
   renderCards();
   statusEl.textContent = 'Criatura criada com sucesso.';
-}
 
 async function transferCreature() {
   const newUid = transferTargetUser.value;
@@ -328,14 +317,12 @@ async function init() {
   await loadUsers();
   renderCards();
 
-  document.getElementById('goHomeBtn').addEventListener('click', () => window.location.href = '../index.html');
-  document.getElementById('goPlayerSheetBtn').addEventListener('click', () => {
-    const qs = new URLSearchParams({ uid: targetUid });
-    if (accessMode === 'admin') qs.set('admin', '1');
-    window.location.href = `./ficha.html?${qs.toString()}`;
-  });
-  document.getElementById('goAdminBtn').style.display = admin ? 'inline-block' : 'none';
-  document.getElementById('goAdminBtn').addEventListener('click', () => window.location.href = './admin.html');
+  document.getElementById('goHomeBtn').setAttribute('href', '../index.html');
+  const topSheetQs = new URLSearchParams({ uid: targetUid });
+  if (accessMode === 'admin') topSheetQs.set('admin', '1');
+  document.getElementById('goPlayerSheetBtn').setAttribute('href', `./ficha.html?${topSheetQs.toString()}`);
+  document.getElementById('goAdminBtn').style.display = admin ? 'inline-flex' : 'none';
+  document.getElementById('goAdminBtn').setAttribute('href', './admin.html');
   document.getElementById('logoutBtn').addEventListener('click', async () => { await logout(); window.location.href = '../index.html'; });
 
   document.getElementById('cancelCreateCreatureBtn').addEventListener('click', () => closeModal(createModal));
