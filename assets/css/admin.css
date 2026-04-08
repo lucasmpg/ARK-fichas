@@ -89,7 +89,8 @@ body {
   flex-wrap: wrap;
 }
 
-button {
+button,
+.button-link {
   min-height: 44px;
   border-radius: 12px;
   text-transform: uppercase;
@@ -102,9 +103,14 @@ button {
   padding: 10px 16px;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-button:hover {
+button:hover,
+.button-link:hover {
   transform: translateY(-1px);
   border-color: rgba(125, 231, 255, 0.6);
   box-shadow: 0 0 0 1px rgba(125, 231, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.22);
