@@ -33,12 +33,10 @@ export async function bindLandingAuth() {
     }
   });
   if (logoutBtn) logoutBtn.addEventListener("click", async () => logout());
-  if (openFichaBtn) openFichaBtn.addEventListener("click", () => window.location.href = "./pages/dashboard.html");
-  if (openAdminBtn) openAdminBtn.addEventListener("click", () => window.location.href = "./pages/admin.html");
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      if (loginBtn) loginBtn.style.display = "inline-block";
+      if (loginBtn) loginBtn.style.display = "inline-flex";
       if (logoutBtn) logoutBtn.style.display = "none";
       if (openFichaBtn) openFichaBtn.style.display = "none";
       if (openAdminBtn) openAdminBtn.style.display = "none";
@@ -48,18 +46,19 @@ export async function bindLandingAuth() {
 
     await upsertUserProfile(user);
     if (loginBtn) loginBtn.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "inline-flex";
+    if (openFichaBtn) openFichaBtn.style.display = "inline-flex";
+    if (userInfo) userInfo.textContent = `${user.displayName || "Usuário"} • ${user.email || ""}`;
+
+    const admin = isAdminUser(user);
+    if (openAdminBtn) openAdminBtn.style.display = admin ? "inline-flex" : "none";
+    if (adminHint) adminHint.textContent = admin
+      ? "Seu e-mail está cadastrado como administrador."
+      : "Seu e-mail ainda não está cadastrado como administrador.";
+
     if (window.location.pathname.endsWith("/index.html") || window.location.pathname === "/") {
       window.location.href = "./pages/dashboard.html";
       return;
     }
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
-    if (openFichaBtn) openFichaBtn.style.display = "inline-block";
-    if (userInfo) userInfo.textContent = `${user.displayName || "Usuário"} • ${user.email || ""}`;
-
-    const admin = isAdminUser(user);
-    if (openAdminBtn) openAdminBtn.style.display = admin ? "inline-block" : "none";
-    if (adminHint) adminHint.textContent = admin
-      ? "Seu e-mail está cadastrado como administrador."
-      : "Seu e-mail ainda não está cadastrado como administrador.";
   });
 }
