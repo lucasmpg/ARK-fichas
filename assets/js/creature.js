@@ -35,21 +35,36 @@ const qp = (name) => new URLSearchParams(window.location.search).get(name);
 const byId = (id) => document.getElementById(id);
 const num = (id) => parseFloat(byId(id)?.value || 0) || 0;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const getOptionalIntFieldValue = (id, min, max) => {
+  const field = byId(id);
+  if (!field) return null;
+  const raw = String(field.value ?? '').trim();
+  if (raw === '') return null;
+  const parsed = Math.round(parseFloat(raw));
+  if (!Number.isFinite(parsed)) return null;
+  const value = clamp(parsed, min, max);
+  field.value = value;
+  return value;
+};
 const clone = (value) => JSON.parse(JSON.stringify(value));
-const feedbackTimers = {};
-function showActionFeedback(id, text) {
-  const el = byId(id);
-  if (!el) return;
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(feedbackTimers[id]);
-  feedbackTimers[id] = setTimeout(() => {
-    el.classList.remove('show');
-    el.textContent = '';
-  }, 5000);
-}
 const closeModal = (modal) => { modal.classList.add('hidden'); modal.setAttribute('aria-hidden', 'true'); closeAllCustomSelects(); };
 const openModal = (modal) => { modal.classList.remove('hidden'); modal.setAttribute('aria-hidden', 'false'); };
+
+function showActionNotice(buttonOrHost, text) {
+  const host = buttonOrHost?.closest?.('.resource-box, .actions') || buttonOrHost;
+  if (!host) return;
+  host.classList.add('action-feedback-host');
+  let notice = host.querySelector('.action-feedback');
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.className = 'action-feedback';
+    host.appendChild(notice);
+  }
+  if (notice._hideTimer) window.clearTimeout(notice._hideTimer);
+  notice.textContent = text;
+  requestAnimationFrame(() => notice.classList.add('is-visible'));
+  notice._hideTimer = window.setTimeout(() => notice.classList.remove('is-visible'), 5000);
+}
 
 function closeAllCustomSelects(exceptSelect = null) {
   document.querySelectorAll('.custom-select.open').forEach((host) => {
@@ -193,7 +208,6 @@ function saveCreatureToWorkspace() {
   creature.sexo = byId('sexo').value.trim();
   creature.pontosPorNivel = Math.max(0, num('pontosPorNivel'));
   creature.bonusPontos = num('bonusPontos');
-  creature.danoEscalaAttr = byId('danoEscalaAttr')?.value || creature.danoEscalaAttr || 'forca';
   creature.stats = creature.stats || {};
   attrs.forEach((attr) => { creature.stats[attr.id] = clamp(Math.round(num(attr.id)), 0, 100); });
   creature.inventory = creature.inventory || { slotsBase: 5, items: [] };
@@ -206,6 +220,7 @@ function saveCreatureToWorkspace() {
       unit: parseFloat(byId(inventoryKey(i,'unit'))?.value || 0) || 0
     });
   }
+  creature.damageScaling = byId('creatureDamageScaling')?.value || creature.damageScaling || 'forca';
   creature.sharedViewers = normalizeSharedViewers(creature.sharedViewers);
   creature.current = {
     vidaAtual: clamp(num('vidaAtual'), 0, Math.max(0, parseFloat(byId('vidaAtualMax').value || 0))),
@@ -255,7 +270,6 @@ function applyCreatureToForm() {
   byId('basePeso').value = creature.basePeso ?? 50;
   byId('pontosPorNivel').value = creature.pontosPorNivel ?? 5;
   byId('bonusPontos').value = creature.bonusPontos ?? 0;
-  if (byId('danoEscalaAttr')) byId('danoEscalaAttr').value = creature.danoEscalaAttr || 'forca';
   attrs.forEach((attr) => { byId(attr.id).value = creature.stats?.[attr.id] ?? 0; });
   byId('vidaAtual').value = creature.current?.vidaAtual ?? creature.baseVida ?? 100;
   byId('torporAtual').value = creature.current?.torporAtual ?? 0;
@@ -263,6 +277,7 @@ function applyCreatureToForm() {
   byId('notas').value = creature.notes || '';
   byId('adminNotas').value = creature.adminNotas || '';
   byId('inventorySlotsBase').value = creature.inventory?.slotsBase || 5;
+  byId('creatureDamageScaling').value = creature.damageScaling || 'forca';
   createInventoryRows(true);
   const items = Array.isArray(creature.inventory?.items) ? creature.inventory.items : [];
   items.forEach((item, index) => {
@@ -451,17 +466,19 @@ byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
   updateBars('torporAtual', torporMax, 'torporBar');
   updateBars('staminaAtual', staminaMax, 'staminaBar');
 
-  const danoEscalaAttr = byId('danoEscalaAttr')?.value || creature?.danoEscalaAttr || 'forca';
-  const danoEscalonadoPct = danoEscalaAttr === 'destreza' ? danoDistancia : danoFisicoPercent;
-  const rollRaw = String(byId('rolagemD20')?.value || '').trim();
-  const roll = rollRaw ? clamp(Math.round(num('rolagemD20')), 1, 20) : null;
-  const multiplier = roll == null ? 1 : d20Multiplier(roll);
+  const rollInput = getOptionalIntFieldValue('rolagemD20', 1, 20);
+  const roll = rollInput ?? 10;
+  const multiplier = d20Multiplier(roll);
   const danoBaseRolado = Math.max(0, num('danoBaseRolado'));
   const extraPct = num('bonusPercentualExtra');
-  const danoBruto = (danoBaseRolado + baseDano) * (1 + (danoEscalonadoPct + extraPct) / 100) * multiplier;
-  byId('multiD20').textContent = roll == null ? '—' : `${Math.round(multiplier * 100)}%`;
+  const damageScaling = byId('creatureDamageScaling')?.value || creature?.damageScaling || 'forca';
+  const scalePercent = damageScaling === 'forca' ? danoFisicoPercent : damageScaling === 'destreza' ? danoDistancia : 0;
+  const danoBruto = (danoBaseRolado + baseDano) * (1 + (scalePercent + extraPct) / 100) * multiplier;
+  byId('multiD20').textContent = `${Math.round(multiplier * 100)}%`;
   byId('danoBruto').textContent = danoBruto.toFixed(2).replace(/\.00$/, '');
   byId('danoFinal').textContent = danoBruto.toFixed(2).replace(/\.00$/, '');
+  const damageScaleModeText = damageScaling === 'forca' ? 'força' : damageScaling === 'destreza' ? 'destreza' : 'sem escalonamento';
+  byId('danoBruto').parentElement.querySelector('.sub').textContent = `base + escalonamentos (${damageScaleModeText})`;
 
   const danoRecebidoBruto = Math.max(0, num('danoRecebidoBruto'));
   const reducao = clamp(num('reducaoArmadura'), 0, 100);
@@ -553,8 +570,11 @@ async function init() {
       ? 'Visualização compartilhada da criatura'
       : 'Ficha da criatura';
   byId('authUserInfo').textContent = `${currentUser.displayName || 'Usuário'} • ${currentUser.email || ''}`;
-  byId('goAdminBtn').style.display = admin ? 'inline-block' : 'none';
-  byId('goDashboardBtn').setAttribute('href', `./dashboard.html?${new URLSearchParams({ uid: workspaceUid, ...(canAdminEdit && workspaceUid !== currentUser.uid ? { admin: '1' } : {}), ...(isViewerMode ? { view: '1' } : {}) }).toString()}`);
+  byId('goAdminBtn').style.display = admin ? 'inline-flex' : 'none';
+  const dashboardQs = new URLSearchParams({ uid: workspaceUid });
+  if (canAdminEdit && workspaceUid !== currentUser.uid) dashboardQs.set('admin', '1');
+  if (isViewerMode) dashboardQs.set('view', '1');
+  byId('goDashboardBtn').setAttribute('href', `./dashboard.html?${dashboardQs.toString()}`);
   byId('goAdminBtn').setAttribute('href', './admin.html');
   byId('logoutBtn').addEventListener('click', async () => { await logout(); window.location.href = '../index.html'; });
 
@@ -597,63 +617,72 @@ async function init() {
     persistCreature();
   });
 
-  byId('applyVidaBtn').addEventListener('click', () => {
+  byId('applyVidaBtn').addEventListener('click', (event) => {
     byId('vidaAtual').value = clamp(num('vidaAtual') + num('vidaDelta'), 0, parseFloat(byId('vidaAtualMax').value || 0));
     byId('vidaDelta').value = 0;
     updateAll();
-    showActionFeedback('creatureVidaFeedback', 'Vida aplicada com sucesso.');
+    showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('applyTorporBtn').addEventListener('click', () => {
+  byId('applyTorporBtn').addEventListener('click', (event) => {
     byId('torporAtual').value = clamp(num('torporAtual') + num('torporDelta'), 0, parseFloat(byId('torporAtualMax').value || 0));
     byId('torporDelta').value = 0;
     updateAll();
-    showActionFeedback('creatureTorporFeedback', 'Variação aplicada com sucesso.');
+    showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('applyStaminaBtn').addEventListener('click', () => {
+  byId('applyStaminaBtn').addEventListener('click', (event) => {
     byId('staminaAtual').value = clamp(num('staminaAtual') + num('staminaDelta'), 0, parseFloat(byId('staminaAtualMax').value || 0));
     byId('staminaDelta').value = 0;
     updateAll();
-    showActionFeedback('creatureStaminaFeedback', 'Stamina aplicada com sucesso.');
+    showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('recoverHpBtn').addEventListener('click', () => {
+  byId('recoverHpBtn').addEventListener('click', (event) => {
     byId('vidaAtual').value = clamp(num('vidaAtual') + Math.round(parseFloat(byId('vidaAtualMax').value || 0) * ((2 + Math.floor(num('constituicao') / 10)) / 100)), 0, parseFloat(byId('vidaAtualMax').value || 0));
     updateAll();
-    showActionFeedback('creatureVidaFeedback', 'Vida regenerada com sucesso.');
+    showActionNotice(event.currentTarget, 'Vida regenerada com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('recoverStaminaBtn').addEventListener('click', () => {
+  byId('recoverStaminaBtn').addEventListener('click', (event) => {
     byId('staminaAtual').value = clamp(num('staminaAtual') + Math.round(parseFloat(byId('staminaAtualMax').value || 0) * ((5 + Math.floor(num('resistencia') / 10)) / 100)), 0, parseFloat(byId('staminaAtualMax').value || 0));
     updateAll();
-    showActionFeedback('creatureStaminaFeedback', 'Stamina regenerada com sucesso.');
+    showActionNotice(event.currentTarget, 'Stamina regenerada com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('dropTorporBtn').addEventListener('click', () => {
+  byId('dropTorporBtn').addEventListener('click', (event) => {
     byId('torporAtual').value = Math.max(0, num('torporAtual') - Math.round(parseFloat(byId('torporAtualMax').value || 0) * 0.05));
     updateAll();
-    showActionFeedback('creatureTorporFeedback', 'Torpor reduzido com sucesso.');
+    showActionNotice(event.currentTarget, 'Torpor reduzido com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('applyReceivedDamageBtn').addEventListener('click', () => {
+  byId('applyReceivedDamageBtn').addEventListener('click', (event) => {
     byId('vidaAtual').value = Math.max(0, num('vidaAtual') - parseFloat(byId('danoRecebidoFinal').value || 0));
     updateAll();
-    showActionFeedback('creatureReceivedDamageFeedback', 'Dano recebido foi aplicado na vida com sucesso.');
+    showActionNotice(event.currentTarget, 'Dano recebido aplicado na vida com sucesso.');
     if (canEdit || canAdminEdit) persistCreature();
   });
-  byId('applyDamageToTargetBtn').addEventListener('click', () => {
+  byId('applyDamageToTargetBtn').addEventListener('click', (event) => {
     byId('danoAplicadoAlvo').value = Math.max(0, num('danoAplicadoAlvo') - parseFloat(byId('danoFinal').textContent || 0)).toFixed(2).replace(/\.00$/, '');
-    showActionFeedback('creatureTargetDamageFeedback', 'Dano aplicado com sucesso.');
+    showActionNotice(event.currentTarget, 'Variação aplicada com sucesso.');
   });
 
-  [['creatureLightAttackBtn', 10, 'leve'], ['creatureMediumAttackBtn', 15, 'médio'], ['creatureHeavyAttackBtn', 25, 'pesado']].forEach(([id, cost, label]) => {
-    byId(id)?.addEventListener('click', async () => {
+  ['creatureLightAttackBtn', 'creatureMediumAttackBtn', 'creatureHeavyAttackBtn'].forEach((id) => {
+    byId(id)?.addEventListener('click', async (event) => {
+      if (!(canEdit || canAdminEdit)) return;
+      const cost = Math.max(0, parseFloat(event.currentTarget.dataset.staminaCost || '0') || 0);
       byId('staminaAtual').value = Math.max(0, num('staminaAtual') - cost);
       updateAll();
-      showActionFeedback('creatureAttackFeedback', `Stamina foi reduzida com sucesso no ataque ${label}.`);
-      if (canEdit || canAdminEdit) await persistCreature();
+      showActionNotice(event.currentTarget, 'Stamina reduzida com sucesso.');
+      await persistCreature();
     });
+  });
+
+  byId('jumpToCreatureInventoryBtn')?.addEventListener('click', () => {
+    document.querySelector('.creature-section-inventory')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  byId('jumpToCreatureMovementBtn')?.addEventListener('click', () => {
+    document.querySelector('.creature-section-right')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   byId('deleteCreatureBtn').addEventListener('click', async () => {
