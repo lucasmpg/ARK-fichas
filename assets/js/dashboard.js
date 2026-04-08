@@ -249,7 +249,7 @@ async function createCreature() {
   document.getElementById('newCreatureName').value = '';
   renderCards();
   statusEl.textContent = 'Criatura criada com sucesso.';
-
+}
 async function transferCreature() {
   const newUid = transferTargetUser.value;
   if (!pendingTransferCreatureId || !newUid) return;
