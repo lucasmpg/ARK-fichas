@@ -5,6 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Ficha ARK RPG</title>
+  <link rel="icon" type="image/png" href="../img/fav_rex.png" />
 <link href="../assets/css/app.css" rel="stylesheet"/>
 </head>
 <body>
@@ -15,8 +16,8 @@
 <span class="muted" id="authUserInfo"></span>
 </div>
 <div class="authbar-actions">
-<a class="nav-button" href="./dashboard.html" id="goHomeBtn">Início</a>
-<a class="nav-button" href="./admin.html" id="goAdminBtn" style="display:none;">Painel do mestre</a>
+<a id="goHomeBtn" class="button-link" href="../index.html">Início</a>
+<a id="goAdminBtn" class="button-link" href="./admin.html" style="display:none;">Painel do mestre</a>
 <button id="logoutBtn" type="button">Sair</button>
 </div>
 </div>
@@ -218,7 +219,7 @@
 <div><label>Vida atual</label><input data-save="" id="vidaAtual" min="0" type="number" value="100"/></div>
 <div><label>Máxima</label><input id="vidaAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="vidaDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button><div class="action-feedback" id="vidaFeedback"></div></div>
+<div class="resource-main-action"><button onclick="applyDelta('vida')">Aplicar</button></div>
 <div class="resource-side-action"><button id="recoverHpBtn">Regenerar</button></div>
 </div>
 <div class="progress"><div class="bar hp" id="vidaBar"></div></div>
@@ -226,7 +227,7 @@
 <div><label>Torpor atual</label><input data-save="" id="torporAtual" min="0" type="number" value="0"/></div>
 <div><label>Máximo</label><input id="torporAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="torporDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button><div class="action-feedback" id="torporFeedback"></div></div>
+<div class="resource-main-action"><button onclick="applyDelta('torpor')">Aplicar</button></div>
 <div class="resource-side-action"><button id="dropTorporBtn">Reduzir</button></div>
 </div>
 <div class="progress"><div class="bar torpor" id="torporBar"></div></div>
@@ -234,7 +235,7 @@
 <div><label>Stamina atual</label><input data-save="" id="staminaAtual" min="0" type="number" value="100"/></div>
 <div><label>Máxima</label><input id="staminaAtualMax" readonly=""/></div>
 <div><label>Variação</label><input id="staminaDelta" type="number" value="0"/></div>
-<div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button><div class="action-feedback" id="staminaFeedback"></div></div>
+<div class="resource-main-action"><button onclick="applyDelta('stamina')">Aplicar</button></div>
 <div class="resource-side-action"><button id="recoverStaminaBtn">Regenerar</button></div>
 </div>
 <div class="progress"><div class="bar stamina" id="staminaBar"></div></div>
@@ -273,23 +274,22 @@
 <div>
 <label for="acaoRapida">Consumir stamina por ação</label>
 <select id="acaoRapida">
-<option data-cost="0" value="andar">Andar (0)</option>
-<option data-cost="5" value="correr">Correr (5)</option>
-<option data-cost="10" value="ataque_leve">Ataque leve (10)</option>
-<option data-cost="15" value="ataque_medio">Ataque médio (15)</option>
-<option data-cost="25" value="ataque_pesado">Ataque pesado (25)</option>
-<option data-cost="12" value="ataque_distancia">Ataque à distância (12)</option>
-<option data-cost="18" value="ataque_distancia_pesado">Ataque à distância pesado (18)</option>
-<option data-cost="10" value="postura_defensiva">Postura defensiva (10)</option>
-<option data-cost="10" value="postura_esquiva">Postura esquiva (10)</option>
-<option data-cost="5" value="usar_item_combate">Usar item em combate (5)</option>
-<option data-cost="5" value="comandar_criatura">Comandar criatura (5)</option>
+<option value="andar" data-cost="0" data-label="Andar">Andar (0)</option>
+<option value="correr" data-cost="5" data-label="Correr">Correr (5)</option>
+<option value="ataque_leve" data-cost="10" data-label="Ataque leve">Ataque leve (10)</option>
+<option value="ataque_medio" data-cost="15" data-label="Ataque médio">Ataque médio (15)</option>
+<option value="ataque_pesado" data-cost="25" data-label="Ataque pesado">Ataque pesado (25)</option>
+<option value="ataque_distancia" data-cost="12" data-label="Ataque à distância">Ataque à distância (12)</option>
+<option value="ataque_distancia_pesado" data-cost="18" data-label="Ataque à distância pesado">Ataque à distância pesado (18)</option>
+<option value="postura_defensiva" data-cost="10" data-label="Postura defensiva">Postura defensiva (10)</option>
+<option value="postura_esquiva" data-cost="10" data-label="Postura esquiva">Postura esquiva (10)</option>
+<option value="usar_item_combate" data-cost="5" data-label="Usar item em combate">Usar item em combate (5)</option>
+<option value="comandar_criatura" data-cost="5" data-label="Comandar criatura">Comandar criatura (5)</option>
 </select>
 </div>
 </div>
 <div class="actions section-space">
 <button class="btn-accent" id="useActionBtn">Gastar stamina da ação</button>
-<div class="action-feedback action-feedback-inline" id="actionFeedback"></div>
 </div>
 <div class="footer-note" id="posturaResumo"></div>
 </div>
