@@ -244,12 +244,16 @@ async function createCreature() {
   };
   workspace.creatures.push(creature);
   workspace.sharedViewerUids = computeWorkspaceSharedViewerUids(workspace.creatures);
-  await saveWorkspace(targetUid, { creatures: clone(workspace.creatures), sharedViewerUids: clone(workspace.sharedViewerUids) });
+  await saveWorkspace(targetUid, {
+    creatures: clone(workspace.creatures),
+    sharedViewerUids: clone(workspace.sharedViewerUids)
+  });
   closeModal(createModal);
   document.getElementById('newCreatureName').value = '';
   renderCards();
   statusEl.textContent = 'Criatura criada com sucesso.';
 }
+
 async function transferCreature() {
   const newUid = transferTargetUser.value;
   if (!pendingTransferCreatureId || !newUid) return;
