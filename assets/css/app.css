@@ -1586,11 +1586,14 @@ margin-bottom: 22px;
   padding: 0 8px;
 }
 
-.inventory-grid, .inventory-metrics {
-display: grid;
-grid-template-columns: repeat(4, minmax(0, 1fr));
-gap: 10px;
-{
+
+.inventory-grid,
+.inventory-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
 /* ===== correção dos modais ===== */
 .modal-overlay {
   position: fixed !important;
@@ -1605,11 +1608,7 @@ gap: 10px;
   background: rgba(3, 10, 18, 0.72);
   backdrop-filter: blur(4px);
 }
-
-.modal-overlay.hidden {
-  display: none !important;
-}
-
+.modal-overlay.hidden { display: none !important; }
 .modal-box {
   position: relative;
   width: min(100%, 720px);
@@ -1620,50 +1619,117 @@ gap: 10px;
   border-radius: 14px;
   box-shadow: 0 0 24px rgba(0, 210, 255, 0.08);
 }
-      /* ===== selects escuros dentro dos modais ===== */
-.modal-box select {
-  background: linear-gradient(180deg, rgba(10, 25, 39, 0.96), rgba(6, 15, 25, 0.98));
-  color: #ecfbff;
-  border: 1px solid rgba(95, 193, 219, 0.28);
-}
 
-.modal-box option,
-.modal-box optgroup {
-  background: #091523;
+/* ===== selects sempre na paleta da ficha ===== */
+select,
+.custom-select-trigger,
+.custom-select-option,
+.custom-select-menu,
+option,
+optgroup {
   color: #ecfbff;
+}
+select,
+.custom-select-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background:
+    linear-gradient(180deg, rgba(10, 25, 39, 0.98), rgba(6, 15, 25, 0.99));
+  border: 1px solid rgba(95, 193, 219, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+select {
+  background-image:
+    linear-gradient(180deg, rgba(10, 25, 39, 0.98), rgba(6, 15, 25, 0.99)),
+    linear-gradient(45deg, transparent 50%, #89d9ef 50%),
+    linear-gradient(135deg, #89d9ef 50%, transparent 50%);
+  background-position:
+    0 0,
+    calc(100% - 20px) calc(50% - 3px),
+    calc(100% - 14px) calc(50% - 3px);
+  background-size: auto, 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 38px;
+}
+select:hover,
+.custom-select-trigger:hover {
+  border-color: rgba(122, 223, 255, 0.5);
+}
+select:focus,
+.custom-select-trigger:focus,
+.custom-select.open .custom-select-trigger {
+  outline: none;
+  border-color: rgba(136, 227, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(102, 201, 255, 0.12);
+}
+option,
+optgroup,
+.custom-select-menu {
+  background: #091523;
 }
 .custom-select {
   position: relative;
   width: 100%;
 }
-
-.custom-select-trigger {
-  width: 100%;
-}
-
 .custom-select-menu {
   z-index: 10050;
-}
-
-.modal-box .custom-select-menu {
-  background: linear-gradient(180deg, rgba(11,18,32,0.99), rgba(16,26,42,0.99));
   border: 1px solid rgba(95, 193, 219, 0.28);
+  background: linear-gradient(180deg, rgba(11,18,32,0.99), rgba(16,26,42,0.99));
+}
+.custom-select-option {
+  background: transparent;
+}
+.custom-select-option:hover,
+.custom-select-option.active {
+  background: rgba(95, 193, 219, 0.14);
 }
 
-
-/* ===== reforço custom select em modais ===== */
-.modal-box .custom-select{width:100%}
-.modal-box .custom-select-menu{
-  z-index:10050;
-  background:linear-gradient(180deg, rgba(11,18,32,.99), rgba(16,26,42,.99));
+/* ===== aviso temporário sem deslocar a ficha ===== */
+.resource-box.action-feedback-host,
+.actions.action-feedback-host {
+  position: relative;
+  padding-bottom: 54px;
+}
+.action-feedback {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(108, 21, 21, 0.66), rgba(73, 13, 13, 0.56));
+  border: 1px solid rgba(255, 162, 162, 0.16);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: 0 10px 24px rgba(35, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .22s ease, transform .22s ease;
+  pointer-events: none;
+}
+.action-feedback.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
+.creature-stamina-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.creature-stamina-actions button {
+  flex: 1 1 180px;
+}
 
-.nav-button {
+a.button-link,
+.card-action-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  text-decoration: none;
   border: 1px solid var(--line);
   background: var(--panel-2);
   color: var(--text);
@@ -1671,49 +1737,17 @@ gap: 10px;
   padding: 10px 14px;
   cursor: pointer;
   font-weight: 600;
-  text-decoration: none;
+  min-height: 42px;
 }
-.nav-button:hover { filter: brightness(1.06); }
-.action-feedback {
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity .2s ease, transform .2s ease;
-  min-height: 0;
-  margin-top: 8px;
-  padding: 0;
-  pointer-events: none;
-  border-radius: 12px;
-  background: rgba(120, 26, 26, 0);
-  color: rgba(255,255,255,0);
-  font-size: 12px;
-  font-weight: 700;
+a.button-link:hover,
+.card-action-link:hover {
+  filter: brightness(1.06);
 }
-.action-feedback.show {
-  opacity: 1;
-  transform: translateY(0);
-  padding: 9px 12px;
-  background: rgba(120, 26, 26, .24);
-  box-shadow: 0 8px 18px rgba(120, 26, 26, .18);
-  color: #fff;
+a.button-link.btn-accent,
+.card-action-link.btn-accent {
+  background: linear-gradient(180deg, #2f5fb8, #284f97);
+  border-color: #3d6aca;
 }
-.action-feedback-inline {
-  width: 100%;
-  margin-top: 0;
-}
-.custom-select-menu .custom-select-option,
-.custom-select-option {
-  background: transparent;
-}
-.custom-select-option:hover,
-.custom-select-option.active {
-  background: rgba(121,168,255,.14);
-}
-.custom-select-option,
-.custom-select-menu {
-  color: var(--text);
-}
-.inventory-config-row .custom-select-trigger,
-.inventory-config-row .custom-select-menu {
-  background: linear-gradient(180deg, rgba(9,16,29,.98), rgba(15,25,43,.98));
-  color: var(--text);
+a.button-link[style*="display:none"] {
+  display: none !important;
 }
