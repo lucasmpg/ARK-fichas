@@ -4,20 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ARK Fichas Online</title>
+  <link rel="icon" type="image/png" href="./img/fav_rex.png" />
   <link rel="stylesheet" href="./assets/css/index.css" />
   <link rel="stylesheet" href="./assets/css/common.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <div class="center-card card">
-      <h1 class="hero-title">ARK Fichas Online</h1>
-      <p class="hero-subtitle">Login com Google para cada player usar a própria ficha.</p>
+  <div class="page-shell login-shell">
+    <div class="center-card card login-card">
+      <div class="login-hero">
+        <img class="login-logo" src="./img/dino_logo.png" alt="Dinossauro ARK" />
+      </div>
+      <div class="login-copy">
+        <h1 class="hero-title">ARK Fichas Online</h1>
+        <p class="hero-subtitle">Entre com Google para acessar o dashboard.</p>
+      </div>
       <div class="notice" id="userInfo">Verificando autenticação...</div>
-      <div class="page-actions">
-        <button class="google-login-btn" id="loginGoogleBtn" type="button"><span class="google-mark" aria-hidden="true"></span><span>Entrar com Google</span></button>
+      <div class="page-actions login-actions">
+        <button id="loginGoogleBtn" class="google-login-btn" type="button">
+          <img class="google-logo" src="./img/google_logo.png" alt="" />
+          <span>Continue com Google</span>
+        </button>
         <button id="logoutBtn" type="button" style="display:none;">Sair</button>
-        <button id="openFichaBtn" type="button" style="display:none;">Abrir dashboard</button>
-        <button id="openAdminBtn" type="button" style="display:none;">Painel do mestre</button>
+        <a id="openFichaBtn" class="button-link" href="./pages/dashboard.html" style="display:none;">Abrir dashboard</a>
+        <a id="openAdminBtn" class="button-link" href="./pages/admin.html" style="display:none;">Painel do mestre</a>
+      </div>
     </div>
   </div>
   <script type="module">
