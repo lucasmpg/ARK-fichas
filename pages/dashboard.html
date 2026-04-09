@@ -8,22 +8,50 @@
   <link rel="stylesheet" href="../assets/css/dashboard.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <div class="card page-card">
-      <div class="section-row">
-        <div>
+  <div class="dashboard-shell">
+    <header class="dashboard-topbar">
+      <img class="topbar-frame" src="../img/top_bar.png" alt="" aria-hidden="true" />
+
+      <div class="topbar-content">
+        <div class="brand-side">
+          <img class="brand-logo" src="../img/fav_rex.png" alt="ARK" />
+        </div>
+
+        <div class="title-side">
           <h1 class="hero-title">Dashboard do Jogador</h1>
-          <div class="muted" id="dashboardSubtitle">Carregando...</div>
+          <div class="muted top-subtitle" id="dashboardSubtitle">Carregando...</div>
         </div>
-        <div class="authbar-actions">
-          <a id="goPlayerSheetBtn" class="button-link" href="./ficha.html">Minha ficha</a>
-                    <a id="goAdminBtn" class="button-link" href="./admin.html" style="display:none;">Painel do mestre</a>
-          <button id="logoutBtn" type="button">Sair</button>
-        </div>
+
+        <nav class="authbar-actions" aria-label="Ações do dashboard">
+          <a id="goPlayerSheetBtn" class="asset-button asset-button-top" href="./ficha.html">
+            <span>Minha Ficha</span>
+          </a>
+          <a id="goAdminBtn" class="asset-button asset-button-top" href="./admin.html" style="display:none;">
+            <span>Painel do Mestre</span>
+          </a>
+          <button id="logoutBtn" class="asset-button asset-button-red asset-button-top" type="button">
+            <span>Sair</span>
+          </button>
+        </nav>
       </div>
-      <div class="notice" id="dashboardStatus">Verificando dados...</div>
-      <div class="cards-grid" id="dashboardCards"></div>
-    </div>
+    </header>
+
+    <main class="dashboard-stage">
+      <section class="workspace-line">
+        <div class="workspace-status" id="dashboardStatus">Verificando dados...</div>
+      </section>
+
+      <section class="top-cards-grid" id="dashboardTopCards"></section>
+
+      <section class="creatures-section">
+        <div class="section-heading">
+          <img class="section-heading-frame" src="../img/section_sep.png" alt="" aria-hidden="true" />
+          <h2>Minhas Criaturas</h2>
+        </div>
+
+        <div class="creature-list" id="dashboardCreatureList"></div>
+      </section>
+    </main>
   </div>
 
   <div id="createCreatureModal" class="modal-overlay hidden" aria-hidden="true">
@@ -44,8 +72,8 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="cancelCreateCreatureBtn">Cancelar</button>
-        <button type="button" id="confirmCreateCreatureBtn">Criar criatura</button>
+        <button class="asset-button asset-button-red" type="button" id="cancelCreateCreatureBtn"><span>Cancelar</span></button>
+        <button class="asset-button asset-button-green" type="button" id="confirmCreateCreatureBtn"><span>Criar criatura</span></button>
       </div>
     </div>
   </div>
@@ -65,8 +93,8 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="cancelTransferCreatureBtn">Cancelar</button>
-        <button type="button" id="confirmTransferCreatureBtn">Transferir</button>
+        <button class="asset-button asset-button-red" type="button" id="cancelTransferCreatureBtn"><span>Cancelar</span></button>
+        <button class="asset-button asset-button-orange" type="button" id="confirmTransferCreatureBtn"><span>Transferir</span></button>
       </div>
     </div>
   </div>
