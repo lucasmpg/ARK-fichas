@@ -73,8 +73,6 @@
 <div class="section-space"><h2>Dano recebido</h2><div class="row"><div><label for="danoRecebidoBruto">Dano bruto recebido</label><input id="danoRecebidoBruto" type="number" value="0"/></div><div><label for="reducaoArmadura">Redução manual (%)</label><input id="reducaoArmadura" max="100" min="0" type="number" value="0"/></div><div><label for="danoRecebidoFinal">Dano final</label><input id="danoRecebidoFinal" readonly=""/></div><div><label for="vidaAposDanoRecebido">Vida depois do dano</label><input id="vidaAposDanoRecebido" readonly=""/></div></div><div class="actions section-space"><button id="applyReceivedDamageBtn">Aplicar dano recebido</button></div></div>
 </div>
 
-</div>
-
 <div class="card inventory-standalone-card creature-section creature-section-inventory">
 <h2>Inventário e peso</h2>
 <div class="inventory-grid inventory-metrics">
@@ -109,6 +107,7 @@
 <h2>Anotações</h2>
 <div><label for="notas">Anotações da criatura</label><textarea id="notas"></textarea></div>
 <div class="section-space"><label for="adminNotas">Anotações do admin</label><textarea id="adminNotas"></textarea></div>
+</div>
 </div>
 <div aria-hidden="true" class="modal-overlay hidden" id="pointConfirmModal"><div aria-modal="true" class="modal-box" role="dialog"><h3>Confirmar ponto</h3><p id="pointConfirmText">Deseja adicionar 1 ponto?</p><label class="modal-check"><input id="skipPointConfirmCheckbox" type="checkbox"/> Não mostrar novamente</label><div class="modal-actions"><button id="cancelPointConfirmBtn" type="button">Cancelar</button><button class="btn-accent" id="confirmPointConfirmBtn" type="button">Confirmar</button></div></div></div>
 <div aria-hidden="true" class="modal-overlay hidden" id="transferCreatureModal">
