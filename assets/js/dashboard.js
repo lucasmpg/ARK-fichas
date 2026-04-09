@@ -10,471 +10,245 @@ import {
 
 const statusEl = document.getElementById('dashboardStatus');
 const subtitleEl = document.getElementById('dashboardSubtitle');
-const cardsEl = document.getElementById('dashboardCards');
+const topCardsEl = document.getElementById('dashboardTopCards');
+const creatureListEl = document.getElementById('dashboardCreatureList');
+
 const createModal = document.getElementById('createCreatureModal');
 const transferModal = document.getElementById('transferCreatureModal');
+
 const templateSelect = document.getElementById('newCreatureTemplate');
 const transferTargetUser = document.getElementById('transferTargetUser');
 
 const TEMPLATES = [
-  { key: 'lobo', label: 'Lobo', baseVida: 100, baseDano: 12, baseMovimento: 7, basePeso: 45, pontosPorNivel: 5 },
-  { key: 'urso', label: 'Urso', baseVida: 180, baseDano: 20, baseMovimento: 6, basePeso: 120, pontosPorNivel: 5 },
-  { key: 'raptor', label: 'Raptor', baseVida: 120, baseDano: 16, baseMovimento: 8, basePeso: 60, pontosPorNivel: 5 },
-  { key: 'escorpiao', label: 'Escorpião', baseVida: 110, baseDano: 14, baseMovimento: 6, basePeso: 35, pontosPorNivel: 5 },
-  { key: 'aranha', label: 'Aranha', baseVida: 90, baseDano: 11, baseMovimento: 7, basePeso: 25, pontosPorNivel: 5 },
-  { key: 'custom', label: 'Template customizado', baseVida: 100, baseDano: 0, baseMovimento: 5, basePeso: 50, pontosPorNivel: 5 }
+  { key: 'lobo', label: 'Lobo', baseVida: 100 },
+  { key: 'urso', label: 'Urso', baseVida: 180 },
+  { key: 'raptor', label: 'Raptor', baseVida: 120 },
+  { key: 'custom', label: 'Custom', baseVida: 100 }
 ];
 
 let currentUser = null;
 let targetUid = null;
 let workspace = null;
-let workspaceOwner = null;
 let allUsers = [];
 let pendingTransferCreatureId = null;
 let accessMode = 'owner';
 
-const qp = (name) => new URLSearchParams(window.location.search).get(name);
-const clone = (value) => JSON.parse(JSON.stringify(value));
+const clone = (v) => JSON.parse(JSON.stringify(v));
 
-const closeModal = (modal) => {
-  if (!modal) return;
-  modal.classList.add('hidden');
-  modal.setAttribute('aria-hidden', 'true');
-  closeAllCustomSelects();
-};
+function openModal(m){ m.classList.remove('hidden'); }
+function closeModal(m){ m.classList.add('hidden'); }
 
-const openModal = (modal) => {
-  if (!modal) return;
-  modal.classList.remove('hidden');
-  modal.setAttribute('aria-hidden', 'false');
-};
-
-function closeAllCustomSelects(exceptSelect = null) {
-  document.querySelectorAll('.custom-select.open').forEach((host) => {
-    const nativeSelect = host.querySelector('select');
-    if (!exceptSelect || nativeSelect !== exceptSelect) host.classList.remove('open');
-  });
+function getCreatureImage(creature){
+  return (
+    creature.imageUrl ||
+    creature.avatarUrl ||
+    creature.fotoUrl ||
+    creature.portraitUrl ||
+    null
+  );
 }
 
-function refreshCustomSelect(select) {
-  if (!select) return;
+/* ============================
+   RENDER TOPO (CARDS DE CIMA)
+============================ */
 
-  const host = select.closest('.custom-select');
-  if (!host) return;
+function renderTopCards(){
 
-  const trigger = host.querySelector('.custom-select-trigger');
-  const menu = host.querySelector('.custom-select-menu');
-  if (!trigger || !menu) return;
+  topCardsEl.innerHTML = "";
 
-  const placeholder = select.dataset.placeholder || 'Selecione';
-  const options = [...select.options];
-  const selectedOption =
-    options.find((option) => option.value === select.value) || options[0] || null;
-
-  trigger.textContent = selectedOption ? selectedOption.textContent : placeholder;
-  menu.innerHTML = '';
-
-  options.forEach((option) => {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'custom-select-option';
-
-    if (option.value === select.value) item.classList.add('active');
-
-    item.textContent = option.textContent || placeholder;
-    item.disabled = option.disabled;
-
-    item.addEventListener('click', () => {
-      select.value = option.value;
-      refreshCustomSelect(select);
-      host.classList.remove('open');
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    menu.appendChild(item);
-  });
-}
-
-function initCustomSelect(selectId) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
-
-  const host = select.closest('.custom-select');
-  if (!host || host.dataset.bound === '1') {
-    refreshCustomSelect(select);
-    return;
-  }
-
-  const trigger = host.querySelector('.custom-select-trigger');
-  host.dataset.bound = '1';
-
-  trigger?.addEventListener('click', (event) => {
-    event.preventDefault();
-    const willOpen = !host.classList.contains('open');
-    closeAllCustomSelects(select);
-    if (willOpen) host.classList.add('open');
-  });
-
-  select.addEventListener('change', () => refreshCustomSelect(select));
-  refreshCustomSelect(select);
-}
-
-const canManageWorkspace = () => accessMode === 'owner' || accessMode === 'admin';
-
-function ensureWorkspaceShape(data) {
-  return {
-    ownerUid: targetUid,
-    ownerName: data?.ownerName || workspaceOwner?.displayName || '',
-    ownerEmail: data?.ownerEmail || workspaceOwner?.email || '',
-    sheetStore: data?.sheetStore || null,
-    creatures: Array.isArray(data?.creatures) ? data.creatures : [],
-    sharedViewerUids: Array.isArray(data?.sharedViewerUids) ? data.sharedViewerUids : []
-  };
-}
-
-function creatureTemplate(key) {
-  return TEMPLATES.find((item) => item.key === key) || TEMPLATES[0];
-}
-
-function computeWorkspaceSharedViewerUids(creatures) {
-  const set = new Set();
-
-  (creatures || []).forEach((creature) => {
-    (creature.sharedViewers || []).forEach((viewer) => {
-      const uid = String(viewer?.uid || '').trim();
-      if (uid) set.add(uid);
-    });
-  });
-
-  return [...set];
-}
-
-async function loadUsers() {
-  allUsers = await listAllUsers();
-
-  if (!transferTargetUser) return;
-
-  transferTargetUser.innerHTML = allUsers
-    .filter((user) => user.uid !== targetUid)
-    .map(
-      (user) =>
-        `<option value="${user.uid}">${user.name || 'Sem nome'} • ${user.email || 'Sem e-mail'}</option>`
-    )
-    .join('');
-
-  initCustomSelect('transferTargetUser');
-}
-
-function renderCards() {
-  const isAdmin = accessMode === 'admin';
-  cardsEl.innerHTML = '';
-
+  // Minha ficha
   const player = document.createElement('div');
-  player.className = 'card-mini';
-
-  const playerQs = new URLSearchParams({ uid: targetUid });
-  if (accessMode === 'admin') playerQs.set('admin', '1');
+  player.className = "card-small";
 
   player.innerHTML = `
-    <h2>Minha ficha</h2>
-    <div class="meta-stack">
-      <div><strong>Jogador:</strong> ${workspace.ownerName || workspaceOwner?.displayName || 'Sem nome'}</div>
-      <div><strong>E-mail:</strong> ${workspace.ownerEmail || workspaceOwner?.email || 'Sem e-mail'}</div>
-      <div><strong>Criaturas:</strong> ${workspace.creatures.length}</div>
-      <div><strong>Modo:</strong> ${isAdmin ? 'Admin' : 'Dono'}</div>
-    </div>
-    <div class="card-actions">
-      <a class="card-action-link" data-open-sheet href="./ficha.html?${playerQs.toString()}">Abrir ficha</a>
+    <div class="card-content">
+      <h2>Minha ficha</h2>
+      <div class="meta-stack">
+        <div><strong>Jogador:</strong> ${workspace.ownerName || '---'}</div>
+        <div><strong>Criaturas:</strong> ${workspace.creatures.length}</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn"><img src="../img/btn_blue.png"></button>
+      </div>
     </div>
   `;
 
-  cardsEl.appendChild(player);
+  topCardsEl.appendChild(player);
 
-  workspace.creatures.forEach((creature) => {
+  // Criatura principal
+  const main = workspace.creatures[0];
+
+  if(main){
     const card = document.createElement('div');
-    card.className = 'card-mini';
+    card.className = "card-small";
 
-    const creatureQs = new URLSearchParams({ uid: targetUid, cid: creature.id });
-    if (accessMode === 'admin') creatureQs.set('admin', '1');
+    const img = getCreatureImage(main);
 
     card.innerHTML = `
-      <h2>${creature.nome || 'Criatura sem nome'}</h2>
-      <div class="meta-stack">
-        <div><strong>Espécie:</strong> ${creature.especie || 'Sem espécie'}</div>
-        <div><strong>Nível:</strong> ${creature.nivel || 1}</div>
-        <div><strong>Dono:</strong> ${creature.ownerName || workspace.ownerName || 'Sem dono'}</div>
-      </div>
-      <div class="card-actions">
-        <a class="card-action-link" data-open href="./criatura.html?${creatureQs.toString()}">Abrir ficha</a>
-        <button type="button" data-transfer>Transferir</button>
-        <button type="button" data-delete>Apagar</button>
+      <div class="card-content">
+        <h2>${main.nome}</h2>
+        <div class="meta-stack">
+          <div>${main.especie}</div>
+          <div>Nível ${main.nivel}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn"><img src="../img/btn_blue.png"></button>
+          <button class="btn"><img src="../img/btn_orange.png"></button>
+          <button class="btn"><img src="../img/btn_red.png"></button>
+        </div>
       </div>
     `;
 
-    const canManageCreature = canManageWorkspace() || currentUser.uid === creature.ownerUid;
-    const transferBtn = card.querySelector('[data-transfer]');
-    const deleteBtn = card.querySelector('[data-delete]');
+    topCardsEl.appendChild(card);
+  }
 
-    if (transferBtn) transferBtn.disabled = !canManageCreature;
-    if (deleteBtn) deleteBtn.disabled = !canManageCreature;
-
-    transferBtn?.addEventListener('click', () => {
-      if (!canManageCreature) return;
-      pendingTransferCreatureId = creature.id;
-      openModal(transferModal);
-    });
-
-    deleteBtn?.addEventListener('click', async () => {
-      if (!canManageCreature) return;
-      if (!window.confirm(`Apagar a criatura ${creature.nome || 'sem nome'}?`)) return;
-
-      workspace.creatures = workspace.creatures.filter((item) => item.id !== creature.id);
-      workspace.sharedViewerUids = computeWorkspaceSharedViewerUids(workspace.creatures);
-
-      await saveWorkspace(targetUid, {
-        creatures: clone(workspace.creatures),
-        sharedViewerUids: clone(workspace.sharedViewerUids)
-      });
-
-      renderCards();
-      statusEl.textContent = 'Criatura apagada.';
-    });
-
-    cardsEl.appendChild(card);
-  });
-
+  // Nova criatura
   const add = document.createElement('div');
-  add.className = 'card-mini card-accent';
+  add.className = "card-small";
+
   add.innerHTML = `
-    <h2>Nova criatura</h2>
-    <div class="meta-stack">
-      <div>Criação por template com valores base automáticos.</div>
-      <div>Depois disso, o dono distribui pontos com o botão +.</div>
-      <div>Criação liberada para dono e admin.</div>
-    </div>
-    <div class="card-actions">
-      <button type="button" data-new>Criar criatura</button>
+    <div class="card-content">
+      <h2>Nova criatura</h2>
+      <div class="meta-stack">
+        <div>Criar nova criatura</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn" id="btnCreate">
+          <img src="../img/btn_green.png">
+        </button>
+      </div>
     </div>
   `;
 
-  const newBtn = add.querySelector('[data-new]');
-  if (newBtn) {
-    newBtn.disabled = !canManageWorkspace();
-    newBtn.addEventListener('click', () => {
-      if (!canManageWorkspace()) return;
-      openModal(createModal);
-    });
-  }
+  topCardsEl.appendChild(add);
 
-  cardsEl.appendChild(add);
+  document.getElementById("btnCreate").onclick = () => openModal(createModal);
 }
 
-async function createCreature() {
-  if (!canManageWorkspace()) return;
+/* ============================
+   RENDER LISTA DE CRIATURAS
+============================ */
 
-  const name = document.getElementById('newCreatureName')?.value.trim() || '';
-  const template = creatureTemplate(templateSelect?.value);
+function renderCreatures(){
 
-  const id = `criatura_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  creatureListEl.innerHTML = "";
+
+  workspace.creatures.forEach(c => {
+
+    const img = getCreatureImage(c);
+
+    const el = document.createElement('div');
+    el.className = "creature-card";
+
+    el.innerHTML = `
+      <div class="creature-img">
+        ${
+          img
+          ? `<img src="${img}">`
+          : `<span>${c.nome.charAt(0)}</span>`
+        }
+      </div>
+
+      <div class="creature-info">
+        <div class="creature-name">${c.nome}</div>
+
+        <div class="bar">
+          <div class="fill vida" style="width:80%"></div>
+        </div>
+
+        <div class="bar">
+          <div class="fill stamina" style="width:60%"></div>
+        </div>
+
+        <div class="bar">
+          <div class="fill peso" style="width:40%"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn"><img src="../img/btn_blue.png"></button>
+          <button class="btn"><img src="../img/btn_orange.png"></button>
+        </div>
+      </div>
+    `;
+
+    creatureListEl.appendChild(el);
+  });
+}
+
+/* ============================
+   CREATE
+============================ */
+
+async function createCreature(){
+
+  const name = document.getElementById('newCreatureName').value || "Criatura";
+  const template = TEMPLATES.find(t => t.key === templateSelect.value);
 
   const creature = {
-    id,
-    nome: name || template.label,
+    id: Date.now(),
+    nome: name,
     especie: template.label,
-    ownerUid: targetUid,
-    ownerName: workspace.ownerName || workspaceOwner?.displayName || '',
-    ownerEmail: workspace.ownerEmail || workspaceOwner?.email || '',
     nivel: 1,
-    baseVida: template.baseVida,
-    baseDano: template.baseDano,
-    baseMovimento: template.baseMovimento,
-    basePeso: template.basePeso,
-    pontosPorNivel: template.pontosPorNivel,
-    bonusPontos: 0,
-    stats: {
-      forca: 0,
-      constituicao: 0,
-      destreza: 0,
-      inteligencia: 0,
-      sabedoria: 0,
-      carisma: 0,
-      peso: 0,
-      resistencia: 0
-    },
-    current: { vidaAtual: template.baseVida, torporAtual: 0, staminaAtual: 100 },
-    inventory: { slotsBase: 5, slotsExtra: 0, items: [] },
-    damageScaling: 'forca',
-    sharedViewers: [],
-    notes: '',
-    adminNotas: ''
+    baseVida: template.baseVida
   };
 
   workspace.creatures.push(creature);
-  workspace.sharedViewerUids = computeWorkspaceSharedViewerUids(workspace.creatures);
 
   await saveWorkspace(targetUid, {
-    creatures: clone(workspace.creatures),
-    sharedViewerUids: clone(workspace.sharedViewerUids)
+    creatures: clone(workspace.creatures)
   });
 
   closeModal(createModal);
 
-  const newCreatureName = document.getElementById('newCreatureName');
-  if (newCreatureName) newCreatureName.value = '';
-
-  renderCards();
-  statusEl.textContent = 'Criatura criada com sucesso.';
+  renderAll();
 }
 
-async function transferCreature() {
-  const newUid = transferTargetUser?.value;
-  if (!pendingTransferCreatureId || !newUid) return;
+/* ============================
+   INIT
+============================ */
 
-  const creature = workspace.creatures.find((item) => item.id === pendingTransferCreatureId);
-  if (!creature) return;
+async function init(){
 
-  const targetUser = allUsers.find((item) => item.uid === newUid);
-  const raw = await getWorkspace(newUid);
-
-  const targetWorkspace = {
-    ownerUid: newUid,
-    ownerName: raw?.ownerName || targetUser?.name || '',
-    ownerEmail: raw?.ownerEmail || targetUser?.email || '',
-    creatures: Array.isArray(raw?.creatures) ? raw.creatures : [],
-    sharedViewerUids: Array.isArray(raw?.sharedViewerUids) ? raw.sharedViewerUids : []
-  };
-
-  workspace.creatures = workspace.creatures.filter(
-    (item) => item.id !== pendingTransferCreatureId
-  );
-
-  creature.ownerUid = newUid;
-  creature.ownerName = targetUser?.name || '';
-  creature.ownerEmail = targetUser?.email || '';
-
-  targetWorkspace.creatures.push(creature);
-
-  workspace.sharedViewerUids = computeWorkspaceSharedViewerUids(workspace.creatures);
-  targetWorkspace.sharedViewerUids = computeWorkspaceSharedViewerUids(targetWorkspace.creatures);
-
-  await saveWorkspace(targetUid, {
-    creatures: clone(workspace.creatures),
-    sharedViewerUids: clone(workspace.sharedViewerUids)
-  });
-
-  await saveWorkspace(newUid, {
-    ownerUid: newUid,
-    ownerName: targetWorkspace.ownerName,
-    ownerEmail: targetWorkspace.ownerEmail,
-    creatures: clone(targetWorkspace.creatures),
-    sharedViewerUids: clone(targetWorkspace.sharedViewerUids)
-  });
-
-  pendingTransferCreatureId = null;
-  closeModal(transferModal);
-  renderCards();
-  statusEl.textContent = 'Criatura transferida.';
-}
-
-async function init() {
   currentUser = await waitForAuth();
 
-  if (!currentUser) {
-    window.location.href = '../index.html';
+  if(!currentUser){
+    location.href = "../index.html";
     return;
   }
 
   await upsertUserProfile(currentUser);
 
-  const admin = isAdminUser(currentUser);
-  const requestedUid = qp('uid');
-  targetUid = admin && requestedUid ? requestedUid : currentUser.uid;
+  targetUid = currentUser.uid;
 
-  if (!admin && requestedUid && requestedUid !== currentUser.uid) {
-    window.location.href = './dashboard.html';
-    return;
-  }
+  workspace = await getWorkspace(targetUid) || {
+    ownerName: currentUser.displayName,
+    creatures: []
+  };
 
-  const raw = await getWorkspace(targetUid);
-  workspaceOwner =
-    targetUid === currentUser.uid
-      ? currentUser
-      : { displayName: raw?.ownerName || 'Usuário', email: raw?.ownerEmail || '' };
+  subtitleEl.textContent = `Bem-vindo ${workspace.ownerName}`;
+  statusEl.textContent = `${workspace.creatures.length} criatura(s)`;
 
-  workspace = ensureWorkspaceShape(raw);
-  accessMode = admin && targetUid !== currentUser.uid ? 'admin' : 'owner';
+  renderAll();
 
-  subtitleEl.textContent =
-    accessMode === 'admin'
-      ? `Admin visualizando o dashboard de ${workspace.ownerName || workspace.ownerEmail || targetUid}`
-      : `Dashboard de ${workspace.ownerName || currentUser.displayName || 'Jogador'}`;
+  document.getElementById("logoutBtn").onclick = async () => {
+    await logout();
+    location.href = "../index.html";
+  };
 
-  statusEl.textContent = `Workspace pronto. ${workspace.creatures.length} criatura(s) encontrada(s).`;
+  document.getElementById("confirmCreateCreatureBtn")
+    .onclick = createCreature;
 
-  if (templateSelect) {
-    templateSelect.innerHTML = TEMPLATES.map(
-      (item) => `<option value="${item.key}">${item.label}</option>`
-    ).join('');
-    initCustomSelect('newCreatureTemplate');
-  }
+  document.getElementById("cancelCreateCreatureBtn")
+    .onclick = () => closeModal(createModal);
+}
 
-  await loadUsers();
-  renderCards();
+/* ============================
+   MASTER RENDER
+============================ */
 
-  const goHomeBtn = document.getElementById('goHomeBtn');
-  if (goHomeBtn) {
-    goHomeBtn.setAttribute('href', '../index.html');
-  }
-
-  const topSheetQs = new URLSearchParams({ uid: targetUid });
-  if (accessMode === 'admin') topSheetQs.set('admin', '1');
-
-  const goPlayerSheetBtn = document.getElementById('goPlayerSheetBtn');
-  if (goPlayerSheetBtn) {
-    goPlayerSheetBtn.setAttribute('href', `./ficha.html?${topSheetQs.toString()}`);
-  }
-
-  const goAdminBtn = document.getElementById('goAdminBtn');
-  if (goAdminBtn) {
-    goAdminBtn.style.display = admin ? 'inline-flex' : 'none';
-    goAdminBtn.setAttribute('href', './admin.html');
-  }
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await logout();
-      } finally {
-        window.location.href = '../index.html';
-      }
-    });
-  }
-
-  const cancelCreateCreatureBtn = document.getElementById('cancelCreateCreatureBtn');
-  cancelCreateCreatureBtn?.addEventListener('click', () => closeModal(createModal));
-
-  const confirmCreateCreatureBtn = document.getElementById('confirmCreateCreatureBtn');
-  confirmCreateCreatureBtn?.addEventListener('click', createCreature);
-
-  const cancelTransferCreatureBtn = document.getElementById('cancelTransferCreatureBtn');
-  cancelTransferCreatureBtn?.addEventListener('click', () => {
-    pendingTransferCreatureId = null;
-    closeModal(transferModal);
-  });
-
-  const confirmTransferCreatureBtn = document.getElementById('confirmTransferCreatureBtn');
-  confirmTransferCreatureBtn?.addEventListener('click', transferCreature);
-
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest('.custom-select')) closeAllCustomSelects();
-  });
-
-  [createModal, transferModal].forEach((modal) => {
-    modal?.addEventListener('click', (event) => {
-      if (event.target === modal) closeModal(modal);
-    });
-  });
+function renderAll(){
+  renderTopCards();
+  renderCreatures();
 }
 
 init();
