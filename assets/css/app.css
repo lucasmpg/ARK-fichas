@@ -1751,3 +1751,42 @@ a.button-link.btn-accent,
 a.button-link[style*="display:none"] {
   display: none !important;
 }
+
+
+/* ===== Ordem corrigida da ficha de criatura ===== */
+.creature-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 1.1fr) minmax(420px, 1.12fr) minmax(330px, 0.96fr);
+  grid-template-areas:
+    "identity summary calculator"
+    "attributes attributes attributes"
+    "inventory inventory inventory"
+    "notes notes notes";
+  gap: 18px;
+  align-items: start;
+}
+
+.creature-section-identity { grid-area: identity; }
+.creature-section-right { grid-area: summary; }
+.creature-section-calculator { grid-area: calculator; }
+.creature-section-attributes { grid-area: attributes; }
+.creature-section-inventory { grid-area: inventory; }
+.creature-section-notes { grid-area: notes; }
+
+.creature-section-inventory,
+.creature-section-notes {
+  margin-top: 0;
+}
+
+@media (max-width: 1100px) {
+  .creature-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "identity"
+      "summary"
+      "calculator"
+      "attributes"
+      "inventory"
+      "notes";
+  }
+}
