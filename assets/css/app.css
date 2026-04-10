@@ -1269,7 +1269,7 @@ body,
 }
 
 body {
-  background: background: linear-gradient(rgba(5, 10, 16, 0.84), rgba(5, 10, 16, 0.95)), url(../../img/background_1.jpg) center / cover no-repeat fixed;
+  background: linear-gradient(rgba(5, 10, 16, 0.84), rgba(5, 10, 16, 0.95)), url(../../img/background_1.jpg) center / cover no-repeat fixed;
 }
 
 .wrap,
