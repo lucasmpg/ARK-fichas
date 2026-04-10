@@ -33,7 +33,7 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   background:
     linear-gradient(rgba(5, 10, 16, 0.82), rgba(5, 10, 16, 0.94)),
-    url("../img/background_1.jpg") center / cover no-repeat fixed;
+    url("../../img/background_1.jpg") center / cover no-repeat fixed;
   overflow-x: hidden;
 }
 
@@ -46,7 +46,7 @@ body::after {
 }
 
 body::before {
-  background: url("../img/texture_1.jpg") center / cover repeat;
+  background: url("../../img/texture_1.jpg") center / cover repeat;
   opacity: 0.11;
   mix-blend-mode: screen;
 }
@@ -75,7 +75,7 @@ body::after {
 .hud-topbar-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/top_bar.png") center / 100% 100% no-repeat;
+  background: url("../../img/top_bar.png") center / 100% 100% no-repeat;
   filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.34));
   pointer-events: none;
 }
@@ -166,7 +166,7 @@ body::after {
 .hero-panel-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/big_bar_mold.png") center / 100% 100% no-repeat;
+  background: url("../../img/big_bar_mold.png") center / 100% 100% no-repeat;
   pointer-events: none;
   filter: drop-shadow(0 20px 28px rgba(0,0,0,0.28));
 }
@@ -193,7 +193,7 @@ body::after {
   border-radius: 24px;
   background:
     linear-gradient(rgba(8, 14, 22, 0.78), rgba(8, 14, 22, 0.9)),
-    url("../img/texture_2.jpg") center / cover no-repeat;
+    url("../../img/texture_2.jpg") center / cover no-repeat;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
@@ -253,7 +253,7 @@ label {
   padding: 11px 16px;
   background:
     linear-gradient(180deg, rgba(4, 12, 19, 0.92), rgba(9, 17, 25, 0.98)),
-    url("../img/texture_2.jpg") center / cover no-repeat;
+    url("../../img/texture_2.jpg") center / cover no-repeat;
   border: 1px solid rgba(83, 214, 255, 0.16);
   box-shadow: var(--shadow-md), inset 0 0 0 1px rgba(255,255,255,0.04);
   color: #d8eef9;
@@ -330,7 +330,7 @@ label {
   position: absolute;
   inset: 0 auto 0 0;
   width: 100%;
-  background: url("../img/section_sep.png") left center / contain no-repeat;
+  background: url("../../img/section_sep.png") left center / contain no-repeat;
   opacity: 0.98;
   pointer-events: none;
 }
@@ -371,7 +371,7 @@ label {
 .hud-card-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/small_bar_mold.png") center / 100% 100% no-repeat;
+  background: url("../../img/small_bar_mold.png") center / 100% 100% no-repeat;
   z-index: 0;
 }
 
@@ -499,10 +499,10 @@ label {
   pointer-events: none;
 }
 
-.ark-btn-blue::before { background-image: url("../img/btn_blue.png"); }
-.ark-btn-green::before { background-image: url("../img/btn_green.png"); }
-.ark-btn-orange::before { background-image: url("../img/btn_orange.png"); }
-.ark-btn-red::before { background-image: url("../img/btn_red.png"); }
+.ark-btn-blue::before { background-image: url("../../img/btn_blue.png"); }
+.ark-btn-green::before { background-image: url("../../img/btn_green.png"); }
+.ark-btn-orange::before { background-image: url("../../img/btn_orange.png"); }
+.ark-btn-red::before { background-image: url("../../img/btn_red.png"); }
 
 .creature-list {
   display: grid;
@@ -516,7 +516,7 @@ label {
 .hud-creature-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/big_bar_mold.png") center / 100% 100% no-repeat;
+  background: url("../../img/big_bar_mold.png") center / 100% 100% no-repeat;
   z-index: 0;
   filter: drop-shadow(0 18px 26px rgba(0,0,0,0.26));
 }
@@ -541,7 +541,7 @@ label {
 .portrait-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/place_holder_mold.png") center / 100% 100% no-repeat;
+  background: url("../../img/place_holder_mold.png") center / 100% 100% no-repeat;
   z-index: 1;
 }
 
@@ -552,7 +552,7 @@ label {
   overflow: hidden;
   background:
     linear-gradient(rgba(8, 14, 20, 0.48), rgba(8, 14, 20, 0.72)),
-    url("../img/place_holder_pattern.png") center / cover no-repeat;
+    url("../../img/place_holder_pattern.png") center / cover no-repeat;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -638,7 +638,7 @@ label {
 .status-bar-frame {
   position: absolute;
   inset: 0;
-  background: url("../img/small_bar_mold.png") center / 100% 100% no-repeat;
+  background: url("../../img/small_bar_mold.png") center / 100% 100% no-repeat;
   opacity: 0.86;
 }
 
@@ -724,7 +724,7 @@ label {
   left: 18px;
   right: 18px;
   height: 58px;
-  background: url("../img/section_sep.png") left center / contain no-repeat;
+  background: url("../../img/section_sep.png") left center / contain no-repeat;
   opacity: 0.72;
 }
 
