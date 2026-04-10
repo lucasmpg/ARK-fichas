@@ -12,6 +12,7 @@ const statusEl = document.getElementById("dashboardStatus");
 const subtitleEl = document.getElementById("dashboardSubtitle");
 const topCardsEl = document.getElementById("dashboardTopCards");
 const creatureListEl = document.getElementById("dashboardCreatureList");
+const quickStatsEl = document.getElementById("dashboardQuickStats");
 
 const createModal = document.getElementById("createCreatureModal");
 const transferModal = document.getElementById("transferCreatureModal");
@@ -47,6 +48,13 @@ let accessMode = "owner";
 
 const qp = (name) => new URLSearchParams(window.location.search).get(name);
 const clone = (value) => JSON.parse(JSON.stringify(value));
+const escapeHtml = (value) =>
+  String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 
 function openModal(modal) {
   if (!modal) return;
@@ -192,40 +200,52 @@ function clampPercent(value) {
   return Math.max(0, Math.min(100, n));
 }
 
-function getVidaPercent(creature) {
+function getVidaMax(creature) {
+  return Number(creature?.baseVida) || 100;
+}
+
+function getVidaAtual(creature) {
   const atual = Number(creature?.current?.vidaAtual);
-  const max = Number(creature?.baseVida);
-  if (Number.isFinite(atual) && Number.isFinite(max) && max > 0) {
-    return clampPercent((atual / max) * 100);
-  }
+  return Number.isFinite(atual) ? atual : getVidaMax(creature);
+}
+
+function getVidaPercent(creature) {
+  const atual = getVidaAtual(creature);
+  const max = getVidaMax(creature);
+  if (max > 0) return clampPercent((atual / max) * 100);
   return 100;
+}
+
+function getStaminaAtual(creature) {
+  const atual = Number(creature?.current?.staminaAtual);
+  return Number.isFinite(atual) ? atual : 100;
 }
 
 function getStaminaPercent(creature) {
-  const atual = Number(creature?.current?.staminaAtual);
-  if (Number.isFinite(atual)) {
-    return clampPercent(atual);
-  }
-  return 100;
+  return clampPercent(getStaminaAtual(creature));
 }
 
-function getPesoPercent(creature) {
-  const currentPeso =
+function getPesoAtual(creature) {
+  return (
     Number(creature?.stats?.peso) ||
     Number(creature?.pesoAtual) ||
     Number(creature?.inventory?.pesoAtual) ||
-    0;
+    0
+  );
+}
 
-  const maxPeso =
+function getPesoMax(creature) {
+  return (
     Number(creature?.basePeso) ||
     Number(creature?.pesoMaximo) ||
     Number(creature?.inventory?.pesoMaximo) ||
-    100;
+    100
+  );
+}
 
-  if (maxPeso > 0) {
-    return clampPercent((currentPeso / maxPeso) * 100);
-  }
-
+function getPesoPercent(creature) {
+  const maxPeso = getPesoMax(creature);
+  if (maxPeso > 0) return clampPercent((getPesoAtual(creature) / maxPeso) * 100);
   return 0;
 }
 
@@ -237,37 +257,83 @@ function buildArkButton({
   attrs = "",
   disabled = false
 }) {
-  const className = `ark-btn ark-btn-${color}${small ? " ark-btn-sm" : ""}`;
-  const disabledAttr = disabled ? " disabled" : "";
+  const className = `ark-btn ark-btn-${color}${small ? " ark-btn-sm" : ""}${disabled ? " is-disabled" : ""}`;
+  const disabledAttr = disabled ? ' aria-disabled="true" tabindex="-1"' : "";
 
   if (href) {
-    return `<a class="${className}" href="${href}" ${attrs}><span>${label}</span></a>`;
+    return `<a class="${className}" href="${disabled ? "#" : href}" ${attrs}${disabledAttr}><span>${escapeHtml(label)}</span></a>`;
   }
 
-  return `<button type="button" class="${className}" ${attrs}${disabledAttr}><span>${label}</span></button>`;
+  return `<button type="button" class="${className}" ${attrs}${disabled ? " disabled" : ""}><span>${escapeHtml(label)}</span></button>`;
 }
 
-async function loadUsers() {
-  allUsers = await listAllUsers();
+function buildMetricRow(label, current, max, percent, fillClass) {
+  return `
+    <div class="status-row">
+      <div class="status-label">${escapeHtml(label)}</div>
+      <div class="status-bar">
+        <div class="status-bar-frame" aria-hidden="true"></div>
+        <div class="status-bar-fill-track">
+          <div class="status-bar-fill ${fillClass}" style="width:${percent}%"></div>
+        </div>
+      </div>
+      <div class="metric-caption">${escapeHtml(current)}${max !== null ? ` / ${escapeHtml(max)}` : "%"}</div>
+    </div>
+  `;
+}
 
-  if (!transferTargetUser) return;
+function loadUsers() {
+  return listAllUsers().then((users) => {
+    allUsers = users;
 
-  transferTargetUser.innerHTML = allUsers
-    .filter((user) => user.uid !== targetUid)
+    if (!transferTargetUser) return;
+
+    transferTargetUser.innerHTML = allUsers
+      .filter((user) => user.uid !== targetUid)
+      .map(
+        (user) =>
+          `<option value="${escapeHtml(user.uid)}">${escapeHtml(user.name || "Sem nome")} • ${escapeHtml(user.email || "Sem e-mail")}</option>`
+      )
+      .join("");
+
+    initCustomSelect("transferTargetUser");
+  });
+}
+
+function renderQuickStats() {
+  if (!quickStatsEl) return;
+
+  const creatures = workspace?.creatures || [];
+  const total = creatures.length;
+  const totalVida = creatures.reduce((sum, creature) => sum + getVidaAtual(creature), 0);
+  const avgStamina = total
+    ? Math.round(creatures.reduce((sum, creature) => sum + getStaminaAtual(creature), 0) / total)
+    : 0;
+  const ocupacaoAlta = creatures.filter((creature) => getPesoPercent(creature) >= 70).length;
+
+  const stats = [
+    { value: total, label: "Criaturas" },
+    { value: totalVida, label: "Vida total" },
+    { value: `${avgStamina}%`, label: "Estamina média" },
+    { value: ocupacaoAlta, label: "Peso alto" }
+  ];
+
+  quickStatsEl.innerHTML = stats
     .map(
-      (user) =>
-        `<option value="${user.uid}">${user.name || "Sem nome"} • ${user.email || "Sem e-mail"}</option>`
+      (item) => `
+        <article class="stat-pill">
+          <div class="stat-pill-value">${escapeHtml(item.value)}</div>
+          <div class="stat-pill-label">${escapeHtml(item.label)}</div>
+        </article>
+      `
     )
     .join("");
-
-  initCustomSelect("transferTargetUser");
 }
 
 function renderTopCards() {
   topCardsEl.innerHTML = "";
 
   const isAdmin = accessMode === "admin";
-
   const playerQs = new URLSearchParams({ uid: targetUid });
   if (isAdmin) playerQs.set("admin", "1");
 
@@ -281,10 +347,10 @@ function renderTopCards() {
       </div>
 
       <div class="meta-stack">
-        <div><strong>Jogador:</strong> ${workspace.ownerName || workspaceOwner?.displayName || "Sem nome"}</div>
-        <div><strong>E-mail:</strong> ${workspace.ownerEmail || workspaceOwner?.email || "Sem e-mail"}</div>
-        <div><strong>Criaturas:</strong> ${workspace.creatures.length}</div>
-        <div><strong>Modo:</strong> ${isAdmin ? "Admin" : "Dono"}</div>
+        <div><strong>Jogador:</strong> ${escapeHtml(workspace.ownerName || workspaceOwner?.displayName || "Sem nome")}</div>
+        <div><strong>E-mail:</strong> ${escapeHtml(workspace.ownerEmail || workspaceOwner?.email || "Sem e-mail")}</div>
+        <div><strong>Criaturas:</strong> ${escapeHtml(workspace.creatures.length)}</div>
+        <div><strong>Modo:</strong> ${escapeHtml(isAdmin ? "Admin" : "Dono")}</div>
       </div>
 
       <div class="card-actions">
@@ -304,20 +370,20 @@ function renderTopCards() {
     if (isAdmin) mainQs.set("admin", "1");
 
     const canManageCreature = canManageWorkspace() || currentUser.uid === main.ownerUid;
-
-    const creatureCard = document.createElement("article");
-    creatureCard.className = "hud-card hud-card-small";
-    creatureCard.innerHTML = `
+    const mainCard = document.createElement("article");
+    mainCard.className = "hud-card hud-card-small";
+    mainCard.innerHTML = `
       <div class="hud-card-frame" aria-hidden="true"></div>
       <div class="hud-card-inner">
         <div class="hud-card-header">
-          <h2>${main.nome || "Criatura sem nome"}</h2>
+          <h2>${escapeHtml(main.nome || "Criatura sem nome")}</h2>
         </div>
 
-        <div class="meta-stack">
-          <div><strong>Espécie:</strong> ${main.especie || "Sem espécie"}</div>
-          <div><strong>Nível:</strong> ${main.nivel || 1}</div>
-          <div><strong>Dono:</strong> ${main.ownerName || workspace.ownerName || "Sem dono"}</div>
+        <div class="quick-inline-meta">
+          <div><strong>Espécie:</strong> ${escapeHtml(main.especie || "Sem espécie")}</div>
+          <div><strong>Nível:</strong> ${escapeHtml(main.nivel || 1)}</div>
+          <div><strong>Vida:</strong> ${escapeHtml(getVidaAtual(main))} / ${escapeHtml(getVidaMax(main))}</div>
+          <div><strong>Dono:</strong> ${escapeHtml(main.ownerName || workspace.ownerName || "Sem dono")}</div>
         </div>
 
         <div class="card-actions">
@@ -345,16 +411,13 @@ function renderTopCards() {
       </div>
     `;
 
-    const transferBtn = creatureCard.querySelector('[data-transfer-main="1"]');
-    const deleteBtn = creatureCard.querySelector('[data-delete-main="1"]');
-
-    transferBtn?.addEventListener("click", () => {
+    mainCard.querySelector('[data-transfer-main="1"]')?.addEventListener("click", () => {
       if (!canManageCreature) return;
       pendingTransferCreatureId = main.id;
       openModal(transferModal);
     });
 
-    deleteBtn?.addEventListener("click", async () => {
+    mainCard.querySelector('[data-delete-main="1"]')?.addEventListener("click", async () => {
       if (!canManageCreature) return;
       if (!window.confirm(`Apagar a criatura ${main.nome || "sem nome"}?`)) return;
 
@@ -370,7 +433,7 @@ function renderTopCards() {
       statusEl.textContent = "Criatura apagada.";
     });
 
-    topCardsEl.appendChild(creatureCard);
+    topCardsEl.appendChild(mainCard);
   } else {
     const emptyHighlight = document.createElement("article");
     emptyHighlight.className = "hud-card hud-card-small";
@@ -381,10 +444,7 @@ function renderTopCards() {
           <h2>Nenhuma criatura</h2>
         </div>
 
-        <div class="meta-stack">
-          <div>Você ainda não possui criaturas cadastradas.</div>
-          <div>Crie a primeira para começar.</div>
-        </div>
+        <p class="empty-text">Você ainda não possui criaturas cadastradas. Crie a primeira para começar.</p>
 
         <div class="card-actions">
           ${buildArkButton({
@@ -453,9 +513,7 @@ function renderCreatureList() {
             <h3 class="hud-creature-title">Sem criaturas no momento</h3>
           </div>
 
-          <div class="creature-meta">
-            <div>Crie uma nova criatura para preencher esta área.</div>
-          </div>
+          <p class="empty-text">Crie uma nova criatura para preencher esta área.</p>
 
           <div class="creature-actions">
             ${buildArkButton({
@@ -484,68 +542,48 @@ function renderCreatureList() {
     const creatureQs = new URLSearchParams({ uid: targetUid, cid: creature.id });
     if (isAdmin) creatureQs.set("admin", "1");
 
+    const vidaAtual = getVidaAtual(creature);
+    const vidaMax = getVidaMax(creature);
     const vidaPercent = getVidaPercent(creature);
+    const staminaAtual = getStaminaAtual(creature);
     const staminaPercent = getStaminaPercent(creature);
+    const pesoAtual = getPesoAtual(creature);
+    const pesoMax = getPesoMax(creature);
     const pesoPercent = getPesoPercent(creature);
 
     const card = document.createElement("article");
     card.className = "creature-card";
     card.innerHTML = `
       <div class="hud-creature-frame" aria-hidden="true"></div>
-
       <div class="creature-card-inner">
         <div class="creature-portrait-wrap">
           <div class="portrait-frame" aria-hidden="true"></div>
           <div class="creature-portrait">
             ${
               img
-                ? `<img src="${img}" alt="${creature.nome || "Criatura"}" />`
-                : `<div class="creature-portrait-fallback">${getInitials(creature.nome)}</div>`
+                ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(creature.nome || "Criatura")}" />`
+                : `<div class="creature-portrait-fallback">${escapeHtml(getInitials(creature.nome))}</div>`
             }
           </div>
+          <div class="portrait-badge">${escapeHtml(creature.especie || "Sem espécie")}</div>
         </div>
 
         <div class="creature-info">
           <div class="creature-top-row">
-            <h3 class="hud-creature-title">${creature.nome || "Criatura sem nome"}</h3>
+            <h3 class="hud-creature-title">${escapeHtml(creature.nome || "Criatura sem nome")}</h3>
           </div>
 
           <div class="creature-meta">
-            <div><strong>Espécie:</strong> ${creature.especie || "Sem espécie"}</div>
-            <div><strong>Nível:</strong> ${creature.nivel || 1}</div>
-            <div><strong>Dono:</strong> ${creature.ownerName || workspace.ownerName || "Sem dono"}</div>
+            <div><strong>Espécie:</strong> ${escapeHtml(creature.especie || "Sem espécie")}</div>
+            <div><strong>Nível:</strong> ${escapeHtml(creature.nivel || 1)}</div>
+            <div><strong>Dono:</strong> ${escapeHtml(creature.ownerName || workspace.ownerName || "Sem dono")}</div>
+            <div><strong>Escalonamento:</strong> ${escapeHtml(creature.damageScaling || "forca")}</div>
           </div>
 
           <div class="creature-bars">
-            <div class="status-row">
-              <div class="status-label">Vida</div>
-              <div class="status-bar">
-                <div class="status-bar-frame" aria-hidden="true"></div>
-                <div class="status-bar-fill-track">
-                  <div class="status-bar-fill fill-vida" style="width:${vidaPercent}%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="status-row">
-              <div class="status-label">Estamina</div>
-              <div class="status-bar">
-                <div class="status-bar-frame" aria-hidden="true"></div>
-                <div class="status-bar-fill-track">
-                  <div class="status-bar-fill fill-stamina" style="width:${staminaPercent}%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="status-row">
-              <div class="status-label">Peso</div>
-              <div class="status-bar">
-                <div class="status-bar-frame" aria-hidden="true"></div>
-                <div class="status-bar-fill-track">
-                  <div class="status-bar-fill fill-peso" style="width:${pesoPercent}%"></div>
-                </div>
-              </div>
-            </div>
+            ${buildMetricRow("Vida", vidaAtual, vidaMax, vidaPercent, "fill-vida")}
+            ${buildMetricRow("Estamina", staminaAtual, null, staminaPercent, "fill-stamina")}
+            ${buildMetricRow("Peso", pesoAtual, pesoMax, pesoPercent, "fill-peso")}
           </div>
 
           <div class="creature-actions">
@@ -559,14 +597,14 @@ function renderCreatureList() {
               label: "Transferir",
               color: "orange",
               small: true,
-              attrs: `data-transfer-id="${creature.id}"`,
+              attrs: `data-transfer-id="${escapeHtml(creature.id)}"`,
               disabled: !canManageCreature
             })}
             ${buildArkButton({
               label: "Apagar",
               color: "red",
               small: true,
-              attrs: `data-delete-id="${creature.id}"`,
+              attrs: `data-delete-id="${escapeHtml(creature.id)}"`,
               disabled: !canManageCreature
             })}
           </div>
@@ -574,13 +612,13 @@ function renderCreatureList() {
       </div>
     `;
 
-    card.querySelector(`[data-transfer-id="${creature.id}"]`)?.addEventListener("click", () => {
+    card.querySelector(`[data-transfer-id="${CSS.escape(creature.id)}"]`)?.addEventListener("click", () => {
       if (!canManageCreature) return;
       pendingTransferCreatureId = creature.id;
       openModal(transferModal);
     });
 
-    card.querySelector(`[data-delete-id="${creature.id}"]`)?.addEventListener("click", async () => {
+    card.querySelector(`[data-delete-id="${CSS.escape(creature.id)}"]`)?.addEventListener("click", async () => {
       if (!canManageCreature) return;
       if (!window.confirm(`Apagar a criatura ${creature.nome || "sem nome"}?`)) return;
 
@@ -601,6 +639,7 @@ function renderCreatureList() {
 }
 
 function renderAll() {
+  renderQuickStats();
   renderTopCards();
   renderCreatureList();
 }
@@ -688,9 +727,7 @@ async function transferCreature() {
     sharedViewerUids: Array.isArray(raw?.sharedViewerUids) ? raw.sharedViewerUids : []
   };
 
-  workspace.creatures = workspace.creatures.filter(
-    (item) => item.id !== pendingTransferCreatureId
-  );
+  workspace.creatures = workspace.creatures.filter((item) => item.id !== pendingTransferCreatureId);
 
   creature.ownerUid = newUid;
   creature.ownerName = targetUser?.name || "";
@@ -761,7 +798,7 @@ async function init() {
 
   if (templateSelect) {
     templateSelect.innerHTML = TEMPLATES.map(
-      (item) => `<option value="${item.key}">${item.label}</option>`
+      (item) => `<option value="${escapeHtml(item.key)}">${escapeHtml(item.label)}</option>`
     ).join("");
     initCustomSelect("newCreatureTemplate");
   }
@@ -801,6 +838,13 @@ async function init() {
 
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".custom-select")) closeAllCustomSelects();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeModal(createModal);
+      closeModal(transferModal);
+    }
   });
 
   [createModal, transferModal].forEach((modal) => {
