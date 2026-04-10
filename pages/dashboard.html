@@ -13,8 +13,11 @@
       <div class="hud-topbar-frame" aria-hidden="true"></div>
       <div class="hud-topbar-inner">
         <div class="hud-brand">
-          <img class="hud-brand-logo" src="../img/fav_rex.png" alt="Logo" />
-          <div>
+          <div class="hud-brand-mark">
+            <img class="hud-brand-logo" src="../img/fav_rex.png" alt="Logo" />
+          </div>
+          <div class="hud-brand-copy">
+            <div class="eyebrow">Central de Comando</div>
             <h1 class="hero-title">Dashboard do Jogador</h1>
             <div class="hud-subtitle" id="dashboardSubtitle">Carregando...</div>
           </div>
@@ -34,11 +37,40 @@
       </div>
     </header>
 
-    <section class="status-strip">
-      <div class="status-chip" id="dashboardStatus">Verificando dados...</div>
+    <section class="hero-grid" aria-label="Visão geral">
+      <article class="hero-panel hero-panel-main">
+        <div class="hero-panel-frame" aria-hidden="true"></div>
+        <div class="hero-panel-inner">
+          <div>
+            <div class="hero-kicker">Status da base</div>
+            <h2 class="hero-panel-title">Comando ativo</h2>
+            <p class="hero-panel-text">
+              Gerencie criaturas, acompanhe o estado geral e entre rapidamente nas fichas.
+            </p>
+          </div>
+
+          <div class="status-strip">
+            <div class="status-chip" id="dashboardStatus">Verificando dados...</div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="hero-panel hero-panel-side">
+        <div class="hero-panel-frame" aria-hidden="true"></div>
+        <div class="hero-panel-inner hero-panel-side-inner">
+          <div class="mini-overview-title">Resumo rápido</div>
+          <div class="mini-overview-grid" id="dashboardQuickStats"></div>
+        </div>
+      </aside>
     </section>
 
-    <section class="top-grid" id="dashboardTopCards" aria-label="Resumo do dashboard"></section>
+    <section class="dashboard-summary">
+      <div class="section-heading section-heading-compact">
+        <div class="section-heading-line" aria-hidden="true"></div>
+        <h2>Painéis principais</h2>
+      </div>
+      <div class="top-grid" id="dashboardTopCards" aria-label="Resumo do dashboard"></div>
+    </section>
 
     <section class="creatures-section">
       <div class="section-heading">
@@ -51,6 +83,7 @@
 
   <div id="createCreatureModal" class="modal-overlay hidden" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="createCreatureTitle">
+      <div class="modal-header-band" aria-hidden="true"></div>
       <h3 id="createCreatureTitle">Nova criatura</h3>
       <div class="modal-grid">
         <div>
@@ -75,6 +108,7 @@
 
   <div id="transferCreatureModal" class="modal-overlay hidden" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="transferCreatureTitle">
+      <div class="modal-header-band" aria-hidden="true"></div>
       <h3 id="transferCreatureTitle">Transferir criatura</h3>
       <div class="footer-note">Escolha o novo dono.</div>
       <div class="modal-grid modal-grid-single">
