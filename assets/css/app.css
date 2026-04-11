@@ -573,7 +573,9 @@
     }
   
 body {
-  background: radial-gradient(circle at top, #0f1c2e, #050b14 70%);
+  background:
+    linear-gradient(rgba(5, 10, 16, 0.84), rgba(5, 10, 16, 0.95)),
+    url("../../img/texture_1.jpg") center / cover no-repeat fixed;
   font-family: 'Segoe UI', sans-serif;
 }
 
@@ -631,8 +633,8 @@ button:hover {
 
 body {
   background:
-    radial-gradient(circle at top, rgba(40, 115, 150, 0.22), transparent 28%),
-    linear-gradient(180deg, #040a11 0%, #06101a 55%, #03070d 100%);
+    linear-gradient(rgba(5, 10, 16, 0.84), rgba(5, 10, 16, 0.95)),
+    url("../../img/texture_1.jpg") center / cover no-repeat fixed;
   color: #dff8ff;
 }
 
