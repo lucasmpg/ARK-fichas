@@ -9,7 +9,7 @@ body {
     url("../../img/background_1.jpg") center / cover no-repeat fixed;
   overflow-x: hidden;
 }
-.page-shell{max-width:var(--page-max);margin:0 auto;padding:28px}.card,.card-mini,.modal-box{background:linear-gradient(180deg,var(--panel) 0%,rgba(5,12,20,.98) 100%);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft)}
+.page-shell{max-width:var(--page-max);margin:0 auto;padding:28px}.card,.card-mini,.modal-box{border-radius:var(--radius-lg);box-shadow:var(--shadow-soft)}
 .page-card{padding:22px}.hero-title{margin:0;font-size:34px;line-height:1.05;letter-spacing:.05em;text-transform:uppercase;color:var(--title)}.muted,.footer-note{color:var(--muted)}
 .notice{border:1px solid rgba(105,223,255,.18);background:linear-gradient(180deg,rgba(8,20,32,.9),rgba(6,15,24,.94));border-radius:12px;padding:12px 14px;color:var(--muted);margin-top:18px}
 .section-row,.authbar-actions,.card-actions,.modal-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}.authbar-actions{justify-content:flex-end}
