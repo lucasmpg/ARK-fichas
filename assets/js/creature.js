@@ -205,6 +205,8 @@ function saveCreatureToWorkspace() {
   creature.baseDano = Math.max(0, num('baseDano'));
   creature.baseMovimento = Math.max(0, num('baseMovimento'));
   creature.basePeso = Math.max(0, num('basePeso'));
+  creature.baseReducaoArmadura = clamp(num('baseReducaoArmadura'), 0, 100);
+  creature.reducaoArmadura = clamp(num('reducaoArmadura'), 0, 100);
   creature.sexo = byId('sexo').value.trim();
   creature.pontosPorNivel = Math.max(0, num('pontosPorNivel'));
   creature.bonusPontos = num('bonusPontos');
@@ -268,6 +270,8 @@ function applyCreatureToForm() {
   byId('baseDano').value = creature.baseDano ?? 0;
   byId('baseMovimento').value = creature.baseMovimento ?? 5;
   byId('basePeso').value = creature.basePeso ?? 50;
+  byId('baseReducaoArmadura').value = creature.baseReducaoArmadura ?? 0;
+  byId('reducaoArmadura').value = creature.reducaoArmadura ?? 0;
   byId('pontosPorNivel').value = creature.pontosPorNivel ?? 5;
   byId('bonusPontos').value = creature.bonusPontos ?? 0;
   attrs.forEach((attr) => { byId(attr.id).value = creature.stats?.[attr.id] ?? 0; });
@@ -295,10 +299,12 @@ function remainingPointBudget() {
 }
 
 function setEditableState() {
-  ['especie', 'sexo', 'baseVida', 'baseDano', 'baseMovimento', 'basePeso', 'pontosPorNivel', 'bonusPontos'].forEach((id) => {
+  ['especie', 'sexo', 'baseVida', 'baseDano', 'baseMovimento', 'basePeso', 'baseReducaoArmadura', 'pontosPorNivel', 'bonusPontos'].forEach((id) => {
     byId(id).readOnly = !canAdminEdit;
     byId(id).disabled = !canAdminEdit;
   });
+  byId('reducaoArmadura').readOnly = !(canEdit || canAdminEdit);
+  byId('reducaoArmadura').disabled = !(canEdit || canAdminEdit);
   byId('nome').readOnly = !canEdit;
   byId('sexo').readOnly = !canAdminEdit;
   byId('sexo').disabled = !canAdminEdit;
@@ -481,8 +487,10 @@ byId('danoFisicoVal').textContent = `${danoFisicoTotal}`;
   byId('danoBruto').parentElement.querySelector('.sub').textContent = `base + escalonamentos (${damageScaleModeText})`;
 
   const danoRecebidoBruto = Math.max(0, num('danoRecebidoBruto'));
-  const reducao = clamp(num('reducaoArmadura'), 0, 100);
-  const danoRecebidoFinal = danoRecebidoBruto * (1 - reducao / 100);
+  const reducaoBase = clamp(num('baseReducaoArmadura'), 0, 100);
+  const reducaoManual = clamp(num('reducaoArmadura'), 0, 100);
+  const reducaoTotal = clamp(reducaoBase + reducaoManual, 0, 100);
+  const danoRecebidoFinal = danoRecebidoBruto * (1 - reducaoTotal / 100);
   byId('danoRecebidoFinal').value = danoRecebidoFinal.toFixed(2).replace(/\.00$/, '');
   byId('vidaAposDanoRecebido').value = Math.max(0, num('vidaAtual') - danoRecebidoFinal).toFixed(2).replace(/\.00$/, '');
 }
