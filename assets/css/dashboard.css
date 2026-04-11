@@ -161,7 +161,7 @@ body::after {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.65fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-bottom: 22px;
 }
@@ -183,7 +183,7 @@ body::after {
   position: relative;
   z-index: 1;
   height: 100%;
-  padding: 24px 24px 22px;
+  padding: 100px 100px 100px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -199,9 +199,6 @@ body::after {
   inset: 14px;
   z-index: -1;
   border-radius: 20px;
-  background:
-    linear-gradient(rgba(8, 14, 22, 0.72), rgba(8, 14, 22, 0.86)),
-    url("../../img/texture_2.jpg") center / cover no-repeat;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
@@ -393,8 +390,8 @@ label {
 .hud-card-inner {
   position: relative;
   z-index: 1;
-  height: 100%;
-  padding: 20px 20px 18px;
+  height: 50%;
+  padding: 80px 80px 80px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
